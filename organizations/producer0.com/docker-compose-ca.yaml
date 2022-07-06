@@ -1,0 +1,26 @@
+version: '3.9'
+
+networks:
+  hehe:
+    name: hehe
+
+services:
+  ca_producer0:
+    container_name: ca_producer0
+    image: hyperledger/fabric-ca:latest
+    command: sh -c 'fabric-ca-server start -b admin:adminpw -d'
+    labels:
+      service: hyperledger-fabric
+    environment:
+      - FABRIC_CA_HOME=/etc/hyperledger/fabric-ca-server
+      - FABRIC_CA_SERVER_CA_NAME=ca-producer0
+      - FABRIC_CA_SERVER_TLS_ENABLED=true
+      - FABRIC_CA_SERVER_PORT=7055
+      - FABRIC_CA_SERVER_OPERATIONS_LISTENADDRESS=0.0.0.0:17055
+    ports:
+      - "7055:7055"
+      - "17055:17055"
+    volumes:
+      - ./fabric-ca:/etc/hyperledger/fabric-ca-server
+    networks:
+      - hehe
