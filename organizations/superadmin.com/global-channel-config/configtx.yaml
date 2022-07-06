@@ -4,7 +4,7 @@ Organizations:
   - &SuperadminOrdererOrg
     Name: SuperadminOrdererMSP
     ID: SuperadminOrdererMSP
-    MSPDir: msp
+    MSPDir: ../msp
 
     Policies:
       Readers:
@@ -62,8 +62,8 @@ Orderer: &OrdererDefaults
     Consenters:
       - Host: orderer.superadmin.com
         Port: 6050
-        ClientTLSCert: orderers/tls/server.crt
-        ServerTLSCert: orderers/tls/server.crt
+        ClientTLSCert: ../orderers/tls/server.crt
+        ServerTLSCert: ../orderers/tls/server.crt
 
   BatchTimeout: 2s
   BatchSize:

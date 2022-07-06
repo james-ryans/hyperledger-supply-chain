@@ -11,6 +11,7 @@ function networkUp() {
   createManufacturer0Org
   createDistributor0Org
   createRetailer0Org
+  createChannel0
 }
 
 function createSuperadminOrg() {
@@ -105,7 +106,7 @@ function createRetailer0Org() {
 function createGlobalChannel() {
   infoln "Creating Global Channel"
 
-  export FABRIC_CFG_PATH=${PWD}/organizations/superadmin.com
+  export FABRIC_CFG_PATH=${PWD}/organizations/superadmin.com/global-channel-config
 
   set -x
   configtxgen -profile GlobalGenesis -outputBlock ./organizations/superadmin.com/channel-artifacts/globalchannel.block -channelID globalchannel
@@ -132,6 +133,29 @@ function createGlobalChannel() {
   done
 
   cat log.txt
+}
+
+function createChannel0() {
+  infoln "Creating Channel 0"
+
+  export FABRIC_CFG_PATH=${PWD}/organizations/superadmin.com/channel0-config
+
+  set -x
+  configtxgen -profile Channel0Genesis -outputBlock ./organizations/superadmin.com/channel-artifacts/channel0.block -channelID channel0
+  { set +x; } 2>/dev/null
+
+  . createChannel.sh
+  ordererJoinChannel channel0 localhost:4051 producer0.com
+  ordererJoinChannel channel0 localhost:4052 supplier0.com
+  ordererJoinChannel channel0 localhost:4053 manufacturer0.com
+  ordererJoinChannel channel0 localhost:4054 distributor0.com
+  ordererJoinChannel channel0 localhost:4055 retailer0.com
+
+  peerJoinChannel channel0 localhost:5051 producer0.com Producer0MSP
+  peerJoinChannel channel0 localhost:5053 supplier0.com Supplier0MSP
+  peerJoinChannel channel0 localhost:5055 manufacturer0.com Manufacturer0MSP
+  peerJoinChannel channel0 localhost:5057 distributor0.com Distributor0MSP
+  peerJoinChannel channel0 localhost:5059 retailer0.com Retailer0MSP
 }
 
 function networkDown() {

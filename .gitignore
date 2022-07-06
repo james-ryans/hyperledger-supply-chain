@@ -2,9 +2,10 @@
 log.txt
 
 organizations/superadmin.com/*
+!organizations/superadmin.com/global-channel-config/
+!organizations/superadmin.com/channel0-config/
 !organizations/superadmin.com/docker-compose-ca.yaml
 !organizations/superadmin.com/docker-compose-orderer.yaml
-!organizations/superadmin.com/configtx.yaml
 
 organizations/producer0.com/*
 !organizations/producer0.com/peercfg/

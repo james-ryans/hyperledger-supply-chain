@@ -1,0 +1,222 @@
+---
+
+Organizations:
+  - &Producer0Org
+    Name: Producer0MSP
+    ID: Producer0MSP
+    MSPDir: ../../producer0.com/msp
+
+    Policies:
+      Readers:
+        Type: Signature
+        Rule: "OR('Producer0MSP.member')"
+      Writers:
+        Type: Signature
+        Rule: "OR('Producer0MSP.member')"
+      Admins:
+        Type: Signature
+        Rule: "OR('Producer0MSP.admin')"
+    AnchorPeers:
+      - Host: peer.producer0.com
+        Port: 5051
+
+  - &Supplier0Org
+    Name: Supplier0MSP
+    ID: Supplier0MSP
+    MSPDir: ../../supplier0.com/msp
+
+    Policies:
+      Readers:
+        Type: Signature
+        Rule: "OR('Supplier0MSP.member')"
+      Writers:
+        Type: Signature
+        Rule: "OR('Supplier0MSP.member')"
+      Admins:
+        Type: Signature
+        Rule: "OR('Supplier0MSP.admin')"
+    AnchorPeers:
+      - Host: peer.supplier0.com
+        Port: 5053
+
+  - &Manufacturer0Org
+    Name: Manufacturer0MSP
+    ID: Manufacturer0MSP
+    MSPDir: ../../manufacturer0.com/msp
+
+    Policies:
+      Readers:
+        Type: Signature
+        Rule: "OR('Manufacturer0MSP.member')"
+      Writers:
+        Type: Signature
+        Rule: "OR('Manufacturer0MSP.member')"
+      Admins:
+        Type: Signature
+        Rule: "OR('Manufacturer0MSP.admin')"
+    AnchorPeers:
+      - Host: peer.manufacturer0.com
+        Port: 5055
+
+  - &Distributor0Org
+    Name: Distributor0MSP
+    ID: Distributor0MSP
+    MSPDir: ../../distributor0.com/msp
+
+    Policies:
+      Readers:
+        Type: Signature
+        Rule: "OR('Distributor0MSP.member')"
+      Writers:
+        Type: Signature
+        Rule: "OR('Distributor0MSP.member')"
+      Admins:
+        Type: Signature
+        Rule: "OR('Distributor0MSP.admin')"
+    AnchorPeers:
+      - Host: peer.distributor0.com
+        Port: 5057
+
+  - &Retailer0Org
+    Name: Retailer0MSP
+    ID: Retailer0MSP
+    MSPDir: ../../retailer0.com/msp
+
+    Policies:
+      Readers:
+        Type: Signature
+        Rule: "OR('Retailer0MSP.member')"
+      Writers:
+        Type: Signature
+        Rule: "OR('Retailer0MSP.member')"
+      Admins:
+        Type: Signature
+        Rule: "OR('Retailer0MSP.admin')"
+    AnchorPeers:
+      - Host: peer.retailer0.com
+        Port: 5059
+
+Capabilities:
+  Channel: &ChannelCapabilities
+    V2_0: true
+
+  Orderer: &OrdererCapabilities
+    V2_0: true
+
+  Application: &ApplicationCapabilities
+    V2_0: true
+
+Application: &ApplicationDefaults
+  Organizations:
+
+  Policies:
+    Readers:
+      Type: ImplicitMeta
+      Rule: "ANY Readers"
+    Writers:
+      Type: ImplicitMeta
+      Rule: "ANY Writers"
+    Admins:
+      Type: ImplicitMeta
+      Rule: "MAJORITY Admins"
+    LifecycleEndorsement:
+      Type: ImplicitMeta
+      Rule: "MAJORITY Endorsement"
+    Endorsement:
+      Type: ImplicitMeta
+      Rule: "MAJORITY Endorsement"
+
+  Capabilities:
+    <<: *ApplicationCapabilities
+
+Orderer: &OrdererDefaults
+  OrdererType: etcdraft
+  Addresses:
+    - orderer.producer0.com:6051
+    - orderer.supplier0.com:6052
+    - orderer.manufacturer0.com:6053
+    - orderer.distributor0.com:6054
+    - orderer.retailer0.com:6055
+
+  EtcdRaft:
+    Consenters:
+      - Host: orderer.producer0.com
+        Port: 6051
+        ClientTLSCert: ../../producer0.com/orderers/tls/server.crt
+        ServerTLSCert: ../../producer0.com/orderers/tls/server.crt
+      - Host: orderer.supplier0.com
+        Port: 6052
+        ClientTLSCert: ../../supplier0.com/orderers/tls/server.crt
+        ServerTLSCert: ../../supplier0.com/orderers/tls/server.crt
+      - Host: orderer.manufacturer0.com
+        Port: 6053
+        ClientTLSCert: ../../manufacturer0.com/orderers/tls/server.crt
+        ServerTLSCert: ../../manufacturer0.com/orderers/tls/server.crt
+      - Host: orderer.distributor0.com
+        Port: 6054
+        ClientTLSCert: ../../distributor0.com/orderers/tls/server.crt
+        ServerTLSCert: ../../distributor0.com/orderers/tls/server.crt
+      - Host: orderer.retailer0.com
+        Port: 6055
+        ClientTLSCert: ../../retailer0.com/orderers/tls/server.crt
+        ServerTLSCert: ../../retailer0.com/orderers/tls/server.crt
+
+  BatchTimeout: 2s
+  BatchSize:
+    MaxMessageCount: 10
+    AbsoluteMaxBytes: 99 MB
+    PreferredMaxBytes: 512 KB
+
+  Organizations:
+
+  Policies:
+    Readers:
+      Type: ImplicitMeta
+      Rule: "ANY Readers"
+    Writers:
+      Type: ImplicitMeta
+      Rule: "ANY Writers"
+    Admins:
+      Type: ImplicitMeta
+      Rule: "MAJORITY Admins"
+    BlockValidation:
+      Type: ImplicitMeta
+      Rule: "ANY Writers"
+
+Channel: &ChannelDefaults
+  Policies:
+    Readers:
+      Type: ImplicitMeta
+      Rule: "ANY Readers"
+    Writers:
+      Type: ImplicitMeta
+      Rule: "ANY Writers"
+    Admins:
+      Type: ImplicitMeta
+      Rule: "MAJORITY Admins"
+
+  Capabilities:
+    <<: *ChannelCapabilities
+
+Profiles:
+
+  Channel0Genesis:
+    <<: *ChannelDefaults
+    Orderer:
+      <<: *OrdererDefaults
+      Organizations:
+        - *Producer0Org
+        - *Supplier0Org
+        - *Manufacturer0Org
+        - *Distributor0Org
+        - *Retailer0Org
+      Capabilities: *OrdererCapabilities
+    Application:
+      <<: *ApplicationDefaults
+      Organizations:
+        - *Producer0Org
+        - *Supplier0Org
+        - *Manufacturer0Org
+        - *Distributor0Org
+        - *Retailer0Org
+      Capabilities: *ApplicationCapabilities
