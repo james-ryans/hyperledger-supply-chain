@@ -19,7 +19,7 @@ services:
       - FABRIC_LOGGING_SPEC=INFO
       - ORDERER_GENERAL_LISTENADDRESS=0.0.0.0
       - ORDERER_GENERAL_LISTENPORT=6050
-      - ORDERER_GENERAL_LOCALMSPID=SuperadminOrdererMSP
+      - ORDERER_GENERAL_LOCALMSPID=SuperadminMSP
       - ORDERER_GENERAL_LOCALMSPDIR=/var/hyperledger/orderer/msp
       - ORDERER_GENERAL_TLS_ENABLED=true
       - ORDERER_GENERAL_TLS_PRIVATEKEY=/var/hyperledger/orderer/tls/server.key
@@ -36,7 +36,7 @@ services:
       - ORDERER_ADMIN_TLS_ROOTCAS=[/var/hyperledger/orderer/tls/ca.crt]
       - ORDERER_ADMIN_TLS_CLIENTROOTCAS=[/var/hyperledger/orderer/tls/ca.crt]
       - ORDERER_ADMIN_LISTENADDRESS=0.0.0.0:4050
-      - ORDERER_OPERATIONS_LISTENADDRESS=orderer.superadmin.com:9443
+      - ORDERER_OPERATIONS_LISTENADDRESS=orderer.superadmin.com:9442
       - ORDERER_METRICS_PROVIDER=prometheus
     volumes:
       - ./orderers/msp:/var/hyperledger/orderer/msp
@@ -45,6 +45,6 @@ services:
     ports:
       - "6050:6050"
       - "4050:4050"
-      - "9443:9443"
+      - "9442:9442"
     networks:
       - hehe

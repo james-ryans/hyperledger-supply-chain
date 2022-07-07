@@ -1,21 +1,21 @@
 ---
 
 Organizations:
-  - &SuperadminOrdererOrg
-    Name: SuperadminOrdererMSP
-    ID: SuperadminOrdererMSP
+  - &SuperadminOrg
+    Name: SuperadminMSP
+    ID: SuperadminMSP
     MSPDir: ../msp
 
     Policies:
       Readers:
         Type: Signature
-        Rule: "OR('SuperadminOrdererMSP.member')"
+        Rule: "OR('SuperadminMSP.member')"
       Writers:
         Type: Signature
-        Rule: "OR('SuperadminOrdererMSP.member')"
+        Rule: "OR('SuperadminMSP.member')"
       Admins:
         Type: Signature
-        Rule: "OR('SuperadminOrdererMSP.admin')"
+        Rule: "OR('SuperadminMSP.admin')"
 
     OrdererEndpoints:
       - orderer.superadmin.com:6050
@@ -109,7 +109,7 @@ Profiles:
     Orderer:
       <<: *OrdererDefaults
       Organizations:
-        - *SuperadminOrdererOrg
+        - *SuperadminOrg
       Capabilities: *OrdererCapabilities
     Application:
       <<: *ApplicationDefaults

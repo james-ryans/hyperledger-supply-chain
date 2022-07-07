@@ -1,12 +1,14 @@
 #!/bin/bash
 
+. envVar.sh
+
 DELAY=3
 MAX_RETRY=5
 
 ordererJoinChannel() {
-  CHANNEL_NAME="$1"
-  ADDRESS="$2"
-  ORG="$3"
+  CHANNEL_NAME="${1}"
+  ORG="${2}"
+  ADDRESS="${3}"
 
   local rc=1
   local COUNTER=1
@@ -29,13 +31,8 @@ ordererJoinChannel() {
 }
 
 peerJoinChannel() {
-  CHANNEL_NAME="$1"
-  FABRIC_CFG_PATH="${PWD}/organizations/$3/peercfg/"
-  export CORE_PEER_TLS_ENABLED=true
-  export CORE_PEER_LOCALMSPID="$4"
-  export CORE_PEER_TLS_ROOTCERT_FILE="${PWD}/organizations/$3/tlsca/tlsca.$3-cert.pem"
-  export CORE_PEER_MSPCONFIGPATH="${PWD}/organizations/$3/users/Admin@$3/msp"
-  export CORE_PEER_ADDRESS="$2"
+  CHANNEL_NAME="${1}"
+  setPeerEnv "${2}"
 
   local rc=1
   local COUNTER=1

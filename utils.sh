@@ -37,7 +37,14 @@ function fatalln() {
   exit 1
 }
 
+function verifyResult() {
+  if [ $1 -ne 0 ]; then
+    fatalln "$2"
+  fi
+}
+
 export -f errorln
 export -f successln
 export -f infoln
 export -f warnln
+export -f verifyResult

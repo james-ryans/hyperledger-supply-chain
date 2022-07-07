@@ -25,7 +25,8 @@ function createSuperadminOrg() {
   . registerEnroll.sh
   enrollSuperadmin
 
-  docker compose -f organizations/superadmin.com/docker-compose-orderer.yaml up -d 2>&1
+  docker compose -f organizations/superadmin.com/docker-compose-orderer.yaml \
+      -f organizations/superadmin.com/docker-compose-peer.yaml up -d 2>&1
 }
 
 function createProducer0Org() {
@@ -145,17 +146,22 @@ function createChannel0() {
   { set +x; } 2>/dev/null
 
   . createChannel.sh
-  ordererJoinChannel channel0 localhost:4051 producer0.com
-  ordererJoinChannel channel0 localhost:4052 supplier0.com
-  ordererJoinChannel channel0 localhost:4053 manufacturer0.com
-  ordererJoinChannel channel0 localhost:4054 distributor0.com
-  ordererJoinChannel channel0 localhost:4055 retailer0.com
+  ordererJoinChannel channel0 producer0.com localhost:4051
+  ordererJoinChannel channel0 supplier0.com localhost:4052
+  ordererJoinChannel channel0 manufacturer0.com localhost:4053
+  ordererJoinChannel channel0 distributor0.com localhost:4054
+  ordererJoinChannel channel0 retailer0.com localhost:4055
 
-  peerJoinChannel channel0 localhost:5051 producer0.com Producer0MSP
-  peerJoinChannel channel0 localhost:5053 supplier0.com Supplier0MSP
-  peerJoinChannel channel0 localhost:5055 manufacturer0.com Manufacturer0MSP
-  peerJoinChannel channel0 localhost:5057 distributor0.com Distributor0MSP
-  peerJoinChannel channel0 localhost:5059 retailer0.com Retailer0MSP
+  peerJoinChannel channel0 producer0.com Producer0MSP localhost:5051
+  peerJoinChannel channel0 supplier0.com Supplier0MSP localhost:5053
+  peerJoinChannel channel0 manufacturer0.com Manufacturer0MSP localhost:5055
+  peerJoinChannel channel0 distributor0.com Distributor0MSP localhost:5057
+  peerJoinChannel channel0 retailer0.com Retailer0MSP localhost:5059
+}
+
+function deployCC() {
+  chmod 755 deployCC.sh
+  ./deployCC.sh "${1}" "${2}" "${3}" "${4}" "${5}"
 }
 
 function networkDown() {
@@ -186,6 +192,7 @@ function networkDown() {
 
   docker compose -f organizations/superadmin.com/docker-compose-ca.yaml \
     -f organizations/superadmin.com/docker-compose-orderer.yaml \
+    -f organizations/superadmin.com/docker-compose-peer.yaml \
     down --volumes --remove-orphans
 
   rm -rf organizations/retailer0.com/fabric-ca \
@@ -237,6 +244,8 @@ function networkDown() {
     organizations/superadmin.com/fabric-ca \
     organizations/superadmin.com/msp \
     organizations/superadmin.com/orderers \
+    organizations/superadmin.com/peers \
+    organizations/superadmin.com/ca \
     organizations/superadmin.com/tlsca \
     organizations/superadmin.com/users \
     organizations/superadmin.com/fabric-ca-client-config.yaml
@@ -250,4 +259,7 @@ if [ "$MODE" == "up" ]; then
 elif [ "$MODE" == "down" ]; then
   infoln "Stopping network"
   networkDown
+elif [ "$MODE" == "deployCC" ]; then
+  infoln "Deploying chaincode"
+  deployCC "${2}" "${3}" "${4}" "${5}" "${6}"
 fi

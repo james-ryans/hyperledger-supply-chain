@@ -30,14 +30,27 @@ function enrollSuperadmin() {
   mkdir -p "${PWD}/organizations/superadmin.com/tlsca"
   cp "${PWD}/organizations/superadmin.com/fabric-ca/ca-cert.pem" "${PWD}/organizations/superadmin.com/tlsca/tlsca.superadmin.com-cert.pem"
 
+  mkdir -p "${PWD}/organizations/superadmin.com/ca"
+  cp "${PWD}/organizations/superadmin.com/fabric-ca/ca-cert.pem" "${PWD}/organizations/superadmin.com/ca/ca.superadmin.com-cert.pem"
+
   infoln "Registering orderer"
   set -x
   fabric-ca-client register --caname ca-superadmin --id.name orderer --id.secret ordererpw --id.type orderer --tls.certfiles "${PWD}/organizations/superadmin.com/fabric-ca/ca-cert.pem"
   { set +x; } 2>/dev/null
 
-  infoln "Registering the orderer admin"
+  infoln "Registering peer"
   set -x
-  fabric-ca-client register --caname ca-superadmin --id.name ordereradmin --id.secret ordereradminpw --id.type admin --tls.certfiles "${PWD}/organizations/superadmin.com/fabric-ca/ca-cert.pem"
+  fabric-ca-client register --caname ca-superadmin --id.name peer --id.secret peerpw --id.type peer --tls.certfiles "${PWD}/organizations/superadmin.com/fabric-ca/ca-cert.pem"
+  { set +x; } 2>/dev/null
+
+  infoln "Registering user"
+  set -x
+  fabric-ca-client register --caname ca-superadmin --id.name user --id.secret userpw --id.type client --tls.certfiles "${PWD}/organizations/superadmin.com/fabric-ca/ca-cert.pem"
+  { set +x; } 2>/dev/null
+
+  infoln "Registering the org admin"
+  set -x
+  fabric-ca-client register --caname ca-superadmin --id.name superadminadmin --id.secret superadminadminpw --id.type admin --tls.certfiles "${PWD}/organizations/superadmin.com/fabric-ca/ca-cert.pem"
   { set +x; } 2>/dev/null
 
   infoln "Generating the orderer msp"
@@ -56,12 +69,32 @@ function enrollSuperadmin() {
   cp "${PWD}/organizations/superadmin.com/orderers/tls/signcerts/"* "${PWD}/organizations/superadmin.com/orderers/tls/server.crt"
   cp "${PWD}/organizations/superadmin.com/orderers/tls/keystore/"* "${PWD}/organizations/superadmin.com/orderers/tls/server.key"
 
-  mkdir -p "${PWD}/organizations/superadmin.com/orderers/msp/tlscacerts"
-  cp "${PWD}/organizations/superadmin.com/orderers/tls/tlscacerts/"* "${PWD}/organizations/superadmin.com/orderers/msp/tlscacerts/tlsca.superadmin.com-cert.pem"
+  infoln "Generating the peer msp"
+  set -x
+  fabric-ca-client enroll -u https://peer:peerpw@localhost:7054 --caname ca-superadmin -M "${PWD}/organizations/superadmin.com/peers/msp" --csr.hosts peer.superadmin.com --csr.hosts localhost --tls.certfiles "${PWD}/organizations/superadmin.com/fabric-ca/ca-cert.pem"
+  { set +x; } 2>/dev/null
+
+  cp "${PWD}/organizations/superadmin.com/msp/config.yaml" "${PWD}/organizations/superadmin.com/peers/msp/config.yaml"
+
+  infoln "Generating the peer-tls certificates"
+  set -x
+  fabric-ca-client enroll -u https://peer:peerpw@localhost:7054 --caname ca-superadmin -M "${PWD}/organizations/superadmin.com/peers/tls" --enrollment.profile tls --csr.hosts peer.superadmin.com --csr.hosts localhost --tls.certfiles "${PWD}/organizations/superadmin.com/fabric-ca/ca-cert.pem"
+  { set +x; } 2>/dev/null
+
+  cp "${PWD}/organizations/superadmin.com/peers/tls/tlscacerts/"* "${PWD}/organizations/superadmin.com/peers/tls/ca.crt"
+  cp "${PWD}/organizations/superadmin.com/peers/tls/signcerts/"* "${PWD}/organizations/superadmin.com/peers/tls/server.crt"
+  cp "${PWD}/organizations/superadmin.com/peers/tls/keystore/"* "${PWD}/organizations/superadmin.com/peers/tls/server.key"
+
+  infoln "Generating the user msp"
+  set -x
+  fabric-ca-client enroll -u https://user:userpw@localhost:7054 --caname ca-superadmin -M "${PWD}/organizations/superadmin.com/users/User@superadmin.com/msp" --tls.certfiles "${PWD}/organizations/superadmin.com/fabric-ca/ca-cert.pem"
+  { set +x; } 2>/dev/null
+
+  cp "${PWD}/organizations/superadmin.com/msp/config.yaml" "${PWD}/organizations/superadmin.com/peers/users/User@superadmin.com/msp/config.yaml"
 
   infoln "Generating the admin msp"
   set -x
-  fabric-ca-client enroll -u https://ordereradmin:ordereradminpw@localhost:7054 --caname ca-superadmin -M "${PWD}/organizations/superadmin.com/users/Admin@superadmin.com/msp" --tls.certfiles "${PWD}/organizations/superadmin.com/fabric-ca/ca-cert.pem"
+  fabric-ca-client enroll -u https://superadminadmin:superadminadminpw@localhost:7054 --caname ca-superadmin -M "${PWD}/organizations/superadmin.com/users/Admin@superadmin.com/msp" --tls.certfiles "${PWD}/organizations/superadmin.com/fabric-ca/ca-cert.pem"
   { set +x; } 2>/dev/null
 
   cp "${PWD}/organizations/superadmin.com/msp/config.yaml" "${PWD}/organizations/superadmin.com/users/Admin@superadmin.com/msp/config.yaml"

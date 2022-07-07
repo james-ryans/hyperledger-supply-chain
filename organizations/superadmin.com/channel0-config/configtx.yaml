@@ -16,6 +16,9 @@ Organizations:
       Admins:
         Type: Signature
         Rule: "OR('Producer0MSP.admin')"
+      Endorsement:
+        Type: Signature
+        Rule: "OR('Producer0MSP.peer')"
     AnchorPeers:
       - Host: peer.producer0.com
         Port: 5051
@@ -35,6 +38,9 @@ Organizations:
       Admins:
         Type: Signature
         Rule: "OR('Supplier0MSP.admin')"
+      Endorsement:
+        Type: Signature
+        Rule: "OR('Supplier0MSP.peer')"
     AnchorPeers:
       - Host: peer.supplier0.com
         Port: 5053
@@ -54,6 +60,9 @@ Organizations:
       Admins:
         Type: Signature
         Rule: "OR('Manufacturer0MSP.admin')"
+      Endorsement:
+        Type: Signature
+        Rule: "OR('Manufacturer0MSP.peer')"
     AnchorPeers:
       - Host: peer.manufacturer0.com
         Port: 5055
@@ -73,6 +82,9 @@ Organizations:
       Admins:
         Type: Signature
         Rule: "OR('Distributor0MSP.admin')"
+      Endorsement:
+        Type: Signature
+        Rule: "OR('Distributor0MSP.peer')"
     AnchorPeers:
       - Host: peer.distributor0.com
         Port: 5057
@@ -92,6 +104,9 @@ Organizations:
       Admins:
         Type: Signature
         Rule: "OR('Retailer0MSP.admin')"
+      Endorsement:
+        Type: Signature
+        Rule: "OR('Retailer0MSP.peer')"
     AnchorPeers:
       - Host: peer.retailer0.com
         Port: 5059
