@@ -2,8 +2,8 @@
 
 . envVar.sh
 
-DELAY=3
-MAX_RETRY=5
+DELAY=0.5
+MAX_RETRY=30
 
 ordererJoinChannel() {
   CHANNEL_NAME="${1}"

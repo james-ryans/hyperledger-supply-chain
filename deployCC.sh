@@ -3,8 +3,8 @@
 . utils.sh
 . envVar.sh
 
-DELAY=3
-MAX_RETRY=5
+DELAY=0.5
+MAX_RETRY=30
 CHANNEL_NAME=${1}
 CC_NAME=${2}
 CC_SRC_PATH=${3}
@@ -120,7 +120,7 @@ function queryCommitted() {
   ORG=$1
   setPeerEnv $ORG
   EXPECTED_RESULT="Version: ${CC_VERSION}, Sequence: ${CC_SEQUENCE}, Endorsement Plugin: escc, Validation Plugin: vscc"
-  infoln "Querying chaincode definition on peer0.org${ORG} on channel '$CHANNEL_NAME'..."
+  infoln "Querying chaincode definition on ${ORG} on channel '$CHANNEL_NAME'..."
   local rc=1
   local COUNTER=1
   while [[ $rc -ne 0 ]] && [[ $COUNTER -lt $MAX_RETRY ]] ; do
@@ -145,62 +145,61 @@ function queryCommitted() {
 vendorDep
 packageChaincode
 
-installChaincode producer0.com
 installChaincode supplier0.com
+installChaincode producer0.com
 installChaincode manufacturer0.com
 installChaincode distributor0.com
 installChaincode retailer0.com
 
-queryInstalled producer0.com
-approveForMyOrg producer0.com
-
-checkCommitReadiness producer0.com "\"Producer0MSP\": true" "\"Supplier0MSP\": false" "\"Manufacturer0MSP\": false" "\"Distributor0MSP\": false" "\"Retailer0MSP\": false"
-checkCommitReadiness supplier0.com "\"Producer0MSP\": true" "\"Supplier0MSP\": false" "\"Manufacturer0MSP\": false" "\"Distributor0MSP\": false" "\"Retailer0MSP\": false"
-checkCommitReadiness manufacturer0.com "\"Producer0MSP\": true" "\"Supplier0MSP\": false" "\"Manufacturer0MSP\": false" "\"Distributor0MSP\": false" "\"Retailer0MSP\": false"
-checkCommitReadiness distributor0.com "\"Producer0MSP\": true" "\"Supplier0MSP\": false" "\"Manufacturer0MSP\": false" "\"Distributor0MSP\": false" "\"Retailer0MSP\": false"
-checkCommitReadiness retailer0.com "\"Producer0MSP\": true" "\"Supplier0MSP\": false" "\"Manufacturer0MSP\": false" "\"Distributor0MSP\": false" "\"Retailer0MSP\": false"
-
 queryInstalled supplier0.com
 approveForMyOrg supplier0.com
 
-checkCommitReadiness producer0.com "\"Producer0MSP\": true" "\"Supplier0MSP\": true" "\"Manufacturer0MSP\": false" "\"Distributor0MSP\": false" "\"Retailer0MSP\": false"
-checkCommitReadiness supplier0.com "\"Producer0MSP\": true" "\"Supplier0MSP\": true" "\"Manufacturer0MSP\": false" "\"Distributor0MSP\": false" "\"Retailer0MSP\": false"
-checkCommitReadiness manufacturer0.com "\"Producer0MSP\": true" "\"Supplier0MSP\": true" "\"Manufacturer0MSP\": false" "\"Distributor0MSP\": false" "\"Retailer0MSP\": false"
-checkCommitReadiness distributor0.com "\"Producer0MSP\": true" "\"Supplier0MSP\": true" "\"Manufacturer0MSP\": false" "\"Distributor0MSP\": false" "\"Retailer0MSP\": false"
-checkCommitReadiness retailer0.com "\"Producer0MSP\": true" "\"Supplier0MSP\": true" "\"Manufacturer0MSP\": false" "\"Distributor0MSP\": false" "\"Retailer0MSP\": false"
+#checkCommitReadiness supplier0.com "\"Producer0MSP\": false" "\"Supplier0MSP\": true" "\"Manufacturer0MSP\": false" "\"Distributor0MSP\": false" "\"Retailer0MSP\": false"
+#checkCommitReadiness producer0.com "\"Producer0MSP\": false" "\"Supplier0MSP\": true" "\"Manufacturer0MSP\": false" "\"Distributor0MSP\": false" "\"Retailer0MSP\": false"
+#checkCommitReadiness manufacturer0.com "\"Producer0MSP\": false" "\"Supplier0MSP\": true" "\"Manufacturer0MSP\": false" "\"Distributor0MSP\": false" "\"Retailer0MSP\": false"
+#checkCommitReadiness distributor0.com "\"Producer0MSP\": false" "\"Supplier0MSP\": true" "\"Manufacturer0MSP\": false" "\"Distributor0MSP\": false" "\"Retailer0MSP\": false"
+#checkCommitReadiness retailer0.com "\"Producer0MSP\": false" "\"Supplier0MSP\": true" "\"Manufacturer0MSP\": false" "\"Distributor0MSP\": false" "\"Retailer0MSP\": false"
+
+queryInstalled producer0.com
+approveForMyOrg producer0.com
+
+#checkCommitReadiness supplier0.com "\"Producer0MSP\": true" "\"Supplier0MSP\": true" "\"Manufacturer0MSP\": false" "\"Distributor0MSP\": false" "\"Retailer0MSP\": false"
+#checkCommitReadiness producer0.com "\"Producer0MSP\": true" "\"Supplier0MSP\": true" "\"Manufacturer0MSP\": false" "\"Distributor0MSP\": false" "\"Retailer0MSP\": false"
+#checkCommitReadiness manufacturer0.com "\"Producer0MSP\": true" "\"Supplier0MSP\": true" "\"Manufacturer0MSP\": false" "\"Distributor0MSP\": false" "\"Retailer0MSP\": false"
+#checkCommitReadiness distributor0.com "\"Producer0MSP\": true" "\"Supplier0MSP\": true" "\"Manufacturer0MSP\": false" "\"Distributor0MSP\": false" "\"Retailer0MSP\": false"
+#checkCommitReadiness retailer0.com "\"Producer0MSP\": true" "\"Supplier0MSP\": true" "\"Manufacturer0MSP\": false" "\"Distributor0MSP\": false" "\"Retailer0MSP\": false"
 
 queryInstalled manufacturer0.com
 approveForMyOrg manufacturer0.com
 
-checkCommitReadiness producer0.com "\"Producer0MSP\": true" "\"Supplier0MSP\": true" "\"Manufacturer0MSP\": true" "\"Distributor0MSP\": false" "\"Retailer0MSP\": false"
-checkCommitReadiness supplier0.com "\"Producer0MSP\": true" "\"Supplier0MSP\": true" "\"Manufacturer0MSP\": true" "\"Distributor0MSP\": false" "\"Retailer0MSP\": false"
-checkCommitReadiness manufacturer0.com "\"Producer0MSP\": true" "\"Supplier0MSP\": true" "\"Manufacturer0MSP\": true" "\"Distributor0MSP\": false" "\"Retailer0MSP\": false"
-checkCommitReadiness distributor0.com "\"Producer0MSP\": true" "\"Supplier0MSP\": true" "\"Manufacturer0MSP\": true" "\"Distributor0MSP\": false" "\"Retailer0MSP\": false"
-checkCommitReadiness retailer0.com "\"Producer0MSP\": true" "\"Supplier0MSP\": true" "\"Manufacturer0MSP\": true" "\"Distributor0MSP\": false" "\"Retailer0MSP\": false"
+#checkCommitReadiness supplier0.com "\"Producer0MSP\": true" "\"Supplier0MSP\": true" "\"Manufacturer0MSP\": true" "\"Distributor0MSP\": false" "\"Retailer0MSP\": false"
+#checkCommitReadiness producer0.com "\"Producer0MSP\": true" "\"Supplier0MSP\": true" "\"Manufacturer0MSP\": true" "\"Distributor0MSP\": false" "\"Retailer0MSP\": false"
+#checkCommitReadiness manufacturer0.com "\"Producer0MSP\": true" "\"Supplier0MSP\": true" "\"Manufacturer0MSP\": true" "\"Distributor0MSP\": false" "\"Retailer0MSP\": false"
+#checkCommitReadiness distributor0.com "\"Producer0MSP\": true" "\"Supplier0MSP\": true" "\"Manufacturer0MSP\": true" "\"Distributor0MSP\": false" "\"Retailer0MSP\": false"
+#checkCommitReadiness retailer0.com "\"Producer0MSP\": true" "\"Supplier0MSP\": true" "\"Manufacturer0MSP\": true" "\"Distributor0MSP\": false" "\"Retailer0MSP\": false"
 
 queryInstalled distributor0.com
 approveForMyOrg distributor0.com
 
-checkCommitReadiness producer0.com "\"Producer0MSP\": true" "\"Supplier0MSP\": true" "\"Manufacturer0MSP\": true" "\"Distributor0MSP\": true" "\"Retailer0MSP\": false"
-checkCommitReadiness supplier0.com "\"Producer0MSP\": true" "\"Supplier0MSP\": true" "\"Manufacturer0MSP\": true" "\"Distributor0MSP\": true" "\"Retailer0MSP\": false"
-checkCommitReadiness manufacturer0.com "\"Producer0MSP\": true" "\"Supplier0MSP\": true" "\"Manufacturer0MSP\": true" "\"Distributor0MSP\": true" "\"Retailer0MSP\": false"
-checkCommitReadiness distributor0.com "\"Producer0MSP\": true" "\"Supplier0MSP\": true" "\"Manufacturer0MSP\": true" "\"Distributor0MSP\": true" "\"Retailer0MSP\": false"
-checkCommitReadiness retailer0.com "\"Producer0MSP\": true" "\"Supplier0MSP\": true" "\"Manufacturer0MSP\": true" "\"Distributor0MSP\": true" "\"Retailer0MSP\": false"
-
+#checkCommitReadiness supplier0.com "\"Producer0MSP\": true" "\"Supplier0MSP\": true" "\"Manufacturer0MSP\": true" "\"Distributor0MSP\": true" "\"Retailer0MSP\": false"
+#checkCommitReadiness producer0.com "\"Producer0MSP\": true" "\"Supplier0MSP\": true" "\"Manufacturer0MSP\": true" "\"Distributor0MSP\": true" "\"Retailer0MSP\": false"
+#checkCommitReadiness manufacturer0.com "\"Producer0MSP\": true" "\"Supplier0MSP\": true" "\"Manufacturer0MSP\": true" "\"Distributor0MSP\": true" "\"Retailer0MSP\": false"
+#checkCommitReadiness distributor0.com "\"Producer0MSP\": true" "\"Supplier0MSP\": true" "\"Manufacturer0MSP\": true" "\"Distributor0MSP\": true" "\"Retailer0MSP\": false"
+#checkCommitReadiness retailer0.com "\"Producer0MSP\": true" "\"Supplier0MSP\": true" "\"Manufacturer0MSP\": true" "\"Distributor0MSP\": true" "\"Retailer0MSP\": false"
 
 queryInstalled retailer0.com
 approveForMyOrg retailer0.com
 
-checkCommitReadiness producer0.com "\"Producer0MSP\": true" "\"Supplier0MSP\": true" "\"Manufacturer0MSP\": true" "\"Distributor0MSP\": true" "\"Retailer0MSP\": true"
-checkCommitReadiness supplier0.com "\"Producer0MSP\": true" "\"Supplier0MSP\": true" "\"Manufacturer0MSP\": true" "\"Distributor0MSP\": true" "\"Retailer0MSP\": true"
-checkCommitReadiness manufacturer0.com "\"Producer0MSP\": true" "\"Supplier0MSP\": true" "\"Manufacturer0MSP\": true" "\"Distributor0MSP\": true" "\"Retailer0MSP\": true"
-checkCommitReadiness distributor0.com "\"Producer0MSP\": true" "\"Supplier0MSP\": true" "\"Manufacturer0MSP\": true" "\"Distributor0MSP\": true" "\"Retailer0MSP\": true"
-checkCommitReadiness retailer0.com "\"Producer0MSP\": true" "\"Supplier0MSP\": true" "\"Manufacturer0MSP\": true" "\"Distributor0MSP\": true" "\"Retailer0MSP\": true"
+#checkCommitReadiness supplier0.com "\"Producer0MSP\": true" "\"Supplier0MSP\": true" "\"Manufacturer0MSP\": true" "\"Distributor0MSP\": true" "\"Retailer0MSP\": true"
+#checkCommitReadiness producer0.com "\"Producer0MSP\": true" "\"Supplier0MSP\": true" "\"Manufacturer0MSP\": true" "\"Distributor0MSP\": true" "\"Retailer0MSP\": true"
+#checkCommitReadiness manufacturer0.com "\"Producer0MSP\": true" "\"Supplier0MSP\": true" "\"Manufacturer0MSP\": true" "\"Distributor0MSP\": true" "\"Retailer0MSP\": true"
+#checkCommitReadiness distributor0.com "\"Producer0MSP\": true" "\"Supplier0MSP\": true" "\"Manufacturer0MSP\": true" "\"Distributor0MSP\": true" "\"Retailer0MSP\": true"
+#checkCommitReadiness retailer0.com "\"Producer0MSP\": true" "\"Supplier0MSP\": true" "\"Manufacturer0MSP\": true" "\"Distributor0MSP\": true" "\"Retailer0MSP\": true"
 
-commitChaincodeDefinition producer0.com supplier0.com manufacturer0.com distributor0.com retailer0.com
+commitChaincodeDefinition supplier0.com producer0.com manufacturer0.com distributor0.com retailer0.com
 
-queryCommitted producer0.com
 queryCommitted supplier0.com
+queryCommitted producer0.com
 queryCommitted manufacturer0.com
 queryCommitted distributor0.com
 queryCommitted retailer0.com

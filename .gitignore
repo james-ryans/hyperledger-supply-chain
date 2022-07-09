@@ -3,12 +3,10 @@ vendor/
 *.tar.gz
 log.txt
 
-organizations/superadmin.com/*
-organizations/producer0.com/*
-organizations/supplier0.com/*
-organizations/manufacturer0.com/*
-organizations/distributor0.com/*
-organizations/retailer0.com/*
+organizations/*/*
+!organizations/*/fabric-ca/
+organizations/*/fabric-ca/*
+!organizations/*/fabric-ca/fabric-ca-server-config.yaml
 
 !peercfg/
 !global-channel-config/

@@ -4,29 +4,27 @@ setPeerEnv() {
   local ORG=$1
   if [ "$1" = "superadmin.com" ]; then
     local MSPID="SuperadminMSP"
-    local ADDRESS="localhost:5049"
-    local ORDERER_ADDRESS="localhost:6050"
-    local ORDERER_HOSTNAME="orderer.superadmin.com"
-
-  elif [ "$1" = "producer0.com" ]; then
-    local MSPID="Producer0MSP"
-    local ADDRESS="localhost:5051"
+    local ADDRESS="localhost:5050"
 
   elif [ "$1" = "supplier0.com" ]; then
     local MSPID="Supplier0MSP"
-    local ADDRESS="localhost:5053"
+    local ADDRESS="localhost:5052"
+
+  elif [ "$1" = "producer0.com" ]; then
+    local MSPID="Producer0MSP"
+    local ADDRESS="localhost:5054"
 
   elif [ "$1" = "manufacturer0.com" ]; then
     local MSPID="Manufacturer0MSP"
-    local ADDRESS="localhost:5055"
+    local ADDRESS="localhost:5056"
 
   elif [ "$1" = "distributor0.com" ]; then
     local MSPID="Distributor0MSP"
-    local ADDRESS="localhost:5057"
+    local ADDRESS="localhost:5058"
 
   elif [ "$1" = "retailer0.com" ]; then
     local MSPID="Retailer0MSP"
-    local ADDRESS="localhost:5059"
+    local ADDRESS="localhost:5060"
   fi
 
   export FABRIC_CFG_PATH="${PWD}/organizations/${ORG}/peercfg/"
@@ -43,13 +41,13 @@ setOrdererEnv() {
     local ADDRESS="localhost:6050"
     local HOSTNAME="orderer.superadmin.com"
 
-  elif [ "$ORG" = "producer0.com" ]; then
-    local ADDRESS="localhost:6051"
-    local HOSTNAME="orderer.producer0.com"
-
   elif [ "$ORG" = "supplier0.com" ]; then
-    local ADDRESS="localhost:6052"
+    local ADDRESS="localhost:6051"
     local HOSTNAME="orderer.supplier0.com"
+
+  elif [ "$ORG" = "producer0.com" ]; then
+    local ADDRESS="localhost:6052"
+    local HOSTNAME="orderer.producer0.com"
 
   elif [ "$ORG" = "manufacturer0.com" ]; then
     local ADDRESS="localhost:6053"

@@ -18,7 +18,7 @@ services:
     environment:
       - FABRIC_LOGGING_SPEC=INFO
       - ORDERER_GENERAL_LISTENADDRESS=0.0.0.0
-      - ORDERER_GENERAL_LISTENPORT=6051
+      - ORDERER_GENERAL_LISTENPORT=6052
       - ORDERER_GENERAL_LOCALMSPID=Producer0MSP
       - ORDERER_GENERAL_LOCALMSPDIR=/var/hyperledger/orderer/msp
       - ORDERER_GENERAL_TLS_ENABLED=true
@@ -35,16 +35,16 @@ services:
       - ORDERER_ADMIN_TLS_PRIVATEKEY=/var/hyperledger/orderer/tls/server.key
       - ORDERER_ADMIN_TLS_ROOTCAS=[/var/hyperledger/orderer/tls/ca.crt]
       - ORDERER_ADMIN_TLS_CLIENTROOTCAS=[/var/hyperledger/orderer/tls/ca.crt]
-      - ORDERER_ADMIN_LISTENADDRESS=0.0.0.0:4051
-      - ORDERER_OPERATIONS_LISTENADDRESS=orderer.producer0.com:9444
+      - ORDERER_ADMIN_LISTENADDRESS=0.0.0.0:4052
+      - ORDERER_OPERATIONS_LISTENADDRESS=orderer.producer0.com:9446
       - ORDERER_METRICS_PROVIDER=prometheus
     volumes:
       - ./orderers/msp:/var/hyperledger/orderer/msp
       - ./orderers/tls:/var/hyperledger/orderer/tls
       - orderer.producer0.com:/var/hyperledger/production/orderer
     ports:
-      - "6051:6051"
-      - "4051:4051"
-      - "9444:9444"
+      - "6052:6052"
+      - "4052:4052"
+      - "9446:9446"
     networks:
       - hehe

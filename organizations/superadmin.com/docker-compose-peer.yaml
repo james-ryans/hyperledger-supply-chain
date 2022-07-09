@@ -25,12 +25,12 @@ services:
       - CORE_PEER_TLS_KEY_FILE=/etc/hyperledger/fabric/tls/server.key
       - CORE_PEER_TLS_ROOTCERT_FILE=/etc/hyperledger/fabric/tls/ca.crt
       - CORE_PEER_ID=peer.superadmin.com
-      - CORE_PEER_ADDRESS=peer.superadmin.com:5049
-      - CORE_PEER_LISTENADDRESS=0.0.0.0:5049
-      - CORE_PEER_CHAINCODEADDRESS=peer.superadmin.com:5050
-      - CORE_PEER_CHAINCODELISTENADDRESS=0.0.0.0:5050
-      - CORE_PEER_GOSSIP_BOOTSTRAP=peer.superadmin.com:5049
-      - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer.superadmin.com:5049
+      - CORE_PEER_ADDRESS=peer.superadmin.com:5050
+      - CORE_PEER_LISTENADDRESS=0.0.0.0:5050
+      - CORE_PEER_CHAINCODEADDRESS=peer.superadmin.com:5051
+      - CORE_PEER_CHAINCODELISTENADDRESS=0.0.0.0:5051
+      - CORE_PEER_GOSSIP_BOOTSTRAP=peer.superadmin.com:5050
+      - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer.superadmin.com:5050
       - CORE_PEER_LOCALMSPID=SuperadminMSP
       - CORE_PEER_MSPCONFIGPATH=/etc/hyperledger/fabric/msp
       - CORE_OPERATIONS_LISTENADDRESS=peer.superadmin.com:9443
@@ -44,7 +44,7 @@ services:
       - ./peercfg:/etc/hyperledger/peercfg
       - /var/run/docker.sock:/host/var/run/docker.sock
     ports:
-      - "5049:5049"
+      - "5050:5050"
       - "9443:9443"
     networks:
       - hehe

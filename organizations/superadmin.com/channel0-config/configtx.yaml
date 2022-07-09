@@ -1,28 +1,6 @@
 ---
 
 Organizations:
-  - &Producer0Org
-    Name: Producer0MSP
-    ID: Producer0MSP
-    MSPDir: ../../producer0.com/msp
-
-    Policies:
-      Readers:
-        Type: Signature
-        Rule: "OR('Producer0MSP.member')"
-      Writers:
-        Type: Signature
-        Rule: "OR('Producer0MSP.member')"
-      Admins:
-        Type: Signature
-        Rule: "OR('Producer0MSP.admin')"
-      Endorsement:
-        Type: Signature
-        Rule: "OR('Producer0MSP.peer')"
-    AnchorPeers:
-      - Host: peer.producer0.com
-        Port: 5051
-
   - &Supplier0Org
     Name: Supplier0MSP
     ID: Supplier0MSP
@@ -43,7 +21,29 @@ Organizations:
         Rule: "OR('Supplier0MSP.peer')"
     AnchorPeers:
       - Host: peer.supplier0.com
-        Port: 5053
+        Port: 5052
+
+  - &Producer0Org
+    Name: Producer0MSP
+    ID: Producer0MSP
+    MSPDir: ../../producer0.com/msp
+
+    Policies:
+      Readers:
+        Type: Signature
+        Rule: "OR('Producer0MSP.member')"
+      Writers:
+        Type: Signature
+        Rule: "OR('Producer0MSP.member')"
+      Admins:
+        Type: Signature
+        Rule: "OR('Producer0MSP.admin')"
+      Endorsement:
+        Type: Signature
+        Rule: "OR('Producer0MSP.peer')"
+    AnchorPeers:
+      - Host: peer.producer0.com
+        Port: 5054
 
   - &Manufacturer0Org
     Name: Manufacturer0MSP
@@ -65,7 +65,7 @@ Organizations:
         Rule: "OR('Manufacturer0MSP.peer')"
     AnchorPeers:
       - Host: peer.manufacturer0.com
-        Port: 5055
+        Port: 5056
 
   - &Distributor0Org
     Name: Distributor0MSP
@@ -87,7 +87,7 @@ Organizations:
         Rule: "OR('Distributor0MSP.peer')"
     AnchorPeers:
       - Host: peer.distributor0.com
-        Port: 5057
+        Port: 5058
 
   - &Retailer0Org
     Name: Retailer0MSP
@@ -109,7 +109,7 @@ Organizations:
         Rule: "OR('Retailer0MSP.peer')"
     AnchorPeers:
       - Host: peer.retailer0.com
-        Port: 5059
+        Port: 5060
 
 Capabilities:
   Channel: &ChannelCapabilities
@@ -147,22 +147,22 @@ Application: &ApplicationDefaults
 Orderer: &OrdererDefaults
   OrdererType: etcdraft
   Addresses:
-    - orderer.producer0.com:6051
-    - orderer.supplier0.com:6052
+    - orderer.supplier0.com:6051
+    - orderer.producer0.com:6052
     - orderer.manufacturer0.com:6053
     - orderer.distributor0.com:6054
     - orderer.retailer0.com:6055
 
   EtcdRaft:
     Consenters:
-      - Host: orderer.producer0.com
-        Port: 6051
-        ClientTLSCert: ../../producer0.com/orderers/tls/server.crt
-        ServerTLSCert: ../../producer0.com/orderers/tls/server.crt
       - Host: orderer.supplier0.com
-        Port: 6052
+        Port: 6051
         ClientTLSCert: ../../supplier0.com/orderers/tls/server.crt
         ServerTLSCert: ../../supplier0.com/orderers/tls/server.crt
+      - Host: orderer.producer0.com
+        Port: 6052
+        ClientTLSCert: ../../producer0.com/orderers/tls/server.crt
+        ServerTLSCert: ../../producer0.com/orderers/tls/server.crt
       - Host: orderer.manufacturer0.com
         Port: 6053
         ClientTLSCert: ../../manufacturer0.com/orderers/tls/server.crt
@@ -220,8 +220,8 @@ Profiles:
     Orderer:
       <<: *OrdererDefaults
       Organizations:
-        - *Producer0Org
         - *Supplier0Org
+        - *Producer0Org
         - *Manufacturer0Org
         - *Distributor0Org
         - *Retailer0Org
@@ -229,8 +229,8 @@ Profiles:
     Application:
       <<: *ApplicationDefaults
       Organizations:
-        - *Producer0Org
         - *Supplier0Org
+        - *Producer0Org
         - *Manufacturer0Org
         - *Distributor0Org
         - *Retailer0Org

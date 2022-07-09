@@ -1,4 +1,4 @@
-module github.com/meneketehe/hehe/src/chaincode/rice
+module github.com/meneketehe/hehe/chaincode
 
 go 1.18
 

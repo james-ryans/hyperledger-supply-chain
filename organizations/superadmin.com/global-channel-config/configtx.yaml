@@ -16,9 +16,12 @@ Organizations:
       Admins:
         Type: Signature
         Rule: "OR('SuperadminMSP.admin')"
-
-    OrdererEndpoints:
-      - orderer.superadmin.com:6050
+      Endorsement:
+        Type: Signature
+        Rule: "OR('SuperadminMSP.peer')"
+    AnchorPeers:
+      - Host: peer.superadmin.com
+        Port: 5050
 
 Capabilities:
   Channel: &ChannelCapabilities
@@ -114,4 +117,5 @@ Profiles:
     Application:
       <<: *ApplicationDefaults
       Organizations:
+        - *SuperadminOrg
       Capabilities: *ApplicationCapabilities

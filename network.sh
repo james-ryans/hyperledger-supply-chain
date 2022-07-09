@@ -6,8 +6,8 @@ function networkUp() {
   createSuperadminOrg
   createGlobalChannel
 
-  createProducer0Org
   createSupplier0Org
+  createProducer0Org
   createManufacturer0Org
   createDistributor0Org
   createRetailer0Org
@@ -29,21 +29,6 @@ function createSuperadminOrg() {
       -f organizations/superadmin.com/docker-compose-peer.yaml up -d 2>&1
 }
 
-function createProducer0Org() {
-  infoln "Generating producer0 certificates using FABRIC CA"
-
-  docker compose -f organizations/producer0.com/docker-compose-ca.yaml up -d 2>&1
-  until [ -f "${PWD}/organizations/producer0.com/fabric-ca/tls-cert.pem" ]; do
-    sleep 1
-  done;
-
-  . registerEnroll.sh
-  enrollProducer0
-
-  docker compose -f organizations/producer0.com/docker-compose-orderer.yaml \
-    -f organizations/producer0.com/docker-compose-peer.yaml up -d 2>&1
-}
-
 function createSupplier0Org() {
   infoln "Generating supplier0 certificates using FABRIC CA"
 
@@ -57,6 +42,21 @@ function createSupplier0Org() {
 
   docker compose -f organizations/supplier0.com/docker-compose-orderer.yaml \
     -f organizations/supplier0.com/docker-compose-peer.yaml up -d 2>&1
+}
+
+function createProducer0Org() {
+  infoln "Generating producer0 certificates using FABRIC CA"
+
+  docker compose -f organizations/producer0.com/docker-compose-ca.yaml up -d 2>&1
+  until [ -f "${PWD}/organizations/producer0.com/fabric-ca/tls-cert.pem" ]; do
+    sleep 1
+  done;
+
+  . registerEnroll.sh
+  enrollProducer0
+
+  docker compose -f organizations/producer0.com/docker-compose-orderer.yaml \
+    -f organizations/producer0.com/docker-compose-peer.yaml up -d 2>&1
 }
 
 function createManufacturer0Org() {
@@ -113,27 +113,10 @@ function createGlobalChannel() {
   configtxgen -profile GlobalGenesis -outputBlock ./organizations/superadmin.com/channel-artifacts/globalchannel.block -channelID globalchannel
   { set +x; } 2>/dev/null
 
-  local rc=1
-  local COUNTER=1
-  local DELAY=3
-  local MAX_RETRY=10
-  while [[ $rc -ne 0 ]] && [[ $COUNTER -lt $MAX_RETRY ]] ; do
-    sleep $DELAY
-    set -x
-    osnadmin channel join --channelID globalchannel \
-      --config-block ./organizations/superadmin.com/channel-artifacts/globalchannel.block \
-      -o localhost:4050 \
-      --ca-file "${PWD}/organizations/superadmin.com/tlsca/tlsca.superadmin.com-cert.pem" \
-      --client-cert "${PWD}/organizations/superadmin.com/orderers/tls/server.crt" \
-      --client-key "${PWD}/organizations/superadmin.com/orderers/tls/server.key" \
-      >&log.txt
-    res=$?
-    { set +x; } 2>/dev/null
-    let rc=$res
-    COUNTER=$(expr $COUNTER + 1)
-  done
+  . createChannel.sh
+  ordererJoinChannel globalchannel superadmin.com localhost:4050
 
-  cat log.txt
+  peerJoinChannel globalchannel superadmin.com SuperadminMSP localhost:5050
 }
 
 function createChannel0() {
@@ -146,109 +129,65 @@ function createChannel0() {
   { set +x; } 2>/dev/null
 
   . createChannel.sh
-  ordererJoinChannel channel0 producer0.com localhost:4051
-  ordererJoinChannel channel0 supplier0.com localhost:4052
+  ordererJoinChannel channel0 supplier0.com localhost:4051
+  ordererJoinChannel channel0 producer0.com localhost:4052
   ordererJoinChannel channel0 manufacturer0.com localhost:4053
   ordererJoinChannel channel0 distributor0.com localhost:4054
   ordererJoinChannel channel0 retailer0.com localhost:4055
 
-  peerJoinChannel channel0 producer0.com Producer0MSP localhost:5051
-  peerJoinChannel channel0 supplier0.com Supplier0MSP localhost:5053
-  peerJoinChannel channel0 manufacturer0.com Manufacturer0MSP localhost:5055
-  peerJoinChannel channel0 distributor0.com Distributor0MSP localhost:5057
-  peerJoinChannel channel0 retailer0.com Retailer0MSP localhost:5059
+  peerJoinChannel channel0 supplier0.com Supplier0MSP localhost:5052
+  peerJoinChannel channel0 producer0.com Producer0MSP localhost:5054
+  peerJoinChannel channel0 manufacturer0.com Manufacturer0MSP localhost:5056
+  peerJoinChannel channel0 distributor0.com Distributor0MSP localhost:5058
+  peerJoinChannel channel0 retailer0.com Retailer0MSP localhost:5060
 }
 
 function deployCC() {
-  chmod 755 deployCC.sh
   ./deployCC.sh "${1}" "${2}" "${3}" "${4}" "${5}"
 }
 
 function networkDown() {
-  docker compose -f organizations/retailer0.com/docker-compose-ca.yaml \
-    -f organizations/retailer0.com/docker-compose-orderer.yaml \
-    -f organizations/retailer0.com/docker-compose-peer.yaml \
+  downDockerContainers retailer0.com
+  downDockerContainers distributor0.com
+  downDockerContainers manufacturer0.com
+  downDockerContainers producer0.com
+  downDockerContainers supplier0.com
+  downDockerContainers superadmin.com
+
+  removeGeneratedFiles retailer0.com
+  removeGeneratedFiles distributor0.com
+  removeGeneratedFiles manufacturer0.com
+  removeGeneratedFiles producer0.com
+  removeGeneratedFiles supplier0.com
+  removeGeneratedFiles superadmin.com
+}
+
+function downDockerContainers() {
+  ORG=$1
+
+  docker compose -f organizations/"$ORG"/docker-compose-ca.yaml \
+    -f organizations/"$ORG"/docker-compose-orderer.yaml \
+    -f organizations/"$ORG"/docker-compose-peer.yaml \
     down --volumes --remove-orphans
+}
 
-  docker compose -f organizations/distributor0.com/docker-compose-ca.yaml \
-    -f organizations/distributor0.com/docker-compose-orderer.yaml \
-    -f organizations/distributor0.com/docker-compose-peer.yaml \
-    down --volumes --remove-orphans
+function removeGeneratedFiles() {
+  ORG=$1
 
-  docker compose -f organizations/manufacturer0.com/docker-compose-ca.yaml \
-    -f organizations/manufacturer0.com/docker-compose-orderer.yaml \
-    -f organizations/manufacturer0.com/docker-compose-peer.yaml \
-    down --volumes --remove-orphans
-
-  docker compose -f organizations/supplier0.com/docker-compose-ca.yaml \
-      -f organizations/supplier0.com/docker-compose-orderer.yaml \
-      -f organizations/supplier0.com/docker-compose-peer.yaml \
-      down --volumes --remove-orphans
-
-  docker compose -f organizations/producer0.com/docker-compose-ca.yaml \
-    -f organizations/producer0.com/docker-compose-orderer.yaml \
-    -f organizations/producer0.com/docker-compose-peer.yaml \
-    down --volumes --remove-orphans
-
-  docker compose -f organizations/superadmin.com/docker-compose-ca.yaml \
-    -f organizations/superadmin.com/docker-compose-orderer.yaml \
-    -f organizations/superadmin.com/docker-compose-peer.yaml \
-    down --volumes --remove-orphans
-
-  rm -rf organizations/retailer0.com/fabric-ca \
-    organizations/retailer0.com/msp \
-    organizations/retailer0.com/orderers \
-    organizations/retailer0.com/peers \
-    organizations/retailer0.com/ca \
-    organizations/retailer0.com/tlsca \
-    organizations/retailer0.com/users \
-    organizations/retailer0.com/fabric-ca-client-config.yaml
-
-  rm -rf organizations/distributor0.com/fabric-ca \
-    organizations/distributor0.com/msp \
-    organizations/distributor0.com/orderers \
-    organizations/distributor0.com/peers \
-    organizations/distributor0.com/ca \
-    organizations/distributor0.com/tlsca \
-    organizations/distributor0.com/users \
-    organizations/distributor0.com/fabric-ca-client-config.yaml
-
-  rm -rf organizations/manufacturer0.com/fabric-ca \
-    organizations/manufacturer0.com/msp \
-    organizations/manufacturer0.com/orderers \
-    organizations/manufacturer0.com/peers \
-    organizations/manufacturer0.com/ca \
-    organizations/manufacturer0.com/tlsca \
-    organizations/manufacturer0.com/users \
-    organizations/manufacturer0.com/fabric-ca-client-config.yaml
-
-  rm -rf organizations/supplier0.com/fabric-ca \
-    organizations/supplier0.com/msp \
-    organizations/supplier0.com/orderers \
-    organizations/supplier0.com/peers \
-    organizations/supplier0.com/ca \
-    organizations/supplier0.com/tlsca \
-    organizations/supplier0.com/users \
-    organizations/supplier0.com/fabric-ca-client-config.yaml
-
-  rm -rf organizations/producer0.com/fabric-ca \
-    organizations/producer0.com/msp \
-    organizations/producer0.com/orderers \
-    organizations/producer0.com/peers \
-    organizations/producer0.com/ca \
-    organizations/producer0.com/tlsca \
-    organizations/producer0.com/users \
-    organizations/producer0.com/fabric-ca-client-config.yaml
-
-  rm -rf organizations/superadmin.com/channel-artifacts \
-    organizations/superadmin.com/fabric-ca \
-    organizations/superadmin.com/msp \
-    organizations/superadmin.com/orderers \
-    organizations/superadmin.com/peers \
-    organizations/superadmin.com/ca \
-    organizations/superadmin.com/tlsca \
-    organizations/superadmin.com/users \
-    organizations/superadmin.com/fabric-ca-client-config.yaml
+  rm -rf organizations/"$ORG"/channel-artifacts \
+    organizations/"$ORG"/fabric-ca/msp \
+    organizations/"$ORG"/fabric-ca/ca-cert.pem \
+    organizations/"$ORG"/fabric-ca/tls-cert.pem \
+    organizations/"$ORG"/fabric-ca/fabric-ca-server.db \
+    organizations/"$ORG"/fabric-ca/IssuerPublicKey \
+    organizations/"$ORG"/fabric-ca/IssuerRevocationPublicKey \
+    organizations/"$ORG"/msp \
+    organizations/"$ORG"/orderers \
+    organizations/"$ORG"/peers \
+    organizations/"$ORG"/ca \
+    organizations/"$ORG"/tlsca \
+    organizations/"$ORG"/users \
+    organizations/"$ORG"/fabric-ca-client-config.yaml
 }
 
 MODE=$1

@@ -25,12 +25,12 @@ services:
       - CORE_PEER_TLS_KEY_FILE=/etc/hyperledger/fabric/tls/server.key
       - CORE_PEER_TLS_ROOTCERT_FILE=/etc/hyperledger/fabric/tls/ca.crt
       - CORE_PEER_ID=peer.distributor0.com
-      - CORE_PEER_ADDRESS=peer.distributor0.com:5057
-      - CORE_PEER_LISTENADDRESS=0.0.0.0:5057
-      - CORE_PEER_CHAINCODEADDRESS=peer.distributor0.com:5058
-      - CORE_PEER_CHAINCODELISTENADDRESS=0.0.0.0:5058
-      - CORE_PEER_GOSSIP_BOOTSTRAP=peer.distributor0.com:5057
-      - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer.distributor0.com:5057
+      - CORE_PEER_ADDRESS=peer.distributor0.com:5058
+      - CORE_PEER_LISTENADDRESS=0.0.0.0:5058
+      - CORE_PEER_CHAINCODEADDRESS=peer.distributor0.com:5059
+      - CORE_PEER_CHAINCODELISTENADDRESS=0.0.0.0:5059
+      - CORE_PEER_GOSSIP_BOOTSTRAP=peer.distributor0.com:5058
+      - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer.distributor0.com:5058
       - CORE_PEER_LOCALMSPID=Distributor0MSP
       - CORE_PEER_MSPCONFIGPATH=/etc/hyperledger/fabric/msp
       - CORE_OPERATIONS_LISTENADDRESS=peer.distributor0.com:9451
@@ -44,7 +44,7 @@ services:
       - ./peercfg:/etc/hyperledger/peercfg
       - /var/run/docker.sock:/host/var/run/docker.sock
     ports:
-      - "5057:5057"
+      - "5058:5058"
       - "9451:9451"
     networks:
       - hehe
