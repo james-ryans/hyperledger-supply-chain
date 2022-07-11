@@ -22,6 +22,8 @@ function vendorDep() {
 function packageChaincode() {
   setPeerEnv "superadmin.com" "SuperadminMSP" "localhost:5049"
 
+  find "${CC_SRC_PATH}" -type f -iname '*.tar.gz' -delete
+
   set -x
   peer lifecycle chaincode package "${CC_SRC_PATH}${CC_NAME}.tar.gz" --path ${CC_SRC_PATH} --lang golang --label ${CC_NAME}_${CC_VERSION} >&log.txt
   res=$?
