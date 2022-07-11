@@ -13,7 +13,12 @@ type ManufacturerContract struct {
 	contractapi.Contract
 }
 
-func (c *ManufacturerContract) CreateManufacturer(ctx contractapi.TransactionContextInterface, id string, name string, province string, city string, district string, postalCode string, address string, phone string, email string, latitude float32, longitude float32) error {
+type ManufacturerDoc struct {
+	DocType string `json:"doc_type"`
+	model.Manufacturer
+}
+
+func (c *ManufacturerContract) CreateManufacturer(ctx contractapi.TransactionContextInterface, id string, orgType string, name string, province string, city string, district string, postalCode string, address string, phone string, email string, latitude float32, longitude float32) error {
 	err := c.authorizeRoleAsManufacturer(ctx)
 	if err != nil {
 		return err
@@ -27,28 +32,32 @@ func (c *ManufacturerContract) CreateManufacturer(ctx contractapi.TransactionCon
 		return fmt.Errorf("the manufacturer %s already exists", id)
 	}
 
-	manufacturer := model.Manufacturer{
-		Organization: model.Organization{
-			DocType: "manufacturer",
-			ID:      id,
-			Name:    name,
-			Location: model.Location{
-				Province:   province,
-				City:       city,
-				District:   district,
-				PostalCode: postalCode,
-				Address:    address,
-				Coordinate: model.Coordinate{
-					Latitude:  latitude,
-					Longitude: longitude,
+	manufacturer := ManufacturerDoc{
+		DocType: "manufacturer",
+		Manufacturer: model.Manufacturer{
+			Organization: model.Organization{
+				ID:   id,
+				Type: orgType,
+				Name: name,
+				Location: model.Location{
+					Province:   province,
+					City:       city,
+					District:   district,
+					PostalCode: postalCode,
+					Address:    address,
+					Coordinate: model.Coordinate{
+						Latitude:  latitude,
+						Longitude: longitude,
+					},
 				},
-			},
-			ContactInfo: model.ContactInfo{
-				Phone: phone,
-				Email: email,
+				ContactInfo: model.ContactInfo{
+					Phone: phone,
+					Email: email,
+				},
 			},
 		},
 	}
+
 	manufacturerJSON, err := json.Marshal(manufacturer)
 	if err != nil {
 		return err

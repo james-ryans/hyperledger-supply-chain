@@ -11,23 +11,23 @@ import (
 	"github.com/meneketehe/hehe/app/model"
 )
 
-type seedRepository struct {
+type riceRepository struct {
 	Fabric *client.Gateway
 }
 
-func NewSeedRepository(fabric *client.Gateway) model.SeedRepository {
-	return &seedRepository{
+func NewRiceRepository(fabric *client.Gateway) model.RiceRepository {
+	return &riceRepository{
 		Fabric: fabric,
 	}
 }
 
-func (r *seedRepository) FindAll(channelID, orgID string) (*[]model.Seed, error) {
+func (r *riceRepository) FindAll(channelID, orgID string) (*[]model.Rice, error) {
 	network := r.Fabric.GetNetwork(channelID)
 	contract := network.GetContract(os.Getenv("FABRIC_CHAINCODE_NAME"))
 
 	queryString, err := json.Marshal(gin.H{
 		"selector": gin.H{
-			"doc_type":    "seed",
+			"doc_type":    "ricegrain",
 			"supplier_id": orgID,
 		},
 	})
@@ -35,43 +35,43 @@ func (r *seedRepository) FindAll(channelID, orgID string) (*[]model.Seed, error)
 		return nil, fmt.Errorf("failed to parse querystring: %w", err)
 	}
 
-	seedsJSON, err := contract.EvaluateTransaction("SeedContract:QuerySeeds", string(queryString))
+	ricesJSON, err := contract.EvaluateTransaction("RiceContract:QueryRices", string(queryString))
 	if err != nil {
 		return nil, fmt.Errorf("failed to evaluate transaction: %w", err)
 	}
 
-	var seeds *[]model.Seed
-	err = json.Unmarshal(seedsJSON, &seeds)
+	var rices *[]model.Rice
+	err = json.Unmarshal(ricesJSON, &rices)
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse result: %w", err)
 	}
 
-	return seeds, nil
+	return rices, nil
 }
 
-func (r *seedRepository) FindByID(channelID, ID string) (*model.Seed, error) {
+func (r *riceRepository) FindByID(channelID, ID string) (*model.Rice, error) {
 	network := r.Fabric.GetNetwork(channelID)
 	contract := network.GetContract(os.Getenv("FABRIC_CHAINCODE_NAME"))
 
-	seedJSON, err := contract.EvaluateTransaction("SeedContract:ReadSeed", ID)
+	riceJSON, err := contract.EvaluateTransaction("RiceContract:ReadRice", ID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to evaluate transaction: %w", err)
 	}
 
-	seed := &model.Seed{}
-	err = json.Unmarshal(seedJSON, seed)
+	rice := &model.Rice{}
+	err = json.Unmarshal(riceJSON, rice)
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse result: %w", err)
 	}
 
-	return seed, nil
+	return rice, nil
 }
 
-func (r *seedRepository) Create(channelID string, seed *model.Seed) error {
+func (r *riceRepository) Create(channelID string, rice *model.Rice) error {
 	network := r.Fabric.GetNetwork(channelID)
 	contract := network.GetContract(os.Getenv("FABRIC_CHAINCODE_NAME"))
 
-	_, err := contract.SubmitTransaction("SeedContract:CreateSeed", seed.ID, seed.SupplierID, seed.VarietyName, strconv.FormatFloat(float64(seed.PlantAge), 'f', -1, 32), seed.PlantShape, strconv.FormatFloat(float64(seed.PlantHeight), 'f', -1, 32), seed.LeafShape)
+	_, err := contract.SubmitTransaction("RiceContract:CreateRice", rice.ID, rice.ManufacturerID, rice.BrandName, strconv.FormatFloat(float64(rice.Weight), 'f', -1, 32), rice.Texture, strconv.FormatFloat(float64(rice.AmyloseRate), 'f', -1, 32))
 	if err != nil {
 		return fmt.Errorf("failed to submit transaction: %w", err)
 	}
@@ -79,11 +79,11 @@ func (r *seedRepository) Create(channelID string, seed *model.Seed) error {
 	return nil
 }
 
-func (r *seedRepository) Update(channelID string, seed *model.Seed) error {
+func (r *riceRepository) Update(channelID string, rice *model.Rice) error {
 	network := r.Fabric.GetNetwork(channelID)
 	contract := network.GetContract(os.Getenv("FABRIC_CHAINCODE_NAME"))
 
-	_, err := contract.SubmitTransaction("SeedContract:UpdateSeed", seed.ID, seed.SupplierID, seed.VarietyName, strconv.FormatFloat(float64(seed.PlantAge), 'f', -1, 32), seed.PlantShape, strconv.FormatFloat(float64(seed.PlantHeight), 'f', -1, 32), seed.LeafShape)
+	_, err := contract.SubmitTransaction("RiceContract:UpdateRice", rice.ID, rice.ManufacturerID, rice.BrandName, strconv.FormatFloat(float64(rice.Weight), 'f', -1, 32), rice.Texture, strconv.FormatFloat(float64(rice.AmyloseRate), 'f', -1, 32))
 	if err != nil {
 		return fmt.Errorf("failed to submit transaction: %w", err)
 	}
@@ -91,11 +91,11 @@ func (r *seedRepository) Update(channelID string, seed *model.Seed) error {
 	return nil
 }
 
-func (r *seedRepository) Delete(channelID, ID string) error {
+func (r *riceRepository) Delete(channelID, ID string) error {
 	network := r.Fabric.GetNetwork(channelID)
 	contract := network.GetContract(os.Getenv("FABRIC_CHAINCODE_NAME"))
 
-	_, err := contract.SubmitTransaction("SeedContract:DeleteSeed", ID)
+	_, err := contract.SubmitTransaction("RiceContract:DeleteRice", ID)
 	if err != nil {
 		return fmt.Errorf("failed to submit transaction: %w", err)
 	}

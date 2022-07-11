@@ -13,7 +13,12 @@ type ProducerContract struct {
 	contractapi.Contract
 }
 
-func (c *ProducerContract) CreateProducer(ctx contractapi.TransactionContextInterface, id string, name string, province string, city string, district string, postalCode string, address string, phone string, email string, latitude float32, longitude float32) error {
+type ProducerDoc struct {
+	DocType string `json:"doc_type"`
+	model.Producer
+}
+
+func (c *ProducerContract) CreateProducer(ctx contractapi.TransactionContextInterface, id string, orgType string, name string, province string, city string, district string, postalCode string, address string, phone string, email string, latitude float32, longitude float32) error {
 	err := c.authorizeRoleAsProducer(ctx)
 	if err != nil {
 		return err
@@ -27,25 +32,28 @@ func (c *ProducerContract) CreateProducer(ctx contractapi.TransactionContextInte
 		return fmt.Errorf("the producer %s already exists", id)
 	}
 
-	producer := model.Producer{
-		Organization: model.Organization{
-			DocType: "producer",
-			ID:      id,
-			Name:    name,
-			Location: model.Location{
-				Province:   province,
-				City:       city,
-				District:   district,
-				PostalCode: postalCode,
-				Address:    address,
-				Coordinate: model.Coordinate{
-					Latitude:  latitude,
-					Longitude: longitude,
+	producer := ProducerDoc{
+		DocType: "producer",
+		Producer: model.Producer{
+			Organization: model.Organization{
+				ID:   id,
+				Type: orgType,
+				Name: name,
+				Location: model.Location{
+					Province:   province,
+					City:       city,
+					District:   district,
+					PostalCode: postalCode,
+					Address:    address,
+					Coordinate: model.Coordinate{
+						Latitude:  latitude,
+						Longitude: longitude,
+					},
 				},
-			},
-			ContactInfo: model.ContactInfo{
-				Phone: phone,
-				Email: email,
+				ContactInfo: model.ContactInfo{
+					Phone: phone,
+					Email: email,
+				},
 			},
 		},
 	}

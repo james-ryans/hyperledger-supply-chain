@@ -16,15 +16,25 @@ import (
 func inject(d *dataSources) (*gin.Engine, error) {
 	log.Println("Injecting services")
 
-	seedRepository := repository.NewSeedRepository(d.Gateway)
 	organizationRepository := repository.NewOrganizationRepository(d.Gateway)
+	seedRepository := repository.NewSeedRepository(d.Gateway)
+	riceGrainRepository := repository.NewRiceGrainRepository(d.Gateway)
+	riceRepository := repository.NewRiceRepository(d.Gateway)
+
+	organizationService := service.NewOrganizationService(&service.OrganizationServiceConfig{
+		OrganizationRepository: organizationRepository,
+	})
 
 	seedService := service.NewSeedService(&service.SeedServiceConfig{
 		SeedRepository: seedRepository,
 	})
 
-	organizationService := service.NewOrganizationService(&service.OrganizationServiceConfig{
-		OrganizationRepository: organizationRepository,
+	riceGrainService := service.NewRiceGrainService(&service.RiceGrainServiceConfig{
+		RiceGrainRepository: riceGrainRepository,
+	})
+
+	riceService := service.NewRiceService(&service.RiceServiceConfig{
+		RiceRepository: riceRepository,
 	})
 
 	router := gin.Default()
@@ -45,8 +55,10 @@ func inject(d *dataSources) (*gin.Engine, error) {
 
 	handler.NewHandler(&handler.Config{
 		R:                   router,
-		SeedService:         seedService,
 		OrganizationService: organizationService,
+		SeedService:         seedService,
+		RiceGrainService:    riceGrainService,
+		RiceService:         riceService,
 		MaxBodyBytes:        mbb,
 	})
 

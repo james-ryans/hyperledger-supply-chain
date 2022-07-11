@@ -13,13 +13,18 @@ type RiceGrainContract struct {
 	contractapi.Contract
 }
 
-func (s *RiceGrainContract) CreateRiceGrain(ctx contractapi.TransactionContextInterface, id string, producerId string, varietyName string, grainShape string, grainColor string) error {
-	err := s.authorizeRoleAsProducer(ctx)
+type RiceGrainDoc struct {
+	DocType string `json:"doc_type"`
+	model.RiceGrain
+}
+
+func (c *RiceGrainContract) CreateRiceGrain(ctx contractapi.TransactionContextInterface, id string, producerId string, varietyName string, grainShape string, grainColor string) error {
+	err := c.authorizeRoleAsProducer(ctx)
 	if err != nil {
 		return err
 	}
 
-	exists, err := s.riceGrainExists(ctx, id)
+	exists, err := c.riceGrainExists(ctx, id)
 	if err != nil {
 		return err
 	}
@@ -27,13 +32,15 @@ func (s *RiceGrainContract) CreateRiceGrain(ctx contractapi.TransactionContextIn
 		return fmt.Errorf("the rice grain %s already exists", id)
 	}
 
-	riceGrain := model.RiceGrain{
-		DocType:     "ricegrain",
-		ID:          id,
-		ProducerID:  producerId,
-		VarietyName: varietyName,
-		GrainShape:  grainShape,
-		GrainColor:  grainColor,
+	riceGrain := RiceGrainDoc{
+		DocType: "ricegrain",
+		RiceGrain: model.RiceGrain{
+			ID:          id,
+			ProducerID:  producerId,
+			VarietyName: varietyName,
+			GrainShape:  grainShape,
+			GrainColor:  grainColor,
+		},
 	}
 	riceGrainJSON, err := json.Marshal(riceGrain)
 	if err != nil {
@@ -43,13 +50,8 @@ func (s *RiceGrainContract) CreateRiceGrain(ctx contractapi.TransactionContextIn
 	return ctx.GetStub().PutState(id, riceGrainJSON)
 }
 
-func (s *RiceGrainContract) ReadRiceGrain(ctx contractapi.TransactionContextInterface, id string) (*model.RiceGrain, error) {
-	err := s.authorizeRoleAsProducer(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	riceGrainJSON, err := s.getRiceGrain(ctx, id)
+func (c *RiceGrainContract) ReadRiceGrain(ctx contractapi.TransactionContextInterface, id string) (*model.RiceGrain, error) {
+	riceGrainJSON, err := c.getRiceGrain(ctx, id)
 	if err != nil {
 		return nil, err
 	}
@@ -66,13 +68,13 @@ func (s *RiceGrainContract) ReadRiceGrain(ctx contractapi.TransactionContextInte
 	return &riceGrain, nil
 }
 
-func (s *RiceGrainContract) UpdateRiceGrain(ctx contractapi.TransactionContextInterface, id string, producerId string, varietyName string, grainShape string, grainColor string) error {
-	err := s.authorizeRoleAsProducer(ctx)
+func (c *RiceGrainContract) UpdateRiceGrain(ctx contractapi.TransactionContextInterface, id string, producerId string, varietyName string, grainShape string, grainColor string) error {
+	err := c.authorizeRoleAsProducer(ctx)
 	if err != nil {
 		return err
 	}
 
-	exists, err := s.riceGrainExists(ctx, id)
+	exists, err := c.riceGrainExists(ctx, id)
 	if err != nil {
 		return err
 	}
@@ -80,13 +82,15 @@ func (s *RiceGrainContract) UpdateRiceGrain(ctx contractapi.TransactionContextIn
 		return fmt.Errorf("the rice grain %s does not exist", id)
 	}
 
-	riceGrain := model.RiceGrain{
-		DocType:     "ricegrain",
-		ID:          id,
-		ProducerID:  producerId,
-		VarietyName: varietyName,
-		GrainShape:  grainShape,
-		GrainColor:  grainColor,
+	riceGrain := RiceGrainDoc{
+		DocType: "ricegrain",
+		RiceGrain: model.RiceGrain{
+			ID:          id,
+			ProducerID:  producerId,
+			VarietyName: varietyName,
+			GrainShape:  grainShape,
+			GrainColor:  grainColor,
+		},
 	}
 	riceGrainJSON, err := json.Marshal(riceGrain)
 	if err != nil {
@@ -96,13 +100,13 @@ func (s *RiceGrainContract) UpdateRiceGrain(ctx contractapi.TransactionContextIn
 	return ctx.GetStub().PutState(id, riceGrainJSON)
 }
 
-func (s *RiceGrainContract) DeleteRiceGrain(ctx contractapi.TransactionContextInterface, id string) error {
-	err := s.authorizeRoleAsProducer(ctx)
+func (c *RiceGrainContract) DeleteRiceGrain(ctx contractapi.TransactionContextInterface, id string) error {
+	err := c.authorizeRoleAsProducer(ctx)
 	if err != nil {
 		return err
 	}
 
-	exists, err := s.riceGrainExists(ctx, id)
+	exists, err := c.riceGrainExists(ctx, id)
 	if err != nil {
 		return err
 	}
@@ -113,7 +117,32 @@ func (s *RiceGrainContract) DeleteRiceGrain(ctx contractapi.TransactionContextIn
 	return ctx.GetStub().DelState(id)
 }
 
-func (s *RiceGrainContract) authorizeRoleAsProducer(ctx contractapi.TransactionContextInterface) error {
+func (c *RiceGrainContract) QueryRiceGrains(ctx contractapi.TransactionContextInterface, query string) ([]*model.RiceGrain, error) {
+	resultIterator, err := ctx.GetStub().GetQueryResult(query)
+	if err != nil {
+		return nil, err
+	}
+	defer resultIterator.Close()
+
+	riceGrains := make([]*model.RiceGrain, 0)
+	for resultIterator.HasNext() {
+		result, err := resultIterator.Next()
+		if err != nil {
+			return nil, err
+		}
+
+		var riceGrain model.RiceGrain
+		err = json.Unmarshal(result.Value, &riceGrain)
+		if err != nil {
+			return nil, err
+		}
+		riceGrains = append(riceGrains, &riceGrain)
+	}
+
+	return riceGrains, nil
+}
+
+func (c *RiceGrainContract) authorizeRoleAsProducer(ctx contractapi.TransactionContextInterface) error {
 	err := ctx.GetClientIdentity().AssertAttributeValue("hf.Affiliation", "producer")
 	if err != nil {
 		return errors.New("you are not authorized to create rice grain asset, only producer allowed")
@@ -122,7 +151,7 @@ func (s *RiceGrainContract) authorizeRoleAsProducer(ctx contractapi.TransactionC
 	return nil
 }
 
-func (s *RiceGrainContract) getRiceGrain(ctx contractapi.TransactionContextInterface, id string) ([]byte, error) {
+func (c *RiceGrainContract) getRiceGrain(ctx contractapi.TransactionContextInterface, id string) ([]byte, error) {
 	riceGrainJSON, err := ctx.GetStub().GetState(id)
 	if err != nil {
 		return nil, fmt.Errorf("failed to read from world state: %v", err)
@@ -131,8 +160,8 @@ func (s *RiceGrainContract) getRiceGrain(ctx contractapi.TransactionContextInter
 	return riceGrainJSON, nil
 }
 
-func (s *RiceGrainContract) riceGrainExists(ctx contractapi.TransactionContextInterface, id string) (bool, error) {
-	riceGrainJSON, err := s.getRiceGrain(ctx, id)
+func (c *RiceGrainContract) riceGrainExists(ctx contractapi.TransactionContextInterface, id string) (bool, error) {
+	riceGrainJSON, err := c.getRiceGrain(ctx, id)
 	if err != nil {
 		return false, err
 	}

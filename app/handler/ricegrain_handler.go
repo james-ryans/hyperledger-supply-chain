@@ -9,11 +9,11 @@ import (
 	request "github.com/meneketehe/hehe/app/request/organization"
 )
 
-func (h *Handler) GetSeeds(c *gin.Context) {
+func (h *Handler) GetRiceGrains(c *gin.Context) {
 	orgID := c.MustGet("orgID").(string)
 	channelID := c.Param("channelID")
 
-	seeds, err := h.seedService.GetAllSeeds(channelID, orgID)
+	riceGrains, err := h.riceGrainService.GetAllRiceGrains(channelID, orgID)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"success": false,
@@ -26,15 +26,15 @@ func (h *Handler) GetSeeds(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,
 		"message": nil,
-		"data":    model.ToSeedsResponse(seeds),
+		"data":    model.ToRiceGrainsResponse(riceGrains),
 	})
 }
 
-func (h *Handler) GetSeed(c *gin.Context) {
+func (h *Handler) GetRiceGrain(c *gin.Context) {
 	channelID := c.Param("channelID")
-	seedID := c.Param("seedID")
+	riceGrainID := c.Param("riceGrainID")
 
-	seed, err := h.seedService.GetSeedByID(channelID, seedID)
+	riceGrain, err := h.riceGrainService.GetRiceGrainByID(channelID, riceGrainID)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"success": false,
@@ -47,12 +47,12 @@ func (h *Handler) GetSeed(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,
 		"message": nil,
-		"data":    model.ToSeedResponse(seed),
+		"data":    model.ToRiceGrainResponse(riceGrain),
 	})
 }
 
-func (h *Handler) CreateSeed(c *gin.Context) {
-	var req request.SeedRequest
+func (h *Handler) CreateRiceGrain(c *gin.Context) {
+	var req request.RiceGrainRequest
 	if ok := bindData(c, &req); !ok {
 		return
 	}
@@ -62,16 +62,14 @@ func (h *Handler) CreateSeed(c *gin.Context) {
 	orgID := c.MustGet("orgID").(string)
 	channelID := c.Param("channelID")
 
-	input := &model.Seed{
-		SupplierID:  orgID,
+	input := &model.RiceGrain{
+		ProducerID:  orgID,
 		VarietyName: req.VarietyName,
-		PlantAge:    req.PlantAge,
-		PlantShape:  req.PlantShape,
-		PlantHeight: req.PlantHeight,
-		LeafShape:   req.LeafShape,
+		GrainShape:  req.GrainShape,
+		GrainColor:  req.GrainColor,
 	}
 
-	seed, err := h.seedService.CreateSeed(channelID, input)
+	riceGrain, err := h.riceGrainService.CreateRiceGrain(channelID, input)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"success": false,
@@ -83,13 +81,13 @@ func (h *Handler) CreateSeed(c *gin.Context) {
 
 	c.JSON(http.StatusCreated, gin.H{
 		"success": true,
-		"message": "create seed success",
-		"data":    model.ToSeedResponse(seed),
+		"message": "create rice grain success",
+		"data":    model.ToRiceGrainResponse(riceGrain),
 	})
 }
 
-func (h *Handler) UpdateSeed(c *gin.Context) {
-	var req request.SeedRequest
+func (h *Handler) UpdateRiceGrain(c *gin.Context) {
+	var req request.RiceGrainRequest
 	if ok := bindData(c, &req); !ok {
 		return
 	}
@@ -98,9 +96,9 @@ func (h *Handler) UpdateSeed(c *gin.Context) {
 
 	orgID := c.MustGet("orgID").(string)
 	channelID := c.Param("channelID")
-	seedID := c.Param("seedID")
+	riceGrainID := c.Param("riceGrainID")
 
-	seed, err := h.seedService.GetSeedByID(channelID, seedID)
+	riceGrain, err := h.riceGrainService.GetRiceGrainByID(channelID, riceGrainID)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{
 			"success": false,
@@ -110,22 +108,20 @@ func (h *Handler) UpdateSeed(c *gin.Context) {
 		return
 	}
 
-	if seed.SupplierID != orgID {
+	if riceGrain.ProducerID != orgID {
 		c.JSON(http.StatusForbidden, gin.H{
 			"success": false,
-			"message": errors.New("this seed is not yours"),
+			"message": errors.New("this rice grain is not yours").Error(),
 			"data":    nil,
 		})
 		return
 	}
 
-	seed.VarietyName = req.VarietyName
-	seed.PlantAge = req.PlantAge
-	seed.PlantShape = req.PlantShape
-	seed.PlantHeight = req.PlantHeight
-	seed.LeafShape = req.LeafShape
+	riceGrain.VarietyName = req.VarietyName
+	riceGrain.GrainShape = req.GrainShape
+	riceGrain.GrainColor = req.GrainColor
 
-	if err := h.seedService.UpdateSeed(channelID, seed); err != nil {
+	if err := h.riceGrainService.UpdateRiceGrain(channelID, riceGrain); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"success": false,
 			"message": err.Error(),
@@ -136,17 +132,17 @@ func (h *Handler) UpdateSeed(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,
-		"message": "update seed success",
-		"data":    model.ToSeedResponse(seed),
+		"message": "update rice grain success",
+		"data":    model.ToRiceGrainResponse(riceGrain),
 	})
 }
 
-func (h *Handler) DeleteSeed(c *gin.Context) {
+func (h *Handler) DeleteRiceGrain(c *gin.Context) {
 	orgID := c.MustGet("orgID").(string)
 	channelID := c.Param("channelID")
-	seedID := c.Param("seedID")
+	riceGrainID := c.Param("riceGrainID")
 
-	seed, err := h.seedService.GetSeedByID(channelID, seedID)
+	riceGrain, err := h.riceGrainService.GetRiceGrainByID(channelID, riceGrainID)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{
 			"success": false,
@@ -156,16 +152,16 @@ func (h *Handler) DeleteSeed(c *gin.Context) {
 		return
 	}
 
-	if seed.SupplierID != orgID {
+	if riceGrain.ProducerID != orgID {
 		c.JSON(http.StatusForbidden, gin.H{
 			"success": false,
-			"message": errors.New("this seed is not yours").Error(),
+			"message": errors.New("this rice grain is not yours"),
 			"data":    nil,
 		})
 		return
 	}
 
-	if err := h.seedService.DeleteSeed(channelID, seedID); err != nil {
+	if err := h.riceGrainService.DeleteRiceGrain(channelID, riceGrainID); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"success": false,
 			"message": err.Error(),
@@ -176,7 +172,7 @@ func (h *Handler) DeleteSeed(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,
-		"message": "delete seed success",
+		"message": "delete rice grain success",
 		"data":    nil,
 	})
 }

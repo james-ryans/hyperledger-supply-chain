@@ -53,11 +53,6 @@ func (c *SeedContract) CreateSeed(ctx contractapi.TransactionContextInterface, i
 }
 
 func (c *SeedContract) ReadSeed(ctx contractapi.TransactionContextInterface, id string) (*model.Seed, error) {
-	err := c.authorizeRoleAsSupplier(ctx)
-	if err != nil {
-		return nil, err
-	}
-
 	seedJSON, err := c.getSeed(ctx, id)
 	if err != nil {
 		return nil, err
@@ -127,11 +122,6 @@ func (c *SeedContract) DeleteSeed(ctx contractapi.TransactionContextInterface, i
 }
 
 func (c *SeedContract) QuerySeeds(ctx contractapi.TransactionContextInterface, query string) ([]*model.Seed, error) {
-	err := c.authorizeRoleAsSupplier(ctx)
-	if err != nil {
-		return nil, err
-	}
-
 	resultIterator, err := ctx.GetStub().GetQueryResult(query)
 	if err != nil {
 		return nil, err

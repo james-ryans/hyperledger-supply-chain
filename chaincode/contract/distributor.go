@@ -13,7 +13,12 @@ type DistributorContract struct {
 	contractapi.Contract
 }
 
-func (c *DistributorContract) CreateDistributor(ctx contractapi.TransactionContextInterface, id string, name string, province string, city string, district string, postalCode string, address string, phone string, email string, latitude float32, longitude float32) error {
+type DistributorDoc struct {
+	DocType string `json:"doc_type"`
+	model.Distributor
+}
+
+func (c *DistributorContract) CreateDistributor(ctx contractapi.TransactionContextInterface, id string, orgType string, name string, province string, city string, district string, postalCode string, address string, phone string, email string, latitude float32, longitude float32) error {
 	err := c.authorizeRoleAsDistributor(ctx)
 	if err != nil {
 		return err
@@ -27,25 +32,28 @@ func (c *DistributorContract) CreateDistributor(ctx contractapi.TransactionConte
 		return fmt.Errorf("the distributor %s already exists", id)
 	}
 
-	distributor := model.Distributor{
-		Organization: model.Organization{
-			DocType: "distributor",
-			ID:      id,
-			Name:    name,
-			Location: model.Location{
-				Province:   province,
-				City:       city,
-				District:   district,
-				PostalCode: postalCode,
-				Address:    address,
-				Coordinate: model.Coordinate{
-					Latitude:  latitude,
-					Longitude: longitude,
+	distributor := DistributorDoc{
+		DocType: "distributor",
+		Distributor: model.Distributor{
+			Organization: model.Organization{
+				ID:   id,
+				Name: name,
+				Type: orgType,
+				Location: model.Location{
+					Province:   province,
+					City:       city,
+					District:   district,
+					PostalCode: postalCode,
+					Address:    address,
+					Coordinate: model.Coordinate{
+						Latitude:  latitude,
+						Longitude: longitude,
+					},
 				},
-			},
-			ContactInfo: model.ContactInfo{
-				Phone: phone,
-				Email: email,
+				ContactInfo: model.ContactInfo{
+					Phone: phone,
+					Email: email,
+				},
 			},
 		},
 	}

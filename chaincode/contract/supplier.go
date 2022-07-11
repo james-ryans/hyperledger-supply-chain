@@ -13,7 +13,12 @@ type SupplierContract struct {
 	contractapi.Contract
 }
 
-func (c *SupplierContract) CreateSupplier(ctx contractapi.TransactionContextInterface, id string, name string, province string, city string, district string, postalCode string, address string, phone string, email string, latitude float32, longitude float32) error {
+type SupplierDoc struct {
+	DocType string `json:"doc_type"`
+	model.Supplier
+}
+
+func (c *SupplierContract) CreateSupplier(ctx contractapi.TransactionContextInterface, id string, orgType string, name string, province string, city string, district string, postalCode string, address string, phone string, email string, latitude float32, longitude float32) error {
 	err := c.authorizeRoleAsSupplier(ctx)
 	if err != nil {
 		return err
@@ -27,25 +32,28 @@ func (c *SupplierContract) CreateSupplier(ctx contractapi.TransactionContextInte
 		return fmt.Errorf("the supplier %s already exists", id)
 	}
 
-	supplier := model.Supplier{
-		Organization: model.Organization{
-			DocType: "supplier",
-			ID:      id,
-			Name:    name,
-			Location: model.Location{
-				Province:   province,
-				City:       city,
-				District:   district,
-				PostalCode: postalCode,
-				Address:    address,
-				Coordinate: model.Coordinate{
-					Latitude:  latitude,
-					Longitude: longitude,
+	supplier := SupplierDoc{
+		DocType: "supplier",
+		Supplier: model.Supplier{
+			Organization: model.Organization{
+				ID:   id,
+				Type: orgType,
+				Name: name,
+				Location: model.Location{
+					Province:   province,
+					City:       city,
+					District:   district,
+					PostalCode: postalCode,
+					Address:    address,
+					Coordinate: model.Coordinate{
+						Latitude:  latitude,
+						Longitude: longitude,
+					},
 				},
-			},
-			ContactInfo: model.ContactInfo{
-				Phone: phone,
-				Email: email,
+				ContactInfo: model.ContactInfo{
+					Phone: phone,
+					Email: email,
+				},
 			},
 		},
 	}

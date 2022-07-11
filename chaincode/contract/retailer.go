@@ -13,7 +13,12 @@ type RetailerContract struct {
 	contractapi.Contract
 }
 
-func (c *RetailerContract) CreateRetailer(ctx contractapi.TransactionContextInterface, id string, name string, province string, city string, district string, postalCode string, address string, phone string, email string, latitude float32, longitude float32) error {
+type RetailerDoc struct {
+	DocType string `json:"doc_type"`
+	model.Retailer
+}
+
+func (c *RetailerContract) CreateRetailer(ctx contractapi.TransactionContextInterface, id string, orgType string, name string, province string, city string, district string, postalCode string, address string, phone string, email string, latitude float32, longitude float32) error {
 	err := c.authorizeRoleAsRetailer(ctx)
 	if err != nil {
 		return err
@@ -27,25 +32,28 @@ func (c *RetailerContract) CreateRetailer(ctx contractapi.TransactionContextInte
 		return fmt.Errorf("the retailer %s already exists", id)
 	}
 
-	retailer := model.Retailer{
-		Organization: model.Organization{
-			DocType: "retailer",
-			ID:      id,
-			Name:    name,
-			Location: model.Location{
-				Province:   province,
-				City:       city,
-				District:   district,
-				PostalCode: postalCode,
-				Address:    address,
-				Coordinate: model.Coordinate{
-					Latitude:  latitude,
-					Longitude: longitude,
+	retailer := RetailerDoc{
+		DocType: "retailer",
+		Retailer: model.Retailer{
+			Organization: model.Organization{
+				ID:   id,
+				Type: orgType,
+				Name: name,
+				Location: model.Location{
+					Province:   province,
+					City:       city,
+					District:   district,
+					PostalCode: postalCode,
+					Address:    address,
+					Coordinate: model.Coordinate{
+						Latitude:  latitude,
+						Longitude: longitude,
+					},
 				},
-			},
-			ContactInfo: model.ContactInfo{
-				Phone: phone,
-				Email: email,
+				ContactInfo: model.ContactInfo{
+					Phone: phone,
+					Email: email,
+				},
 			},
 		},
 	}
