@@ -9,20 +9,23 @@ import (
 )
 
 type Handler struct {
-	seedService  model.SeedService
-	MaxBodyBytes int64
+	seedService         model.SeedService
+	organizationService model.OrganizationService
+	MaxBodyBytes        int64
 }
 
 type Config struct {
-	R            *gin.Engine
-	SeedService  model.SeedService
-	MaxBodyBytes int64
+	R                   *gin.Engine
+	SeedService         model.SeedService
+	OrganizationService model.OrganizationService
+	MaxBodyBytes        int64
 }
 
 func NewHandler(c *Config) {
 	h := &Handler{
-		seedService:  c.SeedService,
-		MaxBodyBytes: c.MaxBodyBytes,
+		seedService:         c.SeedService,
+		organizationService: c.OrganizationService,
+		MaxBodyBytes:        c.MaxBodyBytes,
 	}
 
 	c.R.NoRoute(func(c *gin.Context) {
@@ -32,6 +35,10 @@ func NewHandler(c *Config) {
 			"data":    nil,
 		})
 	})
+
+	ag := c.R.Group("api/organizations/account")
+	ag.Use(middleware.AuthOrganization())
+	ag.GET("/me", h.GetMeAsOrganization)
 
 	sg := c.R.Group("api/organizations/channels/:channelId/seeds")
 	sg.Use(middleware.AuthOrganization())

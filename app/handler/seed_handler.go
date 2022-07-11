@@ -10,10 +10,10 @@ import (
 )
 
 func (h *Handler) GetSeeds(c *gin.Context) {
-	orgId := c.MustGet("orgId").(string)
-	channelId := c.Param("channelId")
+	orgID := c.MustGet("orgID").(string)
+	channelID := c.Param("channelID")
 
-	seeds, err := h.seedService.GetAllSeeds(channelId, orgId)
+	seeds, err := h.seedService.GetAllSeeds(channelID, orgID)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"success": false,
@@ -31,10 +31,10 @@ func (h *Handler) GetSeeds(c *gin.Context) {
 }
 
 func (h *Handler) GetSeed(c *gin.Context) {
-	channelId := c.Param("channelId")
-	seedId := c.Param("seedId")
+	channelID := c.Param("channelID")
+	seedID := c.Param("seedID")
 
-	seed, err := h.seedService.GetSeedByID(channelId, seedId)
+	seed, err := h.seedService.GetSeedByID(channelID, seedID)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"success": false,
@@ -59,11 +59,11 @@ func (h *Handler) CreateSeed(c *gin.Context) {
 
 	req.Sanitize()
 
-	orgId := c.MustGet("orgId").(string)
-	channelId := c.Param("channelId")
+	orgID := c.MustGet("orgID").(string)
+	channelID := c.Param("channelID")
 
 	input := &model.Seed{
-		SupplierID:  orgId,
+		SupplierID:  orgID,
 		VarietyName: req.VarietyName,
 		PlantAge:    req.PlantAge,
 		PlantShape:  req.PlantShape,
@@ -71,7 +71,7 @@ func (h *Handler) CreateSeed(c *gin.Context) {
 		LeafShape:   req.LeafShape,
 	}
 
-	seed, err := h.seedService.CreateSeed(channelId, input)
+	seed, err := h.seedService.CreateSeed(channelID, input)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"success": false,
@@ -96,11 +96,11 @@ func (h *Handler) UpdateSeed(c *gin.Context) {
 
 	req.Sanitize()
 
-	orgId := c.MustGet("orgId").(string)
-	channelId := c.Param("channelId")
-	seedId := c.Param("seedId")
+	orgID := c.MustGet("orgID").(string)
+	channelID := c.Param("channelID")
+	seedID := c.Param("seedID")
 
-	seed, err := h.seedService.GetSeedByID(channelId, seedId)
+	seed, err := h.seedService.GetSeedByID(channelID, seedID)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{
 			"success": false,
@@ -110,7 +110,7 @@ func (h *Handler) UpdateSeed(c *gin.Context) {
 		return
 	}
 
-	if seed.SupplierID != orgId {
+	if seed.SupplierID != orgID {
 		c.JSON(http.StatusForbidden, gin.H{
 			"success": false,
 			"message": errors.New("this seed is not yours"),
@@ -125,7 +125,7 @@ func (h *Handler) UpdateSeed(c *gin.Context) {
 	seed.PlantHeight = req.PlantHeight
 	seed.LeafShape = req.LeafShape
 
-	if err := h.seedService.UpdateSeed(channelId, seed); err != nil {
+	if err := h.seedService.UpdateSeed(channelID, seed); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"success": false,
 			"message": err.Error(),
@@ -142,11 +142,11 @@ func (h *Handler) UpdateSeed(c *gin.Context) {
 }
 
 func (h *Handler) DeleteSeed(c *gin.Context) {
-	orgId := c.MustGet("orgId").(string)
-	channelId := c.Param("channelId")
-	seedId := c.Param("seedId")
+	orgID := c.MustGet("orgID").(string)
+	channelID := c.Param("channelID")
+	seedID := c.Param("seedID")
 
-	seed, err := h.seedService.GetSeedByID(channelId, seedId)
+	seed, err := h.seedService.GetSeedByID(channelID, seedID)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{
 			"success": false,
@@ -156,7 +156,7 @@ func (h *Handler) DeleteSeed(c *gin.Context) {
 		return
 	}
 
-	if seed.SupplierID != orgId {
+	if seed.SupplierID != orgID {
 		c.JSON(http.StatusForbidden, gin.H{
 			"success": false,
 			"message": errors.New("this seed is not yours"),
@@ -165,7 +165,7 @@ func (h *Handler) DeleteSeed(c *gin.Context) {
 		return
 	}
 
-	if err := h.seedService.DeleteSeed(channelId, seedId); err != nil {
+	if err := h.seedService.DeleteSeed(channelID, seedID); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"success": false,
 			"message": err.Error(),

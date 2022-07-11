@@ -1,12 +1,24 @@
 package repository
 
 import (
+	"github.com/hyperledger/fabric-gateway/pkg/client"
 	"github.com/meneketehe/hehe/app/model"
 )
 
-func GetMe(id string) (*model.Organization, error) {
+type organizationRepository struct {
+	Fabric *client.Gateway
+}
+
+func NewOrganizationRepository(fabric *client.Gateway) model.OrganizationRepository {
+	return &organizationRepository{
+		Fabric: fabric,
+	}
+}
+
+func (r *organizationRepository) FindByID(ID string) (*model.Organization, error) {
 	return &model.Organization{
-		ID:   id,
+		ID:   ID,
+		Type: "supplier",
 		Name: "Supplier 0",
 		Location: model.Location{
 			Province:   "North Sumatra",

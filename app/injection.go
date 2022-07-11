@@ -17,9 +17,14 @@ func inject(d *dataSources) (*gin.Engine, error) {
 	log.Println("Injecting services")
 
 	seedRepository := repository.NewSeedRepository(d.Gateway)
+	organizationRepository := repository.NewOrganizationRepository(d.Gateway)
 
 	seedService := service.NewSeedService(&service.SeedServiceConfig{
 		SeedRepository: seedRepository,
+	})
+
+	organizationService := service.NewOrganizationService(&service.OrganizationServiceConfig{
+		OrganizationRepository: organizationRepository,
 	})
 
 	router := gin.Default()
@@ -39,9 +44,10 @@ func inject(d *dataSources) (*gin.Engine, error) {
 	}
 
 	handler.NewHandler(&handler.Config{
-		R:            router,
-		SeedService:  seedService,
-		MaxBodyBytes: mbb,
+		R:                   router,
+		SeedService:         seedService,
+		OrganizationService: organizationService,
+		MaxBodyBytes:        mbb,
 	})
 
 	return router, nil
