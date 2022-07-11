@@ -19,6 +19,8 @@ Organizations:
       Endorsement:
         Type: Signature
         Rule: "OR('SuperadminMSP.peer')"
+    OrdererEndpoints:
+      - orderer.superadmin.com:6050
     AnchorPeers:
       - Host: peer.superadmin.com
         Port: 5050

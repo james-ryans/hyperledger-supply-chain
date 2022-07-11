@@ -19,6 +19,8 @@ Organizations:
       Endorsement:
         Type: Signature
         Rule: "OR('Supplier0MSP.peer')"
+    OrdererEndpoints:
+      - orderer.supplier0.com:6051
     AnchorPeers:
       - Host: peer.supplier0.com
         Port: 5052
@@ -41,6 +43,8 @@ Organizations:
       Endorsement:
         Type: Signature
         Rule: "OR('Producer0MSP.peer')"
+    OrdererEndpoints:
+      - orderer.producer0.com:6052
     AnchorPeers:
       - Host: peer.producer0.com
         Port: 5054
@@ -63,6 +67,8 @@ Organizations:
       Endorsement:
         Type: Signature
         Rule: "OR('Manufacturer0MSP.peer')"
+    OrdererEndpoints:
+      - orderer.manufacturer0.com:6053
     AnchorPeers:
       - Host: peer.manufacturer0.com
         Port: 5056
@@ -85,6 +91,8 @@ Organizations:
       Endorsement:
         Type: Signature
         Rule: "OR('Distributor0MSP.peer')"
+    OrdererEndpoints:
+      - orderer.distributor0.com:6054
     AnchorPeers:
       - Host: peer.distributor0.com
         Port: 5058
@@ -107,6 +115,8 @@ Organizations:
       Endorsement:
         Type: Signature
         Rule: "OR('Retailer0MSP.peer')"
+    OrdererEndpoints:
+      - orderer.retailer0.com:6055
     AnchorPeers:
       - Host: peer.retailer0.com
         Port: 5060
