@@ -6,14 +6,11 @@ import (
 	"fmt"
 
 	"github.com/hyperledger/fabric-contract-api-go/contractapi"
+	"github.com/meneketehe/hehe/app/model"
 )
 
 type ProducerContract struct {
 	contractapi.Contract
-}
-
-type Producer struct {
-	organization
 }
 
 func (c *ProducerContract) CreateProducer(ctx contractapi.TransactionContextInterface, id string, name string, province string, city string, district string, postalCode string, address string, phone string, email string, latitude float32, longitude float32) error {
@@ -30,22 +27,23 @@ func (c *ProducerContract) CreateProducer(ctx contractapi.TransactionContextInte
 		return fmt.Errorf("the producer %s already exists", id)
 	}
 
-	producer := Producer{
-		organization: organization{
-			ID:   id,
-			Name: name,
-			Location: location{
+	producer := model.Producer{
+		Organization: model.Organization{
+			DocType: "producer",
+			ID:      id,
+			Name:    name,
+			Location: model.Location{
 				Province:   province,
 				City:       city,
 				District:   district,
 				PostalCode: postalCode,
 				Address:    address,
-				Coordinate: coordinate{
+				Coordinate: model.Coordinate{
 					Latitude:  latitude,
 					Longitude: longitude,
 				},
 			},
-			ContactInfo: contactInfo{
+			ContactInfo: model.ContactInfo{
 				Phone: phone,
 				Email: email,
 			},
@@ -59,7 +57,7 @@ func (c *ProducerContract) CreateProducer(ctx contractapi.TransactionContextInte
 	return ctx.GetStub().PutState(id, producerJSON)
 }
 
-func (c *ProducerContract) ReadProducer(ctx contractapi.TransactionContextInterface, id string) (*Producer, error) {
+func (c *ProducerContract) ReadProducer(ctx contractapi.TransactionContextInterface, id string) (*model.Producer, error) {
 	producerJSON, err := c.getProducer(ctx, id)
 	if err != nil {
 		return nil, err
@@ -68,7 +66,7 @@ func (c *ProducerContract) ReadProducer(ctx contractapi.TransactionContextInterf
 		return nil, fmt.Errorf("the producer %s does not exist", id)
 	}
 
-	var producer Producer
+	var producer model.Producer
 	err = json.Unmarshal(producerJSON, &producer)
 	if err != nil {
 		return nil, err

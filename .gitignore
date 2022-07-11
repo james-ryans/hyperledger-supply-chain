@@ -1,3 +1,4 @@
+.env
 .idea/
 vendor/
 *.tar.gz
@@ -14,3 +15,4 @@ organizations/*/fabric-ca/*
 !docker-compose-ca.yaml
 !docker-compose-orderer.yaml
 !docker-compose-peer.yaml
+!docker-compose-couch.yaml

@@ -1,7 +1,5 @@
 #!/bin/bash
 
-. utils.sh
-
 function networkUp() {
   createSuperadminOrg
   createGlobalChannel
@@ -22,11 +20,12 @@ function createSuperadminOrg() {
     sleep 1
   done;
 
-  . registerEnroll.sh
+  . ./script/registerEnroll.sh
   enrollSuperadmin
 
   docker compose -f organizations/superadmin.com/docker-compose-orderer.yaml \
-      -f organizations/superadmin.com/docker-compose-peer.yaml up -d 2>&1
+    -f organizations/superadmin.com/docker-compose-couch.yaml \
+    -f organizations/superadmin.com/docker-compose-peer.yaml up -d 2>&1
 }
 
 function createSupplier0Org() {
@@ -37,10 +36,11 @@ function createSupplier0Org() {
     sleep 1
   done;
 
-  . registerEnroll.sh
+  . ./script/registerEnroll.sh
   enrollSupplier0
 
   docker compose -f organizations/supplier0.com/docker-compose-orderer.yaml \
+    -f organizations/supplier0.com/docker-compose-couch.yaml \
     -f organizations/supplier0.com/docker-compose-peer.yaml up -d 2>&1
 }
 
@@ -52,10 +52,11 @@ function createProducer0Org() {
     sleep 1
   done;
 
-  . registerEnroll.sh
+  . ./script/registerEnroll.sh
   enrollProducer0
 
   docker compose -f organizations/producer0.com/docker-compose-orderer.yaml \
+    -f organizations/producer0.com/docker-compose-couch.yaml \
     -f organizations/producer0.com/docker-compose-peer.yaml up -d 2>&1
 }
 
@@ -67,10 +68,11 @@ function createManufacturer0Org() {
     sleep 1
   done;
 
-  . registerEnroll.sh
+  . ./script/registerEnroll.sh
   enrollManufacturer0
 
   docker compose -f organizations/manufacturer0.com/docker-compose-orderer.yaml \
+    -f organizations/manufacturer0.com/docker-compose-couch.yaml \
     -f organizations/manufacturer0.com/docker-compose-peer.yaml up -d 2>&1
 }
 
@@ -82,10 +84,11 @@ function createDistributor0Org() {
     sleep 1
   done;
 
-  . registerEnroll.sh
+  . ./script/registerEnroll.sh
   enrollDistributor0
 
   docker compose -f organizations/distributor0.com/docker-compose-orderer.yaml \
+    -f organizations/distributor0.com/docker-compose-couch.yaml \
     -f organizations/distributor0.com/docker-compose-peer.yaml up -d 2>&1
 }
 
@@ -97,10 +100,11 @@ function createRetailer0Org() {
     sleep 1
   done;
 
-  . registerEnroll.sh
+  . ./script/registerEnroll.sh
   enrollRetailer0
 
   docker compose -f organizations/retailer0.com/docker-compose-orderer.yaml \
+    -f organizations/retailer0.com/docker-compose-couch.yaml \
     -f organizations/retailer0.com/docker-compose-peer.yaml up -d 2>&1
 }
 
@@ -113,7 +117,7 @@ function createGlobalChannel() {
   configtxgen -profile GlobalGenesis -outputBlock ./organizations/superadmin.com/channel-artifacts/globalchannel.block -channelID globalchannel
   { set +x; } 2>/dev/null
 
-  . createChannel.sh
+  . ./script/createChannel.sh
   ordererJoinChannel globalchannel superadmin.com localhost:4050
 
   peerJoinChannel globalchannel superadmin.com SuperadminMSP localhost:5050
@@ -128,7 +132,7 @@ function createChannel0() {
   configtxgen -profile Channel0Genesis -outputBlock ./organizations/superadmin.com/channel-artifacts/channel0.block -channelID channel0
   { set +x; } 2>/dev/null
 
-  . createChannel.sh
+  . ./script/createChannel.sh
   ordererJoinChannel channel0 supplier0.com localhost:4051
   ordererJoinChannel channel0 producer0.com localhost:4052
   ordererJoinChannel channel0 manufacturer0.com localhost:4053
@@ -143,7 +147,7 @@ function createChannel0() {
 }
 
 function deployCC() {
-  ./deployCC.sh "${1}" "${2}" "${3}" "${4}" "${5}"
+  ./script/deployCC.sh "${1}" "${2}" "${3}" "${4}" "${5}"
 }
 
 function networkDown() {
@@ -167,6 +171,7 @@ function downDockerContainers() {
 
   docker compose -f organizations/"$ORG"/docker-compose-ca.yaml \
     -f organizations/"$ORG"/docker-compose-orderer.yaml \
+    -f organizations/"$ORG"/docker-compose-couch.yaml \
     -f organizations/"$ORG"/docker-compose-peer.yaml \
     down --volumes --remove-orphans
 }
@@ -189,6 +194,10 @@ function removeGeneratedFiles() {
     organizations/"$ORG"/users \
     organizations/"$ORG"/fabric-ca-client-config.yaml
 }
+
+cd "$PWD/.." || exit
+
+. ./script/utils.sh
 
 MODE=$1
 

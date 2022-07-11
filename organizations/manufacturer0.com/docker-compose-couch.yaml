@@ -1,0 +1,19 @@
+version: '3.9'
+
+networks:
+  hehe:
+    name: hehe
+
+services:
+  couchdb.manufacturer0.com:
+    container_name: couchdb.manufacturer0.com
+    image: couchdb:3.2.2
+    labels:
+      service: hyperledger-fabric
+    environment:
+      - COUCHDB_USER=admin
+      - COUCHDB_PASSWORD=adminpw
+    ports:
+      - "5983:5984"
+    networks:
+      - hehe

@@ -6,14 +6,11 @@ import (
 	"fmt"
 
 	"github.com/hyperledger/fabric-contract-api-go/contractapi"
+	"github.com/meneketehe/hehe/app/model"
 )
 
 type SupplierContract struct {
 	contractapi.Contract
-}
-
-type Supplier struct {
-	organization
 }
 
 func (c *SupplierContract) CreateSupplier(ctx contractapi.TransactionContextInterface, id string, name string, province string, city string, district string, postalCode string, address string, phone string, email string, latitude float32, longitude float32) error {
@@ -30,22 +27,23 @@ func (c *SupplierContract) CreateSupplier(ctx contractapi.TransactionContextInte
 		return fmt.Errorf("the supplier %s already exists", id)
 	}
 
-	supplier := Supplier{
-		organization: organization{
-			ID:   id,
-			Name: name,
-			Location: location{
+	supplier := model.Supplier{
+		Organization: model.Organization{
+			DocType: "supplier",
+			ID:      id,
+			Name:    name,
+			Location: model.Location{
 				Province:   province,
 				City:       city,
 				District:   district,
 				PostalCode: postalCode,
 				Address:    address,
-				Coordinate: coordinate{
+				Coordinate: model.Coordinate{
 					Latitude:  latitude,
 					Longitude: longitude,
 				},
 			},
-			ContactInfo: contactInfo{
+			ContactInfo: model.ContactInfo{
 				Phone: phone,
 				Email: email,
 			},
@@ -59,7 +57,7 @@ func (c *SupplierContract) CreateSupplier(ctx contractapi.TransactionContextInte
 	return ctx.GetStub().PutState(id, supplierJSON)
 }
 
-func (c *SupplierContract) ReadSupplier(ctx contractapi.TransactionContextInterface, id string) (*Supplier, error) {
+func (c *SupplierContract) ReadSupplier(ctx contractapi.TransactionContextInterface, id string) (*model.Supplier, error) {
 	supplierJSON, err := c.getSupplier(ctx, id)
 	if err != nil {
 		return nil, err
@@ -68,7 +66,7 @@ func (c *SupplierContract) ReadSupplier(ctx contractapi.TransactionContextInterf
 		return nil, fmt.Errorf("the supplier %s does not exist", id)
 	}
 
-	var supplier Supplier
+	var supplier model.Supplier
 	err = json.Unmarshal(supplierJSON, &supplier)
 	if err != nil {
 		return nil, err

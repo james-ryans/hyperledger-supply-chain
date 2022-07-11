@@ -305,7 +305,7 @@ signing:
 #  if the server creates a self-signed TLS certificate.
 ###########################################################################
 csr:
-   cn: fabric-ca-server
+   cn: ca.supplier0.com
    keyrequest:
      algo: ecdsa
      size: 256
@@ -316,8 +316,8 @@ csr:
         O: Hyperledger
         OU: Fabric
    hosts:
-     - e83e263598d5
      - localhost
+     - supplier0.com
    ca:
       expiry: 131400h
       pathlength: 1

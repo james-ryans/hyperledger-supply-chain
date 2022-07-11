@@ -1,10 +1,10 @@
 #!/bin/bash
 
-. utils.sh
-. envVar.sh
+. ./script/utils.sh
+. ./script/envVar.sh
 
 DELAY=0.5
-MAX_RETRY=30
+MAX_RETRY=10
 CHANNEL_NAME=${1}
 CC_NAME=${2}
 CC_SRC_PATH=${3}
@@ -196,7 +196,11 @@ approveForMyOrg retailer0.com
 #checkCommitReadiness distributor0.com "\"Producer0MSP\": true" "\"Supplier0MSP\": true" "\"Manufacturer0MSP\": true" "\"Distributor0MSP\": true" "\"Retailer0MSP\": true"
 #checkCommitReadiness retailer0.com "\"Producer0MSP\": true" "\"Supplier0MSP\": true" "\"Manufacturer0MSP\": true" "\"Distributor0MSP\": true" "\"Retailer0MSP\": true"
 
-commitChaincodeDefinition supplier0.com producer0.com manufacturer0.com distributor0.com retailer0.com
+commitChaincodeDefinition supplier0.com \
+  producer0.com \
+  manufacturer0.com \
+  distributor0.com \
+  retailer0.com
 
 queryCommitted supplier0.com
 queryCommitted producer0.com

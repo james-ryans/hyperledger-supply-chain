@@ -6,19 +6,11 @@ import (
 	"fmt"
 
 	"github.com/hyperledger/fabric-contract-api-go/contractapi"
+	"github.com/meneketehe/hehe/app/model"
 )
 
 type RiceContract struct {
 	contractapi.Contract
-}
-
-type Rice struct {
-	ID             string  `json:"_id"`
-	ManufacturerID string  `json:"manufacturer_id"`
-	BrandName      string  `json:"brand_name"`
-	Weight         float32 `json:"weight"`
-	Texture        string  `json:"texture"`
-	AmyloseRate    float32 `json:"amylose_rate"`
 }
 
 func (c *RiceContract) CreateRice(ctx contractapi.TransactionContextInterface, id string, manufacturerId string, brandName string, weight float32, texture string, amyloseRate float32) error {
@@ -35,7 +27,8 @@ func (c *RiceContract) CreateRice(ctx contractapi.TransactionContextInterface, i
 		return fmt.Errorf("the rice %s already exists", id)
 	}
 
-	rice := Rice{
+	rice := model.Rice{
+		DocType:        "rice",
 		ID:             id,
 		ManufacturerID: manufacturerId,
 		BrandName:      brandName,
@@ -51,7 +44,7 @@ func (c *RiceContract) CreateRice(ctx contractapi.TransactionContextInterface, i
 	return ctx.GetStub().PutState(id, riceJSON)
 }
 
-func (c *RiceContract) ReadRice(ctx contractapi.TransactionContextInterface, id string) (*Rice, error) {
+func (c *RiceContract) ReadRice(ctx contractapi.TransactionContextInterface, id string) (*model.Rice, error) {
 	err := c.authorizeRoleAsManufacturer(ctx)
 	if err != nil {
 		return nil, err
@@ -65,7 +58,7 @@ func (c *RiceContract) ReadRice(ctx contractapi.TransactionContextInterface, id 
 		return nil, fmt.Errorf("the rice %s does not exist", id)
 	}
 
-	var rice Rice
+	var rice model.Rice
 	err = json.Unmarshal(riceJSON, &rice)
 	if err != nil {
 		return nil, err
@@ -88,7 +81,8 @@ func (c *RiceContract) UpdateRice(ctx contractapi.TransactionContextInterface, i
 		return fmt.Errorf("the rice %s does not exist", id)
 	}
 
-	rice := Rice{
+	rice := model.Rice{
+		DocType:        "rice",
 		ID:             id,
 		ManufacturerID: manufacturerId,
 		BrandName:      brandName,

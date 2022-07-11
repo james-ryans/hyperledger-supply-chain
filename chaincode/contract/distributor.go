@@ -6,14 +6,11 @@ import (
 	"fmt"
 
 	"github.com/hyperledger/fabric-contract-api-go/contractapi"
+	"github.com/meneketehe/hehe/app/model"
 )
 
 type DistributorContract struct {
 	contractapi.Contract
-}
-
-type Distributor struct {
-	organization
 }
 
 func (c *DistributorContract) CreateDistributor(ctx contractapi.TransactionContextInterface, id string, name string, province string, city string, district string, postalCode string, address string, phone string, email string, latitude float32, longitude float32) error {
@@ -30,22 +27,23 @@ func (c *DistributorContract) CreateDistributor(ctx contractapi.TransactionConte
 		return fmt.Errorf("the distributor %s already exists", id)
 	}
 
-	distributor := Distributor{
-		organization: organization{
-			ID:   id,
-			Name: name,
-			Location: location{
+	distributor := model.Distributor{
+		Organization: model.Organization{
+			DocType: "distributor",
+			ID:      id,
+			Name:    name,
+			Location: model.Location{
 				Province:   province,
 				City:       city,
 				District:   district,
 				PostalCode: postalCode,
 				Address:    address,
-				Coordinate: coordinate{
+				Coordinate: model.Coordinate{
 					Latitude:  latitude,
 					Longitude: longitude,
 				},
 			},
-			ContactInfo: contactInfo{
+			ContactInfo: model.ContactInfo{
 				Phone: phone,
 				Email: email,
 			},
@@ -59,7 +57,7 @@ func (c *DistributorContract) CreateDistributor(ctx contractapi.TransactionConte
 	return ctx.GetStub().PutState(id, distributorJSON)
 }
 
-func (c *DistributorContract) ReadDistributor(ctx contractapi.TransactionContextInterface, id string) (*Distributor, error) {
+func (c *DistributorContract) ReadDistributor(ctx contractapi.TransactionContextInterface, id string) (*model.Distributor, error) {
 	distributorJSON, err := c.getDistributor(ctx, id)
 	if err != nil {
 		return nil, err
@@ -68,7 +66,7 @@ func (c *DistributorContract) ReadDistributor(ctx contractapi.TransactionContext
 		return nil, fmt.Errorf("the distributor %s does not exist", id)
 	}
 
-	var distributor Distributor
+	var distributor model.Distributor
 	err = json.Unmarshal(distributorJSON, &distributor)
 	if err != nil {
 		return nil, err

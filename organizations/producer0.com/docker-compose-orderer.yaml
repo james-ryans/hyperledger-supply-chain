@@ -10,7 +10,7 @@ networks:
 services:
   orderer.producer0.com:
     container_name: orderer.producer0.com
-    image: hyperledger/fabric-orderer:latest
+    image: hyperledger/fabric-orderer:2.4.5
     working_dir: /root
     command: orderer
     labels:

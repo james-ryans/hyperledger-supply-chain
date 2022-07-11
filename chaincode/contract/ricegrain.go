@@ -6,18 +6,11 @@ import (
 	"fmt"
 
 	"github.com/hyperledger/fabric-contract-api-go/contractapi"
+	"github.com/meneketehe/hehe/app/model"
 )
 
 type RiceGrainContract struct {
 	contractapi.Contract
-}
-
-type RiceGrain struct {
-	ID          string `json:"_id"`
-	ProducerID  string `json:"producer_id"`
-	VarietyName string `json:"variety_name"`
-	GrainShape  string `json:"grain_shape"`
-	GrainColor  string `json:"grain_color"`
 }
 
 func (s *RiceGrainContract) CreateRiceGrain(ctx contractapi.TransactionContextInterface, id string, producerId string, varietyName string, grainShape string, grainColor string) error {
@@ -34,7 +27,8 @@ func (s *RiceGrainContract) CreateRiceGrain(ctx contractapi.TransactionContextIn
 		return fmt.Errorf("the rice grain %s already exists", id)
 	}
 
-	riceGrain := RiceGrain{
+	riceGrain := model.RiceGrain{
+		DocType:     "ricegrain",
 		ID:          id,
 		ProducerID:  producerId,
 		VarietyName: varietyName,
@@ -49,7 +43,7 @@ func (s *RiceGrainContract) CreateRiceGrain(ctx contractapi.TransactionContextIn
 	return ctx.GetStub().PutState(id, riceGrainJSON)
 }
 
-func (s *RiceGrainContract) ReadRiceGrain(ctx contractapi.TransactionContextInterface, id string) (*RiceGrain, error) {
+func (s *RiceGrainContract) ReadRiceGrain(ctx contractapi.TransactionContextInterface, id string) (*model.RiceGrain, error) {
 	err := s.authorizeRoleAsProducer(ctx)
 	if err != nil {
 		return nil, err
@@ -63,7 +57,7 @@ func (s *RiceGrainContract) ReadRiceGrain(ctx contractapi.TransactionContextInte
 		return nil, fmt.Errorf("the rice grain %s does not exist", id)
 	}
 
-	var riceGrain RiceGrain
+	var riceGrain model.RiceGrain
 	err = json.Unmarshal(riceGrainJSON, &riceGrain)
 	if err != nil {
 		return nil, err
@@ -86,7 +80,8 @@ func (s *RiceGrainContract) UpdateRiceGrain(ctx contractapi.TransactionContextIn
 		return fmt.Errorf("the rice grain %s does not exist", id)
 	}
 
-	riceGrain := RiceGrain{
+	riceGrain := model.RiceGrain{
+		DocType:     "ricegrain",
 		ID:          id,
 		ProducerID:  producerId,
 		VarietyName: varietyName,

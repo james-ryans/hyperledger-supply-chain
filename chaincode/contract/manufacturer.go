@@ -6,14 +6,11 @@ import (
 	"fmt"
 
 	"github.com/hyperledger/fabric-contract-api-go/contractapi"
+	"github.com/meneketehe/hehe/app/model"
 )
 
 type ManufacturerContract struct {
 	contractapi.Contract
-}
-
-type Manufacturer struct {
-	organization
 }
 
 func (c *ManufacturerContract) CreateManufacturer(ctx contractapi.TransactionContextInterface, id string, name string, province string, city string, district string, postalCode string, address string, phone string, email string, latitude float32, longitude float32) error {
@@ -30,22 +27,23 @@ func (c *ManufacturerContract) CreateManufacturer(ctx contractapi.TransactionCon
 		return fmt.Errorf("the manufacturer %s already exists", id)
 	}
 
-	manufacturer := Manufacturer{
-		organization: organization{
-			ID:   id,
-			Name: name,
-			Location: location{
+	manufacturer := model.Manufacturer{
+		Organization: model.Organization{
+			DocType: "manufacturer",
+			ID:      id,
+			Name:    name,
+			Location: model.Location{
 				Province:   province,
 				City:       city,
 				District:   district,
 				PostalCode: postalCode,
 				Address:    address,
-				Coordinate: coordinate{
+				Coordinate: model.Coordinate{
 					Latitude:  latitude,
 					Longitude: longitude,
 				},
 			},
-			ContactInfo: contactInfo{
+			ContactInfo: model.ContactInfo{
 				Phone: phone,
 				Email: email,
 			},
@@ -59,7 +57,7 @@ func (c *ManufacturerContract) CreateManufacturer(ctx contractapi.TransactionCon
 	return ctx.GetStub().PutState(id, manufacturerJSON)
 }
 
-func (c *ManufacturerContract) ReadManufacturer(ctx contractapi.TransactionContextInterface, id string) (*Manufacturer, error) {
+func (c *ManufacturerContract) ReadManufacturer(ctx contractapi.TransactionContextInterface, id string) (*model.Manufacturer, error) {
 	manufacturerJSON, err := c.getManufacturer(ctx, id)
 	if err != nil {
 		return nil, err
@@ -68,7 +66,7 @@ func (c *ManufacturerContract) ReadManufacturer(ctx contractapi.TransactionConte
 		return nil, fmt.Errorf("the manufacturer %s does not exist", id)
 	}
 
-	var manufacturer Manufacturer
+	var manufacturer model.Manufacturer
 	err = json.Unmarshal(manufacturerJSON, &manufacturer)
 	if err != nil {
 		return nil, err
