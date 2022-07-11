@@ -2,6 +2,8 @@ package main
 
 import (
 	"context"
+	"flag"
+	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -16,7 +18,15 @@ func main() {
 	log.Println("Starting server...")
 
 	// Load dev env from .env file
-	err := godotenv.Load()
+	asOrg := flag.String("as", "", "")
+	flag.Parse()
+
+	var err error
+	if asOrg != nil {
+		err = godotenv.Load(fmt.Sprintf(".env.%s", *asOrg))
+	} else {
+		err = godotenv.Load(".env")
+	}
 	if err != nil {
 		log.Fatalf("Error loading .env file: %v\n", err)
 	}
