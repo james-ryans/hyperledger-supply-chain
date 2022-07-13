@@ -18,13 +18,57 @@ type ManufacturerDoc struct {
 	model.Manufacturer
 }
 
-func (c *ManufacturerContract) CreateManufacturer(ctx contractapi.TransactionContextInterface, id string, orgType string, name string, province string, city string, district string, postalCode string, address string, phone string, email string, latitude float32, longitude float32) error {
+func (c *ManufacturerContract) FindAll(ctx contractapi.TransactionContextInterface) ([]*model.Manufacturer, error) {
+	query := fmt.Sprintf(`{"selector":{"doc_type":"manufacturer"}}`)
+	resultIterator, err := ctx.GetStub().GetQueryResult(query)
+	if err != nil {
+		return nil, err
+	}
+	defer resultIterator.Close()
+
+	manufacturers := make([]*model.Manufacturer, 0)
+	for resultIterator.HasNext() {
+		result, err := resultIterator.Next()
+		if err != nil {
+			return nil, err
+		}
+
+		var manufacturer model.Manufacturer
+		err = json.Unmarshal(result.Value, &manufacturer)
+		if err != nil {
+			return nil, err
+		}
+		manufacturers = append(manufacturers, &manufacturer)
+	}
+
+	return manufacturers, nil
+}
+
+func (c *ManufacturerContract) FindByID(ctx contractapi.TransactionContextInterface, id string) (*model.Manufacturer, error) {
+	manufacturerJSON, err := c.get(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+	if manufacturerJSON == nil {
+		return nil, fmt.Errorf("the manufacturer %s does not exist", id)
+	}
+
+	var manufacturer model.Manufacturer
+	err = json.Unmarshal(manufacturerJSON, &manufacturer)
+	if err != nil {
+		return nil, err
+	}
+
+	return &manufacturer, nil
+}
+
+func (c *ManufacturerContract) Create(ctx contractapi.TransactionContextInterface, id string, orgType string, name string, province string, city string, district string, postalCode string, address string, phone string, email string, latitude float32, longitude float32) error {
 	err := c.authorizeRoleAsManufacturer(ctx)
 	if err != nil {
 		return err
 	}
 
-	exists, err := c.manufacturerExists(ctx, id)
+	exists, err := c.exists(ctx, id)
 	if err != nil {
 		return err
 	}
@@ -66,24 +110,6 @@ func (c *ManufacturerContract) CreateManufacturer(ctx contractapi.TransactionCon
 	return ctx.GetStub().PutState(id, manufacturerJSON)
 }
 
-func (c *ManufacturerContract) ReadManufacturer(ctx contractapi.TransactionContextInterface, id string) (*model.Manufacturer, error) {
-	manufacturerJSON, err := c.getManufacturer(ctx, id)
-	if err != nil {
-		return nil, err
-	}
-	if manufacturerJSON == nil {
-		return nil, fmt.Errorf("the manufacturer %s does not exist", id)
-	}
-
-	var manufacturer model.Manufacturer
-	err = json.Unmarshal(manufacturerJSON, &manufacturer)
-	if err != nil {
-		return nil, err
-	}
-
-	return &manufacturer, nil
-}
-
 func (c *ManufacturerContract) authorizeRoleAsManufacturer(ctx contractapi.TransactionContextInterface) error {
 	err := ctx.GetClientIdentity().AssertAttributeValue("hf.Affiliation", "manufacturer")
 	if err != nil {
@@ -93,7 +119,7 @@ func (c *ManufacturerContract) authorizeRoleAsManufacturer(ctx contractapi.Trans
 	return nil
 }
 
-func (c *ManufacturerContract) getManufacturer(ctx contractapi.TransactionContextInterface, id string) ([]byte, error) {
+func (c *ManufacturerContract) get(ctx contractapi.TransactionContextInterface, id string) ([]byte, error) {
 	manufacturerJSON, err := ctx.GetStub().GetState(id)
 	if err != nil {
 		return nil, fmt.Errorf("failed to read from world state: %v", err)
@@ -102,8 +128,8 @@ func (c *ManufacturerContract) getManufacturer(ctx contractapi.TransactionContex
 	return manufacturerJSON, nil
 }
 
-func (c *ManufacturerContract) manufacturerExists(ctx contractapi.TransactionContextInterface, id string) (bool, error) {
-	manufacturerJSON, err := c.getManufacturer(ctx, id)
+func (c *ManufacturerContract) exists(ctx contractapi.TransactionContextInterface, id string) (bool, error) {
+	manufacturerJSON, err := c.get(ctx, id)
 	if err != nil {
 		return false, err
 	}

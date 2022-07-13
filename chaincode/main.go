@@ -18,6 +18,10 @@ func main() {
 	riceGrainContract := &contract.RiceGrainContract{}
 	riceContract := &contract.RiceContract{}
 
+	seedOrderContract := &contract.SeedOrderContract{}
+	riceGrainOrderContract := &contract.RiceGrainOrderContract{}
+	riceOrderContract := &contract.RiceOrderContract{}
+
 	chaincode, err := contractapi.NewChaincode(
 		supplierContract,
 		producerContract,
@@ -27,6 +31,9 @@ func main() {
 		seedContract,
 		riceGrainContract,
 		riceContract,
+		seedOrderContract,
+		riceGrainOrderContract,
+		riceOrderContract,
 	)
 	if err != nil {
 		log.Panicf("Error creating chaincode: %v", err)

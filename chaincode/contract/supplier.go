@@ -18,13 +18,57 @@ type SupplierDoc struct {
 	model.Supplier
 }
 
-func (c *SupplierContract) CreateSupplier(ctx contractapi.TransactionContextInterface, id string, orgType string, name string, province string, city string, district string, postalCode string, address string, phone string, email string, latitude float32, longitude float32) error {
+func (c *SupplierContract) FindAll(ctx contractapi.TransactionContextInterface) ([]*model.Supplier, error) {
+	query := fmt.Sprintf(`{"selector":{"doc_type":"supplier"}}`)
+	resultIterator, err := ctx.GetStub().GetQueryResult(query)
+	if err != nil {
+		return nil, err
+	}
+	defer resultIterator.Close()
+
+	suppliers := make([]*model.Supplier, 0)
+	for resultIterator.HasNext() {
+		result, err := resultIterator.Next()
+		if err != nil {
+			return nil, err
+		}
+
+		var supplier model.Supplier
+		err = json.Unmarshal(result.Value, &supplier)
+		if err != nil {
+			return nil, err
+		}
+		suppliers = append(suppliers, &supplier)
+	}
+
+	return suppliers, nil
+}
+
+func (c *SupplierContract) FindByID(ctx contractapi.TransactionContextInterface, id string) (*model.Supplier, error) {
+	supplierJSON, err := c.get(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+	if supplierJSON == nil {
+		return nil, fmt.Errorf("the supplier %s does not exist", id)
+	}
+
+	var supplier model.Supplier
+	err = json.Unmarshal(supplierJSON, &supplier)
+	if err != nil {
+		return nil, err
+	}
+
+	return &supplier, nil
+}
+
+func (c *SupplierContract) Create(ctx contractapi.TransactionContextInterface, id string, orgType string, name string, province string, city string, district string, postalCode string, address string, phone string, email string, latitude float32, longitude float32) error {
 	err := c.authorizeRoleAsSupplier(ctx)
 	if err != nil {
 		return err
 	}
 
-	exists, err := c.supplierExists(ctx, id)
+	exists, err := c.exists(ctx, id)
 	if err != nil {
 		return err
 	}
@@ -65,24 +109,6 @@ func (c *SupplierContract) CreateSupplier(ctx contractapi.TransactionContextInte
 	return ctx.GetStub().PutState(id, supplierJSON)
 }
 
-func (c *SupplierContract) ReadSupplier(ctx contractapi.TransactionContextInterface, id string) (*model.Supplier, error) {
-	supplierJSON, err := c.getSupplier(ctx, id)
-	if err != nil {
-		return nil, err
-	}
-	if supplierJSON == nil {
-		return nil, fmt.Errorf("the supplier %s does not exist", id)
-	}
-
-	var supplier model.Supplier
-	err = json.Unmarshal(supplierJSON, &supplier)
-	if err != nil {
-		return nil, err
-	}
-
-	return &supplier, nil
-}
-
 func (c *SupplierContract) authorizeRoleAsSupplier(ctx contractapi.TransactionContextInterface) error {
 	err := ctx.GetClientIdentity().AssertAttributeValue("hf.Affiliation", "supplier")
 	if err != nil {
@@ -92,7 +118,7 @@ func (c *SupplierContract) authorizeRoleAsSupplier(ctx contractapi.TransactionCo
 	return nil
 }
 
-func (c *SupplierContract) getSupplier(ctx contractapi.TransactionContextInterface, id string) ([]byte, error) {
+func (c *SupplierContract) get(ctx contractapi.TransactionContextInterface, id string) ([]byte, error) {
 	supplierJSON, err := ctx.GetStub().GetState(id)
 	if err != nil {
 		return nil, fmt.Errorf("failed to read from world state: %v", err)
@@ -101,8 +127,8 @@ func (c *SupplierContract) getSupplier(ctx contractapi.TransactionContextInterfa
 	return supplierJSON, nil
 }
 
-func (c *SupplierContract) supplierExists(ctx contractapi.TransactionContextInterface, id string) (bool, error) {
-	supplierJSON, err := c.getSupplier(ctx, id)
+func (c *SupplierContract) exists(ctx contractapi.TransactionContextInterface, id string) (bool, error) {
+	supplierJSON, err := c.get(ctx, id)
 	if err != nil {
 		return false, err
 	}

@@ -19,6 +19,12 @@ function vendorDep() {
   successln "Finished vendoring Go dependencies"
 }
 
+function dropVendorDep() {
+  infoln "Drop vendored Go dependencies at ${CC_SRC_PATH}"
+  rm -rf "${CC_SRC_PATH}/vendor"
+  successln "Finished drop vendored Go dependencies"
+}
+
 function packageChaincode() {
   setPeerEnv "superadmin.com" "SuperadminMSP" "localhost:5049"
 
@@ -146,6 +152,7 @@ function queryCommitted() {
 
 vendorDep
 packageChaincode
+dropVendorDep
 
 installChaincode supplier0.com
 installChaincode producer0.com

@@ -18,55 +18,34 @@ type DistributorDoc struct {
 	model.Distributor
 }
 
-func (c *DistributorContract) CreateDistributor(ctx contractapi.TransactionContextInterface, id string, orgType string, name string, province string, city string, district string, postalCode string, address string, phone string, email string, latitude float32, longitude float32) error {
-	err := c.authorizeRoleAsDistributor(ctx)
+func (c *DistributorContract) FindAll(ctx contractapi.TransactionContextInterface) ([]*model.Distributor, error) {
+	query := fmt.Sprintf(`{"selector":{"doc_type":"distributor"}}`)
+	resultIterator, err := ctx.GetStub().GetQueryResult(query)
 	if err != nil {
-		return err
+		return nil, err
+	}
+	defer resultIterator.Close()
+
+	distributors := make([]*model.Distributor, 0)
+	for resultIterator.HasNext() {
+		result, err := resultIterator.Next()
+		if err != nil {
+			return nil, err
+		}
+
+		var distributor model.Distributor
+		err = json.Unmarshal(result.Value, &distributor)
+		if err != nil {
+			return nil, err
+		}
+		distributors = append(distributors, &distributor)
 	}
 
-	exists, err := c.distributorExists(ctx, id)
-	if err != nil {
-		return err
-	}
-	if exists {
-		return fmt.Errorf("the distributor %s already exists", id)
-	}
-
-	distributor := DistributorDoc{
-		DocType: "distributor",
-		Distributor: model.Distributor{
-			Organization: model.Organization{
-				ID:   id,
-				Name: name,
-				Type: orgType,
-				Location: model.Location{
-					Province:   province,
-					City:       city,
-					District:   district,
-					PostalCode: postalCode,
-					Address:    address,
-					Coordinate: model.Coordinate{
-						Latitude:  latitude,
-						Longitude: longitude,
-					},
-				},
-				ContactInfo: model.ContactInfo{
-					Phone: phone,
-					Email: email,
-				},
-			},
-		},
-	}
-	distributorJSON, err := json.Marshal(distributor)
-	if err != nil {
-		return err
-	}
-
-	return ctx.GetStub().PutState(id, distributorJSON)
+	return distributors, nil
 }
 
-func (c *DistributorContract) ReadDistributor(ctx contractapi.TransactionContextInterface, id string) (*model.Distributor, error) {
-	distributorJSON, err := c.getDistributor(ctx, id)
+func (c *DistributorContract) FindByID(ctx contractapi.TransactionContextInterface, id string) (*model.Distributor, error) {
+	distributorJSON, err := c.get(ctx, id)
 	if err != nil {
 		return nil, err
 	}
@@ -83,6 +62,55 @@ func (c *DistributorContract) ReadDistributor(ctx contractapi.TransactionContext
 	return &distributor, nil
 }
 
+func (c *DistributorContract) Create(ctx contractapi.TransactionContextInterface, id string, orgType string, name string, province string, city string, district string, postalCode string, address string, phone string, email string, latitude float32, longitude float32) error {
+	err := c.authorizeRoleAsDistributor(ctx)
+	if err != nil {
+		return err
+	}
+
+	exists, err := c.exists(ctx, id)
+	if err != nil {
+		return err
+	}
+	if exists {
+		return fmt.Errorf("the distributor %s already exists", id)
+	}
+
+	distributor := DistributorDoc{
+		DocType: "distributor",
+		Distributor: model.Distributor{
+			Vendor: model.Vendor{
+				Organization: model.Organization{
+					ID:   id,
+					Name: name,
+					Type: orgType,
+					Location: model.Location{
+						Province:   province,
+						City:       city,
+						District:   district,
+						PostalCode: postalCode,
+						Address:    address,
+						Coordinate: model.Coordinate{
+							Latitude:  latitude,
+							Longitude: longitude,
+						},
+					},
+					ContactInfo: model.ContactInfo{
+						Phone: phone,
+						Email: email,
+					},
+				},
+			},
+		},
+	}
+	distributorJSON, err := json.Marshal(distributor)
+	if err != nil {
+		return err
+	}
+
+	return ctx.GetStub().PutState(id, distributorJSON)
+}
+
 func (c *DistributorContract) authorizeRoleAsDistributor(ctx contractapi.TransactionContextInterface) error {
 	err := ctx.GetClientIdentity().AssertAttributeValue("hf.Affiliation", "distributor")
 	if err != nil {
@@ -92,7 +120,7 @@ func (c *DistributorContract) authorizeRoleAsDistributor(ctx contractapi.Transac
 	return nil
 }
 
-func (c *DistributorContract) getDistributor(ctx contractapi.TransactionContextInterface, id string) ([]byte, error) {
+func (c *DistributorContract) get(ctx contractapi.TransactionContextInterface, id string) ([]byte, error) {
 	distributorJSON, err := ctx.GetStub().GetState(id)
 	if err != nil {
 		return nil, fmt.Errorf("failed to read from world state: %v", err)
@@ -101,8 +129,8 @@ func (c *DistributorContract) getDistributor(ctx contractapi.TransactionContextI
 	return distributorJSON, nil
 }
 
-func (c *DistributorContract) distributorExists(ctx contractapi.TransactionContextInterface, id string) (bool, error) {
-	distributorJSON, err := c.getDistributor(ctx, id)
+func (c *DistributorContract) exists(ctx contractapi.TransactionContextInterface, id string) (bool, error) {
+	distributorJSON, err := c.get(ctx, id)
 	if err != nil {
 		return false, err
 	}

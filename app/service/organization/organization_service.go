@@ -1,23 +1,26 @@
 package service
 
 import (
+	"os"
+
 	"github.com/meneketehe/hehe/app/model"
 )
 
 type organizationService struct {
-	OrganizationRepository model.OrganizationRepository
 }
 
-type OrganizationServiceConfig struct {
-	OrganizationRepository model.OrganizationRepository
+func NewOrganizationService() model.OrganizationService {
+	return &organizationService{}
 }
 
-func NewOrganizationService(c *OrganizationServiceConfig) model.OrganizationService {
-	return &organizationService{
-		OrganizationRepository: c.OrganizationRepository,
-	}
-}
+func (s *organizationService) GetMe() (*model.Organization, error) {
+	id := os.Getenv("ORG_ID")
+	name := os.Getenv("ORG_NAME")
+	orgType := os.Getenv("ORG_TYPE")
 
-func (s *organizationService) GetMe(ID string) (*model.Organization, error) {
-	return s.OrganizationRepository.FindByID(ID)
+	return &model.Organization{
+		ID:   id,
+		Type: orgType,
+		Name: name,
+	}, nil
 }

@@ -18,13 +18,57 @@ type ProducerDoc struct {
 	model.Producer
 }
 
-func (c *ProducerContract) CreateProducer(ctx contractapi.TransactionContextInterface, id string, orgType string, name string, province string, city string, district string, postalCode string, address string, phone string, email string, latitude float32, longitude float32) error {
+func (c *ProducerContract) FindAll(ctx contractapi.TransactionContextInterface) ([]*model.Producer, error) {
+	query := fmt.Sprintf(`{"selector":{"doc_type":"producer"}}`)
+	resultIterator, err := ctx.GetStub().GetQueryResult(query)
+	if err != nil {
+		return nil, err
+	}
+	defer resultIterator.Close()
+
+	producers := make([]*model.Producer, 0)
+	for resultIterator.HasNext() {
+		result, err := resultIterator.Next()
+		if err != nil {
+			return nil, err
+		}
+
+		var producer model.Producer
+		err = json.Unmarshal(result.Value, &producer)
+		if err != nil {
+			return nil, err
+		}
+		producers = append(producers, &producer)
+	}
+
+	return producers, nil
+}
+
+func (c *ProducerContract) FindByID(ctx contractapi.TransactionContextInterface, id string) (*model.Producer, error) {
+	producerJSON, err := c.get(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+	if producerJSON == nil {
+		return nil, fmt.Errorf("the producer %s does not exist", id)
+	}
+
+	var producer model.Producer
+	err = json.Unmarshal(producerJSON, &producer)
+	if err != nil {
+		return nil, err
+	}
+
+	return &producer, nil
+}
+
+func (c *ProducerContract) Create(ctx contractapi.TransactionContextInterface, id string, orgType string, name string, province string, city string, district string, postalCode string, address string, phone string, email string, latitude float32, longitude float32) error {
 	err := c.authorizeRoleAsProducer(ctx)
 	if err != nil {
 		return err
 	}
 
-	exists, err := c.producerExists(ctx, id)
+	exists, err := c.exists(ctx, id)
 	if err != nil {
 		return err
 	}
@@ -65,24 +109,6 @@ func (c *ProducerContract) CreateProducer(ctx contractapi.TransactionContextInte
 	return ctx.GetStub().PutState(id, producerJSON)
 }
 
-func (c *ProducerContract) ReadProducer(ctx contractapi.TransactionContextInterface, id string) (*model.Producer, error) {
-	producerJSON, err := c.getProducer(ctx, id)
-	if err != nil {
-		return nil, err
-	}
-	if producerJSON == nil {
-		return nil, fmt.Errorf("the producer %s does not exist", id)
-	}
-
-	var producer model.Producer
-	err = json.Unmarshal(producerJSON, &producer)
-	if err != nil {
-		return nil, err
-	}
-
-	return &producer, nil
-}
-
 func (c *ProducerContract) authorizeRoleAsProducer(ctx contractapi.TransactionContextInterface) error {
 	err := ctx.GetClientIdentity().AssertAttributeValue("hf.Affiliation", "producer")
 	if err != nil {
@@ -92,7 +118,7 @@ func (c *ProducerContract) authorizeRoleAsProducer(ctx contractapi.TransactionCo
 	return nil
 }
 
-func (c *ProducerContract) getProducer(ctx contractapi.TransactionContextInterface, id string) ([]byte, error) {
+func (c *ProducerContract) get(ctx contractapi.TransactionContextInterface, id string) ([]byte, error) {
 	producerJSON, err := ctx.GetStub().GetState(id)
 	if err != nil {
 		return nil, fmt.Errorf("failed to read from world state: %v", err)
@@ -101,8 +127,8 @@ func (c *ProducerContract) getProducer(ctx contractapi.TransactionContextInterfa
 	return producerJSON, nil
 }
 
-func (c *ProducerContract) producerExists(ctx contractapi.TransactionContextInterface, id string) (bool, error) {
-	producerJSON, err := c.getProducer(ctx, id)
+func (c *ProducerContract) exists(ctx contractapi.TransactionContextInterface, id string) (bool, error) {
+	producerJSON, err := c.get(ctx, id)
 	if err != nil {
 		return false, err
 	}

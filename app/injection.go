@@ -16,25 +16,55 @@ import (
 func inject(d *dataSources) (*gin.Engine, error) {
 	log.Println("Injecting services")
 
-	organizationRepository := repository.NewOrganizationRepository(d.Gateway)
+	supplierRepository := repository.NewSupplierRepository(d.Gateway)
+	producerRepository := repository.NewProducerRepository(d.Gateway)
+	manufacturerRepository := repository.NewManufacturerRepository(d.Gateway)
+	distributorRepository := repository.NewDistributorRepository(d.Gateway)
+	retailerRepository := repository.NewRetailerRepository(d.Gateway)
+
 	seedRepository := repository.NewSeedRepository(d.Gateway)
 	riceGrainRepository := repository.NewRiceGrainRepository(d.Gateway)
 	riceRepository := repository.NewRiceRepository(d.Gateway)
 
-	organizationService := service.NewOrganizationService(&service.OrganizationServiceConfig{
-		OrganizationRepository: organizationRepository,
+	seedOrderRepository := repository.NewSeedOrderRepository(d.Gateway)
+	riceGrainOrderRepository := repository.NewRiceGrainOrderRepository(d.Gateway)
+	riceOrderRepository := repository.NewRiceOrderRepository(d.Gateway)
+
+	organizationService := service.NewOrganizationService()
+	supplierService := service.NewSupplierService(&service.SupplierServiceConfig{
+		SupplierRepository: supplierRepository,
+	})
+	producerService := service.NewProducerService(&service.ProducerServiceConfig{
+		ProducerRepository: producerRepository,
+	})
+	manufacturerService := service.NewManufacturerService(&service.ManufacturerServiceConfig{
+		ManufacturerRepository: manufacturerRepository,
+	})
+	distributorService := service.NewDistributorService(&service.DistributorServiceConfig{
+		DistributorRepository: distributorRepository,
+	})
+	retailerService := service.NewRetailerService(&service.RetailerServiceConfig{
+		RetailerRepository: retailerRepository,
 	})
 
 	seedService := service.NewSeedService(&service.SeedServiceConfig{
 		SeedRepository: seedRepository,
 	})
-
 	riceGrainService := service.NewRiceGrainService(&service.RiceGrainServiceConfig{
 		RiceGrainRepository: riceGrainRepository,
 	})
-
 	riceService := service.NewRiceService(&service.RiceServiceConfig{
 		RiceRepository: riceRepository,
+	})
+
+	seedOrderService := service.NewSeedOrderService(&service.SeedOrderServiceConfig{
+		SeedOrderRepository: seedOrderRepository,
+	})
+	riceGrainOrderService := service.NewRiceGrainOrderService(&service.RiceGrainOrderServiceConfig{
+		RiceGrainOrderRepository: riceGrainOrderRepository,
+	})
+	riceOrderService := service.NewRiceOrderService(&service.RiceOrderServiceConfig{
+		RiceOrderRepository: riceOrderRepository,
 	})
 
 	router := gin.Default()
@@ -54,12 +84,20 @@ func inject(d *dataSources) (*gin.Engine, error) {
 	}
 
 	handler.NewHandler(&handler.Config{
-		R:                   router,
-		OrganizationService: organizationService,
-		SeedService:         seedService,
-		RiceGrainService:    riceGrainService,
-		RiceService:         riceService,
-		MaxBodyBytes:        mbb,
+		R:                     router,
+		OrganizationService:   organizationService,
+		SupplierService:       supplierService,
+		ProducerService:       producerService,
+		ManufacturerService:   manufacturerService,
+		DistributorService:    distributorService,
+		RetailerService:       retailerService,
+		SeedService:           seedService,
+		RiceGrainService:      riceGrainService,
+		RiceService:           riceService,
+		SeedOrderService:      seedOrderService,
+		RiceGrainOrderService: riceGrainOrderService,
+		RiceOrderService:      riceOrderService,
+		MaxBodyBytes:          mbb,
 	})
 
 	return router, nil

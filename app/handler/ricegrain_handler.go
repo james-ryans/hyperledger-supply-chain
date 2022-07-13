@@ -2,6 +2,7 @@ package handler
 
 import (
 	"errors"
+	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -36,7 +37,7 @@ func (h *Handler) GetRiceGrain(c *gin.Context) {
 
 	riceGrain, err := h.riceGrainService.GetRiceGrainByID(channelID, riceGrainID)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
+		c.JSON(http.StatusNotFound, gin.H{
 			"success": false,
 			"message": err.Error(),
 			"data":    nil,
@@ -52,15 +53,24 @@ func (h *Handler) GetRiceGrain(c *gin.Context) {
 }
 
 func (h *Handler) CreateRiceGrain(c *gin.Context) {
+	orgID := c.MustGet("orgID").(string)
+	channelID := c.Param("channelID")
+
+	if me, err := h.organizationService.GetMe(); err != nil || me.Type != "producer" {
+		c.JSON(http.StatusForbidden, gin.H{
+			"success": false,
+			"message": fmt.Errorf("only producer role can create rice grain asset, you are %s", me.Type).Error(),
+			"data":    nil,
+		})
+		return
+	}
+
 	var req request.RiceGrainRequest
 	if ok := bindData(c, &req); !ok {
 		return
 	}
 
 	req.Sanitize()
-
-	orgID := c.MustGet("orgID").(string)
-	channelID := c.Param("channelID")
 
 	input := &model.RiceGrain{
 		ProducerID:  orgID,

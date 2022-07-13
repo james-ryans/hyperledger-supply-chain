@@ -2,6 +2,7 @@ package handler
 
 import (
 	"errors"
+	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -52,15 +53,24 @@ func (h *Handler) GetSeed(c *gin.Context) {
 }
 
 func (h *Handler) CreateSeed(c *gin.Context) {
+	orgID := c.MustGet("orgID").(string)
+	channelID := c.Param("channelID")
+
+	if me, err := h.organizationService.GetMe(); err != nil || me.Type != "supplier" {
+		c.JSON(http.StatusForbidden, gin.H{
+			"success": false,
+			"message": fmt.Errorf("only supplier role can create seed asset, you are %s", me.Type).Error(),
+			"data":    nil,
+		})
+		return
+	}
+
 	var req request.SeedRequest
 	if ok := bindData(c, &req); !ok {
 		return
 	}
 
 	req.Sanitize()
-
-	orgID := c.MustGet("orgID").(string)
-	channelID := c.Param("channelID")
 
 	input := &model.Seed{
 		SupplierID:  orgID,
