@@ -198,6 +198,10 @@ func (c *RiceGrainOrderContract) Reject(ctx contractapi.TransactionContextInterf
 		return err
 	}
 
+	if err := c.rejectRiceOrder(ctx, riceGrainOrder.RiceOrderID, rejectedAt, reason); err != nil {
+		return err
+	}
+
 	return ctx.GetStub().PutState(id, riceGrainOrderDocJSON)
 }
 
@@ -275,6 +279,25 @@ func (c *RiceGrainOrderContract) processRiceOrder(ctx contractapi.TransactionCon
 
 	riceOrderDoc := NewRiceOrderDoc(*riceOrder)
 	riceOrderDoc.Process(processingAt)
+	riceOrderDocJSON, err := json.Marshal(riceOrderDoc)
+	if err != nil {
+		return err
+	}
+
+	return ctx.GetStub().PutState(id, riceOrderDocJSON)
+}
+
+func (c *RiceGrainOrderContract) rejectRiceOrder(ctx contractapi.TransactionContextInterface, id string, rejectedAt time.Time, reason string) error {
+	riceOrder, err := c.getRiceOrder(ctx, id)
+	if err != nil {
+		return err
+	}
+	if riceOrder == nil {
+		return fmt.Errorf("the riceo rder %s does not exist", id)
+	}
+
+	riceOrderDoc := NewRiceOrderDoc(*riceOrder)
+	riceOrderDoc.Reject(rejectedAt, reason)
 	riceOrderDocJSON, err := json.Marshal(riceOrderDoc)
 	if err != nil {
 		return err
