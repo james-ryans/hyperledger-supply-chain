@@ -95,7 +95,7 @@ func (h *Handler) RejectSeedOrder(c *gin.Context) {
 		return
 	}
 
-	var req request.RejectProducerOrderRequest
+	var req request.RejectSeedOrderRequest
 	if ok := bindData(c, &req); !ok {
 		return
 	}

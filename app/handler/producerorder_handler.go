@@ -109,7 +109,7 @@ func (h *Handler) CreateSeedOrder(c *gin.Context) {
 		return
 	}
 
-	var req request.CreateProducerOrderRequest
+	var req request.CreateSeedOrderRequest
 	if ok := bindData(c, &req); !ok {
 		return
 	}
@@ -208,6 +208,11 @@ func (h *Handler) ReceiveSeedOrder(c *gin.Context) {
 		})
 		return
 	}
+
+	// var req request.CreateProducerOrderRequest
+	// if ok := bindData(c, &req); !ok {
+	// 	return
+	// }
 
 	seedOrder, err := h.seedOrderService.GetSeedOrderByID(channelID, orderID)
 	if err != nil {
@@ -309,7 +314,7 @@ func (h *Handler) RejectRiceGrainOrder(c *gin.Context) {
 		return
 	}
 
-	var req request.RejectManufacturerOrderRequest
+	var req request.RejectRiceGrainOrderRequest
 	if ok := bindData(c, &req); !ok {
 		return
 	}

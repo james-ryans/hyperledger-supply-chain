@@ -66,7 +66,7 @@ func (h *Handler) CreateRiceOrder(c *gin.Context) {
 		return
 	}
 
-	var req request.CreateDistributorOrderRequest
+	var req request.CreateRiceOrderRequest
 	if ok := bindData(c, &req); !ok {
 		return
 	}
