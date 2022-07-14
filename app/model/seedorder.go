@@ -39,8 +39,8 @@ type SeedOrderService interface {
 	CreateSeedOrder(channelID string, seedOrder *SeedOrder) (*SeedOrder, error)
 	AcceptSeedOrder(channelID string, seedOrder *SeedOrder, acceptedAt time.Time) error
 	RejectSeedOrder(channelID string, seedOrder *SeedOrder, rejectedAt time.Time, reason string) error
-	// ShipSeedOrder(channelID string, seedOrder *SeedOrder, shippedAt time.Time) error
-	// ReceiveSeedOrder(channelID string, seedOrder *SeedOrder, receivedAt time.Time) error
+	ShipSeedOrder(channelID string, seedOrder *SeedOrder, shippedAt time.Time) error
+	ReceiveSeedOrder(channelID string, seedOrder *SeedOrder, receivedAt time.Time) error
 }
 
 type SeedOrderRepository interface {
@@ -50,4 +50,6 @@ type SeedOrderRepository interface {
 	Create(channelID string, riceOrder *SeedOrder) error
 	Accept(channelID, ID string, acceptedAt time.Time) error
 	Reject(channelID, ID string, rejectedAt time.Time, reason string) error
+	Ship(channelID, ID string, shippedAt time.Time) error
+	Receive(channelID, ID string, receivedAt time.Time) error
 }

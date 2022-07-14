@@ -90,6 +90,8 @@ type RiceGrainOrderService interface {
 	CreateRiceGrainOrder(channelID string, riceOrder *RiceGrainOrder) (*RiceGrainOrder, error)
 	AcceptRiceGrainOrder(channelID string, riceOrder *RiceGrainOrder, acceptedAt time.Time) error
 	RejectRiceGrainOrder(channelID string, riceOrder *RiceGrainOrder, rejectedAt time.Time, reason string) error
+	ShipRiceGrainOrder(channelID string, riceOrder *RiceGrainOrder, shippedAt time.Time) error
+	ReceiveRiceGrainOrder(channelID string, riceOrder *RiceGrainOrder, receivedAt time.Time) error
 }
 
 type RiceGrainOrderRepository interface {
@@ -100,4 +102,6 @@ type RiceGrainOrderRepository interface {
 	Create(channelID string, riceOrder *RiceGrainOrder) error
 	Accept(channelID, ID string, acceptedAt time.Time) error
 	Reject(channelID, ID string, rejectedAt time.Time, reason string) error
+	Ship(channelID, ID string, shippedAt time.Time) error
+	Receive(channelID, ID string, receivedAt time.Time) error
 }

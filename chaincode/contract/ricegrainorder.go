@@ -205,6 +205,58 @@ func (c *RiceGrainOrderContract) Reject(ctx contractapi.TransactionContextInterf
 	return ctx.GetStub().PutState(id, riceGrainOrderDocJSON)
 }
 
+func (c *RiceGrainOrderContract) Ship(ctx contractapi.TransactionContextInterface, id string, shippedAt time.Time) error {
+	err := c.authorizeRoleAsProducer(ctx)
+	if err != nil {
+		return fmt.Errorf("you are not authorized to ship rice grain order, %w", err)
+	}
+
+	riceGrainOrder, err := c.getRiceGrainOrder(ctx, id)
+	if err != nil {
+		return err
+	}
+	if riceGrainOrder == nil {
+		return fmt.Errorf("the rice grain order %s does not exist", id)
+	}
+
+	riceGrainOrderDoc := NewRiceGrainOrderDoc(*riceGrainOrder)
+	riceGrainOrderDoc.Ship(shippedAt)
+	riceGrainOrderDocJSON, err := json.Marshal(riceGrainOrderDoc)
+	if err != nil {
+		return err
+	}
+
+	return ctx.GetStub().PutState(id, riceGrainOrderDocJSON)
+}
+
+func (c *RiceGrainOrderContract) Receive(ctx contractapi.TransactionContextInterface, id string, receivedAt time.Time) error {
+	err := c.authorizeRoleAsManufacturer(ctx)
+	if err != nil {
+		return fmt.Errorf("you are not authorized to receive rice grain order, %w", err)
+	}
+
+	riceGrainOrder, err := c.getRiceGrainOrder(ctx, id)
+	if err != nil {
+		return err
+	}
+	if riceGrainOrder == nil {
+		return fmt.Errorf("the rice grain order %s does not exist", id)
+	}
+
+	riceGrainOrderDoc := NewRiceGrainOrderDoc(*riceGrainOrder)
+	riceGrainOrderDoc.Receive(receivedAt)
+	riceGrainOrderDocJSON, err := json.Marshal(riceGrainOrderDoc)
+	if err != nil {
+		return err
+	}
+
+	if err := c.availableRiceOrder(ctx, riceGrainOrderDoc.RiceOrderID, riceGrainOrderDoc.ReceivedAt); err != nil {
+		return err
+	}
+
+	return ctx.GetStub().PutState(id, riceGrainOrderDocJSON)
+}
+
 func (c *RiceGrainOrderContract) authorizeRoleAsManufacturer(ctx contractapi.TransactionContextInterface) error {
 	err := ctx.GetClientIdentity().AssertAttributeValue("hf.Affiliation", "manufacturer")
 	if err != nil {
@@ -298,6 +350,25 @@ func (c *RiceGrainOrderContract) rejectRiceOrder(ctx contractapi.TransactionCont
 
 	riceOrderDoc := NewRiceOrderDoc(*riceOrder)
 	riceOrderDoc.Reject(rejectedAt, reason)
+	riceOrderDocJSON, err := json.Marshal(riceOrderDoc)
+	if err != nil {
+		return err
+	}
+
+	return ctx.GetStub().PutState(id, riceOrderDocJSON)
+}
+
+func (c *RiceGrainOrderContract) availableRiceOrder(ctx contractapi.TransactionContextInterface, id string, availableAt time.Time) error {
+	riceOrder, err := c.getRiceOrder(ctx, id)
+	if err != nil {
+		return err
+	}
+	if riceOrder == nil {
+		return fmt.Errorf("the rice order %s does not exist", id)
+	}
+
+	riceOrderDoc := NewRiceOrderDoc(*riceOrder)
+	riceOrderDoc.Available(availableAt)
 	riceOrderDocJSON, err := json.Marshal(riceOrderDoc)
 	if err != nil {
 		return err

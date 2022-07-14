@@ -51,6 +51,8 @@ func (s *seedOrderService) AcceptSeedOrder(channelID string, seedOrder *model.Se
 	}
 
 	seedOrder.Accept(acceptedAt)
+	seedOrder.Process(acceptedAt)
+	seedOrder.Available(acceptedAt)
 	if err := s.SeedOrderRepository.Accept(channelID, seedOrder.ID, seedOrder.AcceptedAt); err != nil {
 		return err
 	}
@@ -65,6 +67,32 @@ func (s *seedOrderService) RejectSeedOrder(channelID string, seedOrder *model.Se
 
 	seedOrder.Reject(rejectedAt, reason)
 	if err := s.SeedOrderRepository.Reject(channelID, seedOrder.ID, seedOrder.RejectedAt, seedOrder.RejectReason); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (s *seedOrderService) ShipSeedOrder(channelID string, seedOrder *model.SeedOrder, shippedAt time.Time) error {
+	if seedOrder.Status != enum.OrderAvailable {
+		return fmt.Errorf("you can only ship seed order when it is %s", enum.OrderAvailable)
+	}
+
+	seedOrder.Ship(shippedAt)
+	if err := s.SeedOrderRepository.Ship(channelID, seedOrder.ID, seedOrder.ShippedAt); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (s *seedOrderService) ReceiveSeedOrder(channelID string, seedOrder *model.SeedOrder, receivedAt time.Time) error {
+	if seedOrder.Status != enum.OrderShipped {
+		return fmt.Errorf("you can only receive seed order when it is %s", enum.OrderShipped)
+	}
+
+	seedOrder.Receive(receivedAt)
+	if err := s.SeedOrderRepository.Receive(channelID, seedOrder.ID, seedOrder.ReceivedAt); err != nil {
 		return err
 	}
 

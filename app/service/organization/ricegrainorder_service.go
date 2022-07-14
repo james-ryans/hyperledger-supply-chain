@@ -74,3 +74,29 @@ func (s *riceGrainOrderService) RejectRiceGrainOrder(channelID string, riceGrain
 
 	return nil
 }
+
+func (s *riceGrainOrderService) ShipRiceGrainOrder(channelID string, riceGrainOrder *model.RiceGrainOrder, shippedAt time.Time) error {
+	if riceGrainOrder.Status != enum.OrderAvailable {
+		return fmt.Errorf("you can only ship rice grain order when it is %s", enum.OrderAvailable)
+	}
+
+	riceGrainOrder.Ship(shippedAt)
+	if err := s.RiceGrainOrderRepository.Ship(channelID, riceGrainOrder.ID, riceGrainOrder.ShippedAt); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (s *riceGrainOrderService) ReceiveRiceGrainOrder(channelID string, riceGrainOrder *model.RiceGrainOrder, receivedAt time.Time) error {
+	if riceGrainOrder.Status != enum.OrderShipped {
+		return fmt.Errorf("you can only receive rice grain order when it is %s", enum.OrderShipped)
+	}
+
+	riceGrainOrder.Receive(receivedAt)
+	if err := s.RiceGrainOrderRepository.Receive(channelID, riceGrainOrder.ID, riceGrainOrder.ReceivedAt); err != nil {
+		return err
+	}
+
+	return nil
+}

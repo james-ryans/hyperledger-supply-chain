@@ -135,3 +135,53 @@ func (h *Handler) RejectSeedOrder(c *gin.Context) {
 		"data":    nil,
 	})
 }
+
+func (h *Handler) ShipSeedOrder(c *gin.Context) {
+	orgID := c.MustGet("orgID").(string)
+	channelID := c.Param("channelID")
+	orderID := c.Param("orderID")
+
+	if me, err := h.organizationService.GetMe(); err != nil || me.Type != "supplier" {
+		c.JSON(http.StatusForbidden, gin.H{
+			"success": false,
+			"message": fmt.Errorf("only supplier role can ship seed order, you are %s", me.Type).Error(),
+			"data":    nil,
+		})
+		return
+	}
+
+	seedOrder, err := h.seedOrderService.GetSeedOrderByID(channelID, orderID)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{
+			"success": false,
+			"message": err.Error(),
+			"data":    nil,
+		})
+		return
+	}
+
+	if seedOrder.SellerID != orgID {
+		c.JSON(http.StatusForbidden, gin.H{
+			"success": false,
+			"message": fmt.Errorf("you are not the seller that producer ordered").Error(),
+			"data":    nil,
+		})
+		return
+	}
+
+	err = h.seedOrderService.ShipSeedOrder(channelID, seedOrder, time.Now())
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"success": false,
+			"message": err.Error(),
+			"data":    nil,
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"success": true,
+		"message": "order shipped",
+		"data":    nil,
+	})
+}

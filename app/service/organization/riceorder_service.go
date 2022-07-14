@@ -77,7 +77,7 @@ func (s *riceOrderService) RejectRiceOrder(channelID string, riceOrder *model.Ri
 
 func (s *riceOrderService) ShipRiceOrder(channelID string, riceOrder *model.RiceOrder, shippedAt time.Time) error {
 	if riceOrder.Status != enum.OrderAvailable {
-		return fmt.Errorf("you can only ship rice order when it's status is %s", enum.OrderAvailable)
+		return fmt.Errorf("you can only ship rice order when it is %s", enum.OrderAvailable)
 	}
 
 	riceOrder.Ship(shippedAt)
@@ -90,11 +90,11 @@ func (s *riceOrderService) ShipRiceOrder(channelID string, riceOrder *model.Rice
 
 func (s *riceOrderService) ReceiveRiceOrder(channelID string, riceOrder *model.RiceOrder, receivedAt time.Time) error {
 	if riceOrder.Status != enum.OrderShipped {
-		return fmt.Errorf("you can only ship rice order when it's status is %s", enum.OrderShipped)
+		return fmt.Errorf("you can only ship rice order when it is %s", enum.OrderShipped)
 	}
 
 	riceOrder.Receive(receivedAt)
-	if err := s.RiceOrderRepository.Ship(channelID, riceOrder.ID, riceOrder.ReceivedAt); err != nil {
+	if err := s.RiceOrderRepository.Receive(channelID, riceOrder.ID, riceOrder.ReceivedAt); err != nil {
 		return err
 	}
 

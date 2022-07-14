@@ -119,3 +119,27 @@ func (r *seedOrderRepository) Reject(channelID string, ID string, rejectedAt tim
 
 	return nil
 }
+
+func (r *seedOrderRepository) Ship(channelID string, ID string, shippedAt time.Time) error {
+	network := r.Fabric.GetNetwork(channelID)
+	contract := network.GetContract(os.Getenv("FABRIC_CHAINCODE_NAME"))
+
+	_, err := contract.SubmitTransaction("SeedOrderContract:Ship", ID, shippedAt.Format(time.RFC3339))
+	if err != nil {
+		return fmt.Errorf("failed to submit transaction: %w", err)
+	}
+
+	return nil
+}
+
+func (r *seedOrderRepository) Receive(channelID string, ID string, receivedAt time.Time) error {
+	network := r.Fabric.GetNetwork(channelID)
+	contract := network.GetContract(os.Getenv("FABRIC_CHAINCODE_NAME"))
+
+	_, err := contract.SubmitTransaction("SeedOrderContract:Receive", ID, receivedAt.Format(time.RFC3339))
+	if err != nil {
+		return fmt.Errorf("failed to submit transaction: %w", err)
+	}
+
+	return nil
+}

@@ -137,3 +137,27 @@ func (r *riceGrainOrderRepository) Reject(channelID, ID string, rejectedAt time.
 
 	return nil
 }
+
+func (r *riceGrainOrderRepository) Ship(channelID string, ID string, shippedAt time.Time) error {
+	network := r.Fabric.GetNetwork(channelID)
+	contract := network.GetContract(os.Getenv("FABRIC_CHAINCODE_NAME"))
+
+	_, err := contract.SubmitTransaction("RiceGrainOrderContract:Ship", ID, shippedAt.Format(time.RFC3339))
+	if err != nil {
+		return fmt.Errorf("failed to submit transaction: %w", err)
+	}
+
+	return nil
+}
+
+func (r *riceGrainOrderRepository) Receive(channelID string, ID string, receivedAt time.Time) error {
+	network := r.Fabric.GetNetwork(channelID)
+	contract := network.GetContract(os.Getenv("FABRIC_CHAINCODE_NAME"))
+
+	_, err := contract.SubmitTransaction("RiceGrainOrderContract:Receive", ID, receivedAt.Format(time.RFC3339))
+	if err != nil {
+		return fmt.Errorf("failed to submit transaction: %w", err)
+	}
+
+	return nil
+}

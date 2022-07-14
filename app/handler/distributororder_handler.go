@@ -122,3 +122,53 @@ func (h *Handler) CreateRiceOrder(c *gin.Context) {
 		"data":    response.RiceOrderResponse(riceOrder),
 	})
 }
+
+func (h *Handler) ReceiveRiceOrder(c *gin.Context) {
+	orgID := c.MustGet("orgID").(string)
+	channelID := c.Param("channelID")
+	orderID := c.Param("orderID")
+
+	if me, err := h.organizationService.GetMe(); err != nil || me.Type != "distributor" {
+		c.JSON(http.StatusForbidden, gin.H{
+			"success": false,
+			"message": fmt.Errorf("only distributor role can receive rice order, you are %s", me.Type).Error(),
+			"data":    nil,
+		})
+		return
+	}
+
+	riceOrder, err := h.riceOrderService.GetRiceOrderByID(channelID, orderID)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{
+			"success": false,
+			"message": err.Error(),
+			"data":    nil,
+		})
+		return
+	}
+
+	if riceOrder.OrdererID != orgID {
+		c.JSON(http.StatusForbidden, gin.H{
+			"success": false,
+			"message": fmt.Errorf("this order is not yours").Error(),
+			"data":    nil,
+		})
+		return
+	}
+
+	err = h.riceOrderService.ReceiveRiceOrder(channelID, riceOrder, time.Now())
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"success": false,
+			"message": err.Error(),
+			"data":    nil,
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"success": true,
+		"message": "order received",
+		"data":    nil,
+	})
+}
