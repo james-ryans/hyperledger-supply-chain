@@ -150,6 +150,11 @@ func (h *Handler) ShipSeedOrder(c *gin.Context) {
 		return
 	}
 
+	var req request.ShipSeedOrderRequest
+	if ok := bindData(c, &req); !ok {
+		return
+	}
+
 	seedOrder, err := h.seedOrderService.GetSeedOrderByID(channelID, orderID)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{
@@ -169,7 +174,7 @@ func (h *Handler) ShipSeedOrder(c *gin.Context) {
 		return
 	}
 
-	err = h.seedOrderService.ShipSeedOrder(channelID, seedOrder, time.Now())
+	err = h.seedOrderService.ShipSeedOrder(channelID, seedOrder, time.Now(), req.StorageTemperature, req.StorageHumidity)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"success": false,

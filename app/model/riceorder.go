@@ -21,6 +21,16 @@ type RiceInstance struct {
 	StorageHumidity    float32   `json:"storage_humidity"`
 }
 
+func (r *RiceOrder) Ship(shipAt time.Time, grade string, millingDate time.Time, storageTemperature float32, storageHumidity float32) {
+	r.Order.Ship(shipAt)
+	r.RiceInstance = &RiceInstance{
+		Grade:              grade,
+		MillingDate:        millingDate,
+		StorageTemperature: storageTemperature,
+		StorageHumidity:    storageHumidity,
+	}
+}
+
 func (r *RiceInstance) GetGrade() *string {
 	if r == nil {
 		return nil
@@ -57,7 +67,7 @@ type RiceOrderService interface {
 	CreateRiceOrder(channelID string, riceOrder *RiceOrder) (*RiceOrder, error)
 	AcceptRiceOrder(channelID string, riceOrder *RiceOrder, acceptedAt time.Time) error
 	RejectRiceOrder(channelID string, riceOrder *RiceOrder, rejectedAt time.Time, reason string) error
-	ShipRiceOrder(channelID string, riceOrder *RiceOrder, shippedAt time.Time) error
+	ShipRiceOrder(channelID string, riceOrder *RiceOrder, shippedAt time.Time, grade string, millingDate time.Time, storageTemperature float32, storageHumidity float32) error
 	ReceiveRiceOrder(channelID string, riceOrder *RiceOrder, receivedAt time.Time) error
 }
 
@@ -69,6 +79,6 @@ type RiceOrderRepository interface {
 	Create(channelID string, riceOrder *RiceOrder) error
 	Accept(channelID, ID string, acceptedAt time.Time) error
 	Reject(channelID, ID string, rejectedAt time.Time, reason string) error
-	Ship(channelID, ID string, shippedAt time.Time) error
+	Ship(channelID, ID string, shippedAt time.Time, grade string, millingDate time.Time, storageTemperature float32, storageHumidity float32) error
 	Receive(channelID, ID string, receivedAt time.Time) error
 }

@@ -181,7 +181,7 @@ func (c *SeedOrderContract) Reject(ctx contractapi.TransactionContextInterface, 
 	return ctx.GetStub().PutState(id, seedOrderDocJSON)
 }
 
-func (c *SeedOrderContract) Ship(ctx contractapi.TransactionContextInterface, id string, shippedAt time.Time) error {
+func (c *SeedOrderContract) Ship(ctx contractapi.TransactionContextInterface, id string, shippedAt time.Time, storageTemperature, storageHumidity float32) error {
 	err := c.authorizeRoleAsSupplier(ctx)
 	if err != nil {
 		return fmt.Errorf("you are not authorized to ship seed order, %w", err)
@@ -196,7 +196,7 @@ func (c *SeedOrderContract) Ship(ctx contractapi.TransactionContextInterface, id
 	}
 
 	seedOrderDoc := NewSeedOrderDoc(*seedOrder)
-	seedOrderDoc.Ship(shippedAt)
+	seedOrderDoc.Ship(shippedAt, storageTemperature, storageHumidity)
 	seedOrderDocJSON, err := json.Marshal(seedOrderDoc)
 	if err != nil {
 		return err

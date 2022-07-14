@@ -73,13 +73,13 @@ func (s *seedOrderService) RejectSeedOrder(channelID string, seedOrder *model.Se
 	return nil
 }
 
-func (s *seedOrderService) ShipSeedOrder(channelID string, seedOrder *model.SeedOrder, shippedAt time.Time) error {
+func (s *seedOrderService) ShipSeedOrder(channelID string, seedOrder *model.SeedOrder, shippedAt time.Time, storageTemperature, storageHumidity float32) error {
 	if seedOrder.Status != enum.OrderAvailable {
 		return fmt.Errorf("you can only ship seed order when it is %s", enum.OrderAvailable)
 	}
 
-	seedOrder.Ship(shippedAt)
-	if err := s.SeedOrderRepository.Ship(channelID, seedOrder.ID, seedOrder.ShippedAt); err != nil {
+	seedOrder.Ship(shippedAt, storageTemperature, storageHumidity)
+	if err := s.SeedOrderRepository.Ship(channelID, seedOrder.ID, seedOrder.ShippedAt, seedOrder.SeedInstance.StorageTemperature, seedOrder.SeedInstance.StorageHumidity); err != nil {
 		return err
 	}
 

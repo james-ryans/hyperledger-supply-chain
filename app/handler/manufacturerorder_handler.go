@@ -379,11 +379,17 @@ func (h *Handler) ShipRiceOrder(c *gin.Context) {
 	if me, err := h.organizationService.GetMe(); err != nil || me.Type != "manufacturer" {
 		c.JSON(http.StatusForbidden, gin.H{
 			"success": false,
-			"message": fmt.Errorf("only producer role can ship rice order, you are %s", me.Type).Error(),
+			"message": fmt.Errorf("only manufacturer role can ship rice order, you are %s", me.Type).Error(),
 			"data":    nil,
 		})
 		return
 	}
+
+	var req request.ShipRiceOrderRequest
+	if ok := bindData(c, &req); !ok {
+		return
+	}
+	req.Sanitize()
 
 	riceOrder, err := h.riceOrderService.GetRiceOrderByID(channelID, orderID)
 	if err != nil {
@@ -404,7 +410,7 @@ func (h *Handler) ShipRiceOrder(c *gin.Context) {
 		return
 	}
 
-	err = h.riceOrderService.ShipRiceOrder(channelID, riceOrder, time.Now())
+	err = h.riceOrderService.ShipRiceOrder(channelID, riceOrder, time.Now(), req.Grade, req.MillingDate, req.StorageTemperature, req.StorageHumidity)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"success": false,

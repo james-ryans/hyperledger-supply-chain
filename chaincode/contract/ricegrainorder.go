@@ -205,7 +205,7 @@ func (c *RiceGrainOrderContract) Reject(ctx contractapi.TransactionContextInterf
 	return ctx.GetStub().PutState(id, riceGrainOrderDocJSON)
 }
 
-func (c *RiceGrainOrderContract) Ship(ctx contractapi.TransactionContextInterface, id string, shippedAt time.Time) error {
+func (c *RiceGrainOrderContract) Ship(ctx contractapi.TransactionContextInterface, id string, shippedAt time.Time, plowMethod, sowMethod, irrigation, fertilization string, plantDate, harvestDate time.Time, storageTemperature, storageHumidity float32) error {
 	err := c.authorizeRoleAsProducer(ctx)
 	if err != nil {
 		return fmt.Errorf("you are not authorized to ship rice grain order, %w", err)
@@ -220,7 +220,7 @@ func (c *RiceGrainOrderContract) Ship(ctx contractapi.TransactionContextInterfac
 	}
 
 	riceGrainOrderDoc := NewRiceGrainOrderDoc(*riceGrainOrder)
-	riceGrainOrderDoc.Ship(shippedAt)
+	riceGrainOrderDoc.Ship(shippedAt, plowMethod, sowMethod, irrigation, fertilization, plantDate, harvestDate, storageTemperature, storageHumidity)
 	riceGrainOrderDocJSON, err := json.Marshal(riceGrainOrderDoc)
 	if err != nil {
 		return err

@@ -209,11 +209,6 @@ func (h *Handler) ReceiveSeedOrder(c *gin.Context) {
 		return
 	}
 
-	// var req request.CreateProducerOrderRequest
-	// if ok := bindData(c, &req); !ok {
-	// 	return
-	// }
-
 	seedOrder, err := h.seedOrderService.GetSeedOrderByID(channelID, orderID)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{
@@ -369,6 +364,12 @@ func (h *Handler) ShipRiceGrainOrder(c *gin.Context) {
 		return
 	}
 
+	var req request.ShipRiceGrainOrderRequest
+	if ok := bindData(c, &req); !ok {
+		return
+	}
+	req.Sanitize()
+
 	riceGrainOrder, err := h.riceGrainOrderService.GetRiceGrainOrderByID(channelID, orderID)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{
@@ -388,7 +389,7 @@ func (h *Handler) ShipRiceGrainOrder(c *gin.Context) {
 		return
 	}
 
-	err = h.riceGrainOrderService.ShipRiceGrainOrder(channelID, riceGrainOrder, time.Now())
+	err = h.riceGrainOrderService.ShipRiceGrainOrder(channelID, riceGrainOrder, time.Now(), req.PlowMethod, req.SowMethod, req.Irrigation, req.Fertilization, req.PlantDate, req.HarvestDate, req.StorageTemperature, req.StorageHumidity)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"success": false,

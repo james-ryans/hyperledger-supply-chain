@@ -75,13 +75,25 @@ func (s *riceGrainOrderService) RejectRiceGrainOrder(channelID string, riceGrain
 	return nil
 }
 
-func (s *riceGrainOrderService) ShipRiceGrainOrder(channelID string, riceGrainOrder *model.RiceGrainOrder, shippedAt time.Time) error {
+func (s *riceGrainOrderService) ShipRiceGrainOrder(channelID string, riceGrainOrder *model.RiceGrainOrder, shippedAt time.Time, plowMethod, sowMethod, irrigation, fertilization string, plantDate, harvestDate time.Time, storageTemperature, storageHumidity float32) error {
 	if riceGrainOrder.Status != enum.OrderAvailable {
 		return fmt.Errorf("you can only ship rice grain order when it is %s", enum.OrderAvailable)
 	}
 
-	riceGrainOrder.Ship(shippedAt)
-	if err := s.RiceGrainOrderRepository.Ship(channelID, riceGrainOrder.ID, riceGrainOrder.ShippedAt); err != nil {
+	riceGrainOrder.Ship(shippedAt, plowMethod, sowMethod, irrigation, fertilization, plantDate, harvestDate, storageTemperature, storageHumidity)
+	if err := s.RiceGrainOrderRepository.Ship(
+		channelID,
+		riceGrainOrder.ID,
+		riceGrainOrder.ShippedAt,
+		riceGrainOrder.RiceGrainInstance.PlowMethod,
+		riceGrainOrder.RiceGrainInstance.SowMethod,
+		riceGrainOrder.RiceGrainInstance.Irrigation,
+		riceGrainOrder.RiceGrainInstance.Fertilization,
+		riceGrainOrder.RiceGrainInstance.PlantDate,
+		riceGrainOrder.RiceGrainInstance.HarvestDate,
+		riceGrainOrder.RiceGrainInstance.StorageTemperature,
+		riceGrainOrder.RiceGrainInstance.StorageHumidity,
+	); err != nil {
 		return err
 	}
 

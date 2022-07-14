@@ -26,6 +26,20 @@ type RiceGrainInstance struct {
 	StorageHumidity    float32   `json:"storage_humidity"`
 }
 
+func (r *RiceGrainOrder) Ship(shippedAt time.Time, plowMethod, sowMethod, irrigation, fertilization string, plantDate, harvestDate time.Time, storageTemperature, storageHumidity float32) {
+	r.Order.Ship(shippedAt)
+	r.RiceGrainInstance = &RiceGrainInstance{
+		PlowMethod:         plowMethod,
+		SowMethod:          sowMethod,
+		Irrigation:         irrigation,
+		Fertilization:      fertilization,
+		PlantDate:          plantDate,
+		HarvestDate:        harvestDate,
+		StorageTemperature: storageTemperature,
+		StorageHumidity:    storageHumidity,
+	}
+}
+
 func (r *RiceGrainInstance) GetPlowMethod() *string {
 	if r == nil {
 		return nil
@@ -90,7 +104,7 @@ type RiceGrainOrderService interface {
 	CreateRiceGrainOrder(channelID string, riceOrder *RiceGrainOrder) (*RiceGrainOrder, error)
 	AcceptRiceGrainOrder(channelID string, riceOrder *RiceGrainOrder, acceptedAt time.Time) error
 	RejectRiceGrainOrder(channelID string, riceOrder *RiceGrainOrder, rejectedAt time.Time, reason string) error
-	ShipRiceGrainOrder(channelID string, riceOrder *RiceGrainOrder, shippedAt time.Time) error
+	ShipRiceGrainOrder(channelID string, riceOrder *RiceGrainOrder, shippedAt time.Time, plowMethod, sowMethod, irrigation, fertilization string, plantDate, harvestDate time.Time, storageTemperature, storageHumidity float32) error
 	ReceiveRiceGrainOrder(channelID string, riceOrder *RiceGrainOrder, receivedAt time.Time) error
 }
 
@@ -102,6 +116,6 @@ type RiceGrainOrderRepository interface {
 	Create(channelID string, riceOrder *RiceGrainOrder) error
 	Accept(channelID, ID string, acceptedAt time.Time) error
 	Reject(channelID, ID string, rejectedAt time.Time, reason string) error
-	Ship(channelID, ID string, shippedAt time.Time) error
+	Ship(channelID, ID string, shippedAt time.Time, plowMethod, sowMethod, irrigation, fertilization string, plantDate, harvestDate time.Time, storageTemperature, storageHumidity float32) error
 	Receive(channelID, ID string, receivedAt time.Time) error
 }

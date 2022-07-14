@@ -18,18 +18,26 @@ type SeedInstance struct {
 	StorageHumidity    float32 `json:"storage_humidity"`
 }
 
-func (r *SeedInstance) GetStorageTemperature() *float32 {
-	if r == nil {
-		return nil
+func (s *SeedOrder) Ship(shippedAt time.Time, storageTemperature, storageHumidity float32) {
+	s.Order.Ship(shippedAt)
+	s.SeedInstance = &SeedInstance{
+		StorageTemperature: storageTemperature,
+		StorageHumidity:    storageHumidity,
 	}
-	return &r.StorageTemperature
 }
 
-func (r *SeedInstance) GetStorageHumidity() *float32 {
-	if r == nil {
+func (s *SeedInstance) GetStorageTemperature() *float32 {
+	if s == nil {
 		return nil
 	}
-	return &r.StorageHumidity
+	return &s.StorageTemperature
+}
+
+func (s *SeedInstance) GetStorageHumidity() *float32 {
+	if s == nil {
+		return nil
+	}
+	return &s.StorageHumidity
 }
 
 type SeedOrderService interface {
@@ -39,7 +47,7 @@ type SeedOrderService interface {
 	CreateSeedOrder(channelID string, seedOrder *SeedOrder) (*SeedOrder, error)
 	AcceptSeedOrder(channelID string, seedOrder *SeedOrder, acceptedAt time.Time) error
 	RejectSeedOrder(channelID string, seedOrder *SeedOrder, rejectedAt time.Time, reason string) error
-	ShipSeedOrder(channelID string, seedOrder *SeedOrder, shippedAt time.Time) error
+	ShipSeedOrder(channelID string, seedOrder *SeedOrder, shippedAt time.Time, storageTemperature, storageHumidity float32) error
 	ReceiveSeedOrder(channelID string, seedOrder *SeedOrder, receivedAt time.Time) error
 }
 
@@ -50,6 +58,6 @@ type SeedOrderRepository interface {
 	Create(channelID string, riceOrder *SeedOrder) error
 	Accept(channelID, ID string, acceptedAt time.Time) error
 	Reject(channelID, ID string, rejectedAt time.Time, reason string) error
-	Ship(channelID, ID string, shippedAt time.Time) error
+	Ship(channelID, ID string, shippedAt time.Time, storageTemperature, storageHumidity float32) error
 	Receive(channelID, ID string, receivedAt time.Time) error
 }
