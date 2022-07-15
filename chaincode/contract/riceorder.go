@@ -167,7 +167,7 @@ func (c *RiceOrderContract) Create(ctx contractapi.TransactionContextInterface, 
 }
 
 func (c *RiceOrderContract) Accept(ctx contractapi.TransactionContextInterface, id string, acceptedAt time.Time) error {
-	err := authorizeRoleAsManufacturerOrDistributor(ctx)
+	err := authorizeRoleAsManufacturer(ctx)
 	if err != nil {
 		return fmt.Errorf("you are not authorized to accept rice order, %w", err)
 	}
@@ -182,6 +182,32 @@ func (c *RiceOrderContract) Accept(ctx contractapi.TransactionContextInterface, 
 
 	riceOrderDoc := NewRiceOrderDoc(*riceOrder)
 	riceOrderDoc.Accept(acceptedAt)
+	riceOrderDocJSON, err := json.Marshal(riceOrderDoc)
+	if err != nil {
+		return err
+	}
+
+	return ctx.GetStub().PutState(id, riceOrderDocJSON)
+}
+
+func (c *RiceOrderContract) AcceptDistribution(ctx contractapi.TransactionContextInterface, id string, acceptedAt time.Time) error {
+	err := authorizeRoleAsDistributor(ctx)
+	if err != nil {
+		return fmt.Errorf("you are not authorized to accept distribution of rice order, %w", err)
+	}
+
+	riceOrder, err := getRiceOrder(ctx, id)
+	if err != nil {
+		return err
+	}
+	if riceOrder == nil {
+		return fmt.Errorf("the rice order %s does not exist", id)
+	}
+
+	riceOrderDoc := NewRiceOrderDoc(*riceOrder)
+	riceOrderDoc.Accept(acceptedAt)
+	riceOrderDoc.Process(acceptedAt)
+	riceOrderDoc.Available(acceptedAt)
 	riceOrderDocJSON, err := json.Marshal(riceOrderDoc)
 	if err != nil {
 		return err
@@ -215,7 +241,7 @@ func (c *RiceOrderContract) Reject(ctx contractapi.TransactionContextInterface, 
 }
 
 func (c *RiceOrderContract) Ship(ctx contractapi.TransactionContextInterface, id string, shippedAt time.Time, grade string, millingDate time.Time, storageTemperature float32, storageHumidity float32) error {
-	err := authorizeRoleAsManufacturerOrDistributor(ctx)
+	err := authorizeRoleAsManufacturer(ctx)
 	if err != nil {
 		return fmt.Errorf("you are not authorized to ship rice order, %w", err)
 	}
@@ -238,8 +264,37 @@ func (c *RiceOrderContract) Ship(ctx contractapi.TransactionContextInterface, id
 	return ctx.GetStub().PutState(id, riceOrderDocJSON)
 }
 
+func (c *RiceOrderContract) ShipDistribution(ctx contractapi.TransactionContextInterface, id string, shippedAt time.Time, grade string, millingDate time.Time, storageTemperature float32, storageHumidity float32) error {
+	err := authorizeRoleAsDistributor(ctx)
+	if err != nil {
+		return fmt.Errorf("you are not authorized to ship distribution of rice order, %w", err)
+	}
+
+	riceOrder, err := getRiceOrder(ctx, id)
+	if err != nil {
+		return err
+	}
+	if riceOrder == nil {
+		return fmt.Errorf("the rice order %s does not exist", id)
+	}
+
+	riceOrderDoc := NewRiceOrderDoc(*riceOrder)
+	riceOrderDoc.Ship(shippedAt, grade, millingDate, storageTemperature, storageHumidity)
+	riceOrderDocJSON, err := json.Marshal(riceOrderDoc)
+	if err != nil {
+		return err
+	}
+
+	err = subtractRiceStock(ctx, riceOrder.SellerID, riceOrder.RiceID, riceOrder.Quantity)
+	if err != nil {
+		return err
+	}
+
+	return ctx.GetStub().PutState(id, riceOrderDocJSON)
+}
+
 func (c *RiceOrderContract) Receive(ctx contractapi.TransactionContextInterface, id string, receivedAt time.Time) error {
-	err := authorizeRoleAsVendor(ctx)
+	err := authorizeRoleAsDistributor(ctx)
 	if err != nil {
 		return fmt.Errorf("you are not authorized to receive rice order, %w", err)
 	}
@@ -259,18 +314,58 @@ func (c *RiceOrderContract) Receive(ctx contractapi.TransactionContextInterface,
 		return err
 	}
 
-	if role, found, _ := getRole(ctx); found && role == "distributor" {
-		err = addRiceStock(ctx, riceOrder)
-		if err != nil {
-			return err
-		}
+	riceStockpile, err := addRiceStock(ctx, riceOrder.OrdererID, riceOrder.RiceID, riceOrder.Quantity)
+	if err != nil {
+		return err
 	}
 
-	if role, found, _ := getRole(ctx); found && role == "retailer" {
-		err = moveRiceStock(ctx, riceOrder)
-		if err != nil {
-			return err
-		}
+	manufacturer, err := getManufacturer(ctx, riceOrder.SellerID)
+	if err != nil {
+		return err
+	}
+
+	err = createRiceSack(ctx, manufacturer, riceOrder.ID, riceStockpile.ID, riceOrder.Quantity)
+	if err != nil {
+		return err
+	}
+
+	return ctx.GetStub().PutState(id, riceOrderDocJSON)
+}
+
+func (c *RiceOrderContract) ReceiveDistribution(ctx contractapi.TransactionContextInterface, id string, receivedAt time.Time) error {
+	err := authorizeRoleAsRetailer(ctx)
+	if err != nil {
+		return fmt.Errorf("you are not authorized to receive distribution of rice order, %w", err)
+	}
+
+	riceOrder, err := getRiceOrder(ctx, id)
+	if err != nil {
+		return err
+	}
+	if riceOrder == nil {
+		return fmt.Errorf("the rice order %s does not exist", id)
+	}
+
+	riceOrderDoc := NewRiceOrderDoc(*riceOrder)
+	riceOrderDoc.Receive(receivedAt)
+	riceOrderDocJSON, err := json.Marshal(riceOrderDoc)
+	if err != nil {
+		return err
+	}
+
+	sourceStockpile, err := getRiceStockpileByVendorIdAndRiceId(ctx, riceOrder.SellerID, riceOrder.RiceID)
+	if err != nil {
+		return err
+	}
+
+	targetStockpile, err := addRiceStock(ctx, riceOrder.OrdererID, riceOrder.RiceID, riceOrder.Quantity)
+	if err != nil {
+		return err
+	}
+
+	err = moveRiceSack(ctx, sourceStockpile, targetStockpile, riceOrder.ID, riceOrder.Quantity)
+	if err != nil {
+		return err
 	}
 
 	return ctx.GetStub().PutState(id, riceOrderDocJSON)
@@ -289,8 +384,35 @@ func getRole(ctx contractapi.TransactionContextInterface) (string, bool, error) 
 	return ctx.GetClientIdentity().GetAttributeValue("hf.Affiliation")
 }
 
+func authorizeRoleAsManufacturer(ctx contractapi.TransactionContextInterface) error {
+	err := ctx.GetClientIdentity().AssertAttributeValue("hf.Affiliation", "manufacturer")
+	if err != nil {
+		return errors.New("only manufacturer allowed")
+	}
+
+	return nil
+}
+
+func authorizeRoleAsDistributor(ctx contractapi.TransactionContextInterface) error {
+	err := ctx.GetClientIdentity().AssertAttributeValue("hf.Affiliation", "distributor")
+	if err != nil {
+		return errors.New("only distributor allowed")
+	}
+
+	return nil
+}
+
+func authorizeRoleAsRetailer(ctx contractapi.TransactionContextInterface) error {
+	err := ctx.GetClientIdentity().AssertAttributeValue("hf.Affiliation", "retailer")
+	if err != nil {
+		return errors.New("only retailer allowed")
+	}
+
+	return nil
+}
+
 func authorizeRoleAsVendor(ctx contractapi.TransactionContextInterface) error {
-	role, found, err := ctx.GetClientIdentity().GetAttributeValue("hf.Affiliation")
+	role, found, err := getRole(ctx)
 	if err != nil || !found || (role != "distributor" && role != "retailer") {
 		return errors.New("only vendor allowed")
 	}
@@ -299,7 +421,7 @@ func authorizeRoleAsVendor(ctx contractapi.TransactionContextInterface) error {
 }
 
 func authorizeRoleAsManufacturerOrDistributor(ctx contractapi.TransactionContextInterface) error {
-	role, found, err := ctx.GetClientIdentity().GetAttributeValue("hf.Affiliation")
+	role, found, err := getRole(ctx)
 	if err != nil || !found || (role != "manufacturer" && role != "distributor") {
 		return errors.New("only manufacturer and distributor allowed")
 	}
@@ -353,7 +475,7 @@ func riceOrderExists(ctx contractapi.TransactionContextInterface, id string) (bo
 }
 
 func getRiceStockpileByVendorIdAndRiceId(ctx contractapi.TransactionContextInterface, vendorId, riceId string) (*model.RiceStockpile, error) {
-	query := fmt.Sprintf(`{"selector":{"doc_type":"ricestockpile","vendor_id":"%s","rice_id":"%s"},"limit":1}`, vendorId, riceId)
+	query := fmt.Sprintf(`{"selector":{"doc_type":"ricestockpile","vendor_id":"%s","rice_id":"%s"}}`, vendorId, riceId)
 	resultIterator, err := ctx.GetStub().GetQueryResult(query)
 	if err != nil {
 		return nil, err
@@ -379,7 +501,7 @@ func getRiceStockpileByVendorIdAndRiceId(ctx contractapi.TransactionContextInter
 }
 
 func getManufacturerProductCounter(ctx contractapi.TransactionContextInterface, id string) (*ProductCounterDoc, error) {
-	query := fmt.Sprintf(`{"selector":{"doc_type":"productcounter","manufacturer_id":"%s"},"limit":1}`, id)
+	query := fmt.Sprintf(`{"selector":{"doc_type":"productcounter","manufacturer_id":"%s"}}`, id)
 	resultIterator, err := ctx.GetStub().GetQueryResult(query)
 	if err != nil {
 		return nil, err
@@ -387,7 +509,7 @@ func getManufacturerProductCounter(ctx contractapi.TransactionContextInterface, 
 	defer resultIterator.Close()
 
 	if !resultIterator.HasNext() {
-		newUuid, err := newDeterministicUuid(fmt.Sprintf("productcounter:%s", ctx.GetStub().GetTxID()))
+		newUuid, err := newDeterministicUuid(fmt.Sprintf("pc:%s", ctx.GetStub().GetTxID()))
 		if err != nil {
 			return nil, err
 		}
@@ -419,111 +541,60 @@ func putManufacturerProductCounter(ctx contractapi.TransactionContextInterface, 
 	return ctx.GetStub().PutState(doc.ID, docJSON)
 }
 
-func addRiceStock(ctx contractapi.TransactionContextInterface, riceOrder *model.RiceOrder) error {
-	manufacturer, err := getManufacturer(ctx, riceOrder.SellerID)
+func addRiceStock(ctx contractapi.TransactionContextInterface, orgId string, riceId string, qty int32) (*model.RiceStockpile, error) {
+	riceStockpile, err := getRiceStockpileByVendorIdAndRiceId(ctx, orgId, riceId)
 	if err != nil {
-		return err
-	}
-
-	riceStockpile, err := getRiceStockpileByVendorIdAndRiceId(ctx, riceOrder.OrdererID, riceOrder.RiceID)
-	if err != nil {
-		return err
+		return nil, err
 	}
 
 	if riceStockpile == nil {
-		newUuid, err := newDeterministicUuid(fmt.Sprintf("addricestock:%s", ctx.GetStub().GetTxID()))
+		newUuid, err := newDeterministicUuid(fmt.Sprintf("ars:%s", ctx.GetStub().GetTxID()))
 		if err != nil {
-			return err
+			return nil, err
 		}
 
 		riceStockpile = &model.RiceStockpile{
 			ID:       newUuid,
-			RiceID:   riceOrder.RiceID,
-			VendorID: riceOrder.OrdererID,
-			Stock:    riceOrder.Quantity,
+			RiceID:   riceId,
+			VendorID: orgId,
+			Stock:    qty,
 		}
 	} else {
-		riceStockpile.AddStock(riceOrder.Quantity)
+		riceStockpile.AddStock(qty)
 	}
 
 	riceStockpileDoc := NewRiceStockpileDoc(*riceStockpile)
 	riceStockpileDocJSON, err := json.Marshal(riceStockpileDoc)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	err = ctx.GetStub().PutState(riceStockpileDoc.ID, riceStockpileDocJSON)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	err = createRiceSack(ctx, manufacturer, riceOrder.ID, riceStockpile.ID, riceOrder.Quantity)
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return riceStockpile, nil
 }
 
-func moveRiceStock(ctx contractapi.TransactionContextInterface, riceOrder *model.RiceOrder) error {
-	sourceStock, err := getRiceStockpileByVendorIdAndRiceId(ctx, riceOrder.SellerID, riceOrder.RiceID)
+func subtractRiceStock(ctx contractapi.TransactionContextInterface, orgId string, riceId string, qty int32) error {
+	stock, err := getRiceStockpileByVendorIdAndRiceId(ctx, orgId, riceId)
 	if err != nil {
 		return err
 	}
-	if sourceStock == nil {
+	if stock == nil || stock.Stock < qty {
 		return errors.New("out of stock")
 	}
 
-	targetStock, err := getRiceStockpileByVendorIdAndRiceId(ctx, riceOrder.OrdererID, riceOrder.RiceID)
+	stock.SubtractStock(qty)
+
+	stockDoc := NewRiceStockpileDoc(*stock)
+	stockDocJSON, err := json.Marshal(stockDoc)
 	if err != nil {
 		return err
 	}
 
-	if targetStock == nil {
-		newUuid, err := newDeterministicUuid(fmt.Sprintf("movericestock:%s", ctx.GetStub().GetTxID()))
-		if err != nil {
-			return err
-		}
-
-		targetStock = &model.RiceStockpile{
-			ID:       newUuid,
-			RiceID:   riceOrder.RiceID,
-			VendorID: riceOrder.OrdererID,
-			Stock:    riceOrder.Quantity,
-		}
-	} else {
-		targetStock.AddStock(riceOrder.Quantity)
-	}
-	sourceStock.SubtractStock(riceOrder.Quantity)
-
-	sourceStockDoc := NewRiceStockpileDoc(*sourceStock)
-	sourceStockDocJSON, err := json.Marshal(sourceStockDoc)
-	if err != nil {
-		return err
-	}
-
-	targetStockDoc := NewRiceStockpileDoc(*targetStock)
-	targetStockDocJSON, err := json.Marshal(targetStockDoc)
-	if err != nil {
-		return err
-	}
-
-	err = ctx.GetStub().PutState(sourceStockDoc.ID, sourceStockDocJSON)
-	if err != nil {
-		return err
-	}
-
-	err = ctx.GetStub().PutState(targetStockDoc.ID, targetStockDocJSON)
-	if err != nil {
-		return err
-	}
-
-	err = moveRiceSack(ctx, riceOrder.ID, sourceStockDoc.ID, targetStockDoc.ID, riceOrder.Quantity)
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return ctx.GetStub().PutState(stockDoc.ID, stockDocJSON)
 }
 
 func createRiceSack(ctx contractapi.TransactionContextInterface, manufacturer *model.Manufacturer, riceOrderId, riceStockpileId string, qty int32) error {
@@ -534,7 +605,7 @@ func createRiceSack(ctx contractapi.TransactionContextInterface, manufacturer *m
 	}
 
 	for i := 0; i < int(qty); i++ {
-		newUuid, err := newDeterministicUuid(fmt.Sprintf("createricesack:%d:%s", i, ctx.GetStub().GetTxID()))
+		newUuid, err := newDeterministicUuid(fmt.Sprintf("crs%d:%s", i, ctx.GetStub().GetTxID()))
 		if err != nil {
 			return err
 		}
@@ -566,15 +637,15 @@ func createRiceSack(ctx contractapi.TransactionContextInterface, manufacturer *m
 	return nil
 }
 
-func moveRiceSack(ctx contractapi.TransactionContextInterface, riceOrderId, sourceStockId, targetStockId string, qty int32) error {
-	query := fmt.Sprintf(`{"selector":{"doc_type":"ricesack","rice_stockpile_id":"%s"},"limit":%d}`, sourceStockId, qty)
+func moveRiceSack(ctx contractapi.TransactionContextInterface, sourceStockpile, targetStockpile *model.RiceStockpile, riceOrderId string, qty int32) error {
+	query := fmt.Sprintf(`{"selector":{"doc_type":"ricesack","rice_stockpile_id":"%s"}}`, sourceStockpile.ID)
 	resultIterator, err := ctx.GetStub().GetQueryResult(query)
 	if err != nil {
 		return err
 	}
 	defer resultIterator.Close()
 
-	for resultIterator.HasNext() {
+	for i := 0; i < int(qty); i++ {
 		result, err := resultIterator.Next()
 		if err != nil {
 			return err
@@ -587,7 +658,7 @@ func moveRiceSack(ctx contractapi.TransactionContextInterface, riceOrderId, sour
 		}
 
 		riceSack.RiceOrderID = riceOrderId
-		riceSack.RiceStockpileID = targetStockId
+		riceSack.RiceStockpileID = targetStockpile.ID
 		riceSackDoc := NewRiceSackDoc(riceSack)
 		riceSackDocJSON, err := json.Marshal(riceSackDoc)
 		if err != nil {

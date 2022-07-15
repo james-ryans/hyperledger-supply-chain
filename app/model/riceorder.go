@@ -66,9 +66,12 @@ type RiceOrderService interface {
 	GetRiceOrderByID(channelID, ID string) (*RiceOrder, error)
 	CreateRiceOrder(channelID string, riceOrder *RiceOrder) (*RiceOrder, error)
 	AcceptRiceOrder(channelID string, riceOrder *RiceOrder, acceptedAt time.Time) error
+	AcceptDistributionRiceOrder(channelID string, riceOrder *RiceOrder, acceptedAt time.Time) error
 	RejectRiceOrder(channelID string, riceOrder *RiceOrder, rejectedAt time.Time, reason string) error
 	ShipRiceOrder(channelID string, riceOrder *RiceOrder, shippedAt time.Time, grade string, millingDate time.Time, storageTemperature float32, storageHumidity float32) error
+	ShipDistributionRiceOrder(channelID string, riceOrder *RiceOrder, shippedAt time.Time, grade string, millingDate time.Time, storageTemperature float32, storageHumidity float32) error
 	ReceiveRiceOrder(channelID string, riceOrder *RiceOrder, receivedAt time.Time) error
+	ReceiveDistributionRiceOrder(channelID string, riceOrder *RiceOrder, receivedAt time.Time) error
 }
 
 type RiceOrderRepository interface {
@@ -78,7 +81,10 @@ type RiceOrderRepository interface {
 	FindByID(channelID, ID string) (*RiceOrder, error)
 	Create(channelID string, riceOrder *RiceOrder) error
 	Accept(channelID, ID string, acceptedAt time.Time) error
+	AcceptDistribution(channelID, ID string, acceptedAt time.Time) error
 	Reject(channelID, ID string, rejectedAt time.Time, reason string) error
 	Ship(channelID, ID string, shippedAt time.Time, grade string, millingDate time.Time, storageTemperature float32, storageHumidity float32) error
+	ShipDistribution(channelID, ID string, shippedAt time.Time, grade string, millingDate time.Time, storageTemperature float32, storageHumidity float32) error
 	Receive(channelID, ID string, receivedAt time.Time) error
+	ReceiveDistribution(channelID, ID string, receivedAt time.Time) error
 }

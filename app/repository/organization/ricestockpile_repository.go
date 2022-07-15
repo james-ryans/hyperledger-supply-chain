@@ -54,3 +54,21 @@ func (r *riceStockpileRepository) FindByID(channelID, ID string) (*model.RiceSto
 
 	return riceStockpile, nil
 }
+
+func (r *riceStockpileRepository) FindByVendorIDAndRiceID(channelID, vendorID, riceID string) (*model.RiceStockpile, error) {
+	network := r.Fabric.GetNetwork(channelID)
+	contract := network.GetContract(os.Getenv("FABRIC_CHAINCODE_NAME"))
+
+	riceStockpileJSON, err := contract.EvaluateTransaction("RiceStockpileContract:FindByVendorIDAndRiceID", vendorID, riceID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to evaluate transaction %w", err)
+	}
+
+	var riceStockpile *model.RiceStockpile
+	err = json.Unmarshal(riceStockpileJSON, &riceStockpile)
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse result: %w", err)
+	}
+
+	return riceStockpile, nil
+}

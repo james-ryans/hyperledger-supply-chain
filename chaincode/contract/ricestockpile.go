@@ -62,6 +62,32 @@ func (c *RiceStockpileContract) FindByID(ctx contractapi.TransactionContextInter
 	return stockpile, nil
 }
 
+func (c *RiceStockpileContract) FindByVendorIDAndRiceID(ctx contractapi.TransactionContextInterface, vendorId, riceId string) (*model.RiceStockpile, error) {
+	query := fmt.Sprintf(`{"selector":{"doc_type":"ricestockpile","vendor_id":"%s","rice_id":"%s"}}`, vendorId, riceId)
+	resultIterator, err := ctx.GetStub().GetQueryResult(query)
+	if err != nil {
+		return nil, err
+	}
+	defer resultIterator.Close()
+
+	if !resultIterator.HasNext() {
+		return nil, nil
+	}
+
+	result, err := resultIterator.Next()
+	if err != nil {
+		return nil, err
+	}
+
+	var riceStockpile model.RiceStockpile
+	err = json.Unmarshal(result.Value, &riceStockpile)
+	if err != nil {
+		return nil, err
+	}
+
+	return &riceStockpile, nil
+}
+
 func (c *RiceStockpileContract) getRiceStockpile(ctx contractapi.TransactionContextInterface, id string) (*model.RiceStockpile, error) {
 	stockpileJSON, err := ctx.GetStub().GetState(id)
 	if err != nil {

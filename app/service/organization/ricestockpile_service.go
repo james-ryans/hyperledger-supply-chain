@@ -23,3 +23,7 @@ func (s *riceStockpileService) GetAllRiceStockpile(channelID, vendorID string) (
 func (s *riceStockpileService) GetRiceStockpileByID(channelID, ID string) (*model.RiceStockpile, error) {
 	return s.RiceStockpileRepository.FindByID(channelID, ID)
 }
+
+func (s *riceStockpileService) GetRiceStockpileByVendorIDAndRiceID(channelID, vendorID, riceID string) (*model.RiceStockpile, error) {
+	return s.RiceStockpileRepository.FindByVendorIDAndRiceID(channelID, vendorID, riceID)
+}

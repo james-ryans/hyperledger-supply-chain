@@ -404,7 +404,7 @@ func (h *Handler) ShipRiceOrder(c *gin.Context) {
 	if riceOrder.SellerID != orgID {
 		c.JSON(http.StatusForbidden, gin.H{
 			"success": false,
-			"message": fmt.Errorf("you are not the seller that manufacturer ordered").Error(),
+			"message": fmt.Errorf("you are not the seller that distributor ordered").Error(),
 			"data":    nil,
 		})
 		return

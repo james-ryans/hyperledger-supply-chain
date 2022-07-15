@@ -125,6 +125,18 @@ func (r *riceOrderRepository) Accept(channelID string, ID string, acceptedAt tim
 	return nil
 }
 
+func (r *riceOrderRepository) AcceptDistribution(channelID string, ID string, acceptedAt time.Time) error {
+	network := r.Fabric.GetNetwork(channelID)
+	contract := network.GetContract(os.Getenv("FABRIC_CHAINCODE_NAME"))
+
+	_, err := contract.SubmitTransaction("RiceOrderContract:AcceptDistribution", ID, acceptedAt.Format(time.RFC3339))
+	if err != nil {
+		return fmt.Errorf("failed to submit transaction: %w", err)
+	}
+
+	return nil
+}
+
 func (r *riceOrderRepository) Reject(channelID string, ID string, rejectedAt time.Time, reason string) error {
 	network := r.Fabric.GetNetwork(channelID)
 	contract := network.GetContract(os.Getenv("FABRIC_CHAINCODE_NAME"))
@@ -157,11 +169,43 @@ func (r *riceOrderRepository) Ship(channelID string, ID string, shippedAt time.T
 	return nil
 }
 
+func (r *riceOrderRepository) ShipDistribution(channelID string, ID string, shippedAt time.Time, grade string, millingDate time.Time, storageTemperature float32, storageHumidity float32) error {
+	network := r.Fabric.GetNetwork(channelID)
+	contract := network.GetContract(os.Getenv("FABRIC_CHAINCODE_NAME"))
+
+	_, err := contract.SubmitTransaction(
+		"RiceOrderContract:ShipDistribution",
+		ID,
+		shippedAt.Format(time.RFC3339),
+		grade,
+		millingDate.Format(time.RFC3339),
+		strconv.FormatFloat(float64(storageTemperature), 'f', -1, 32),
+		strconv.FormatFloat(float64(storageHumidity), 'f', -1, 32),
+	)
+	if err != nil {
+		return fmt.Errorf("failed to submit transaction: %w", err)
+	}
+
+	return nil
+}
+
 func (r *riceOrderRepository) Receive(channelID string, ID string, receivedAt time.Time) error {
 	network := r.Fabric.GetNetwork(channelID)
 	contract := network.GetContract(os.Getenv("FABRIC_CHAINCODE_NAME"))
 
 	_, err := contract.SubmitTransaction("RiceOrderContract:Receive", ID, receivedAt.Format(time.RFC3339))
+	if err != nil {
+		return fmt.Errorf("failed to submit transaction: %w", err)
+	}
+
+	return nil
+}
+
+func (r *riceOrderRepository) ReceiveDistribution(channelID string, ID string, receivedAt time.Time) error {
+	network := r.Fabric.GetNetwork(channelID)
+	contract := network.GetContract(os.Getenv("FABRIC_CHAINCODE_NAME"))
+
+	_, err := contract.SubmitTransaction("RiceOrderContract:ReceiveDistribution", ID, receivedAt.Format(time.RFC3339))
 	if err != nil {
 		return fmt.Errorf("failed to submit transaction: %w", err)
 	}

@@ -167,7 +167,17 @@ func NewHandler(c *Config) {
 	dog := c.R.Group("api/organizations/channels/:channelID/distributor-orders")
 	dog.Use(middleware.AuthOrganization())
 	dog.GET("/outgoing", h.GetAllOutgoingRiceOrder)
+	dog.GET("/incoming", h.GetAllIncomingDistributedRiceOrder)
 	dog.GET("/:orderID", h.GetRiceOrder)
 	dog.POST("", h.CreateRiceOrder)
 	dog.POST("/:orderID/receive", h.ReceiveRiceOrder)
+	dog.POST("/:orderID/accept", h.AcceptDistributedRiceOrder)
+	dog.POST("/:orderID/ship", h.ShipDistributedRiceOrder)
+
+	rog := c.R.Group("api/organizations/channels/:channelID/retailer-orders")
+	rog.Use(middleware.AuthOrganization())
+	rog.GET("/outgoing", h.GetAllOutgoingDistributedRiceOrder)
+	rog.GET("/:orderID", h.GetDistributedRiceOrder)
+	rog.POST("", h.CreateDistributedRiceOrder)
+	rog.POST("/:orderID/receive", h.ReceiveDistributedRiceOrder)
 }
