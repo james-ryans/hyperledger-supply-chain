@@ -27,7 +27,7 @@ type ShipSeedOrderRequest struct {
 
 func (r ShipSeedOrderRequest) Validate() error {
 	return validation.ValidateStruct(&r,
-		validation.Field(&r.StorageTemperature, validation.Required, validation.Min(float64(0)), validation.Min(float64(100))),
-		validation.Field(&r.StorageHumidity, validation.Required, validation.Min(float64(0)), validation.Min(float64(100))),
+		validation.Field(&r.StorageTemperature, validation.Required, validation.Min(float64(0)), validation.Max(float64(100))),
+		validation.Field(&r.StorageHumidity, validation.Required, validation.Min(float64(0)), validation.Max(float64(100))),
 	)
 }

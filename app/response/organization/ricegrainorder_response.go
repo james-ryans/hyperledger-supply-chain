@@ -20,6 +20,7 @@ type riceGrainOrderResponse struct {
 	RiceGrainID        string     `json:"rice_grain_id"`
 	RiceOrderID        string     `json:"rice_order_id"`
 	Weight             float32    `json:"weight"`
+	Status             string     `json:"status"`
 	PlowMethod         *string    `json:"plow_method"`
 	SowMethod          *string    `json:"sow_method"`
 	Irrigation         *string    `json:"irrigation"`
@@ -60,6 +61,7 @@ func RiceGrainOrderResponse(riceGrainOrder *model.RiceGrainOrder) *riceGrainOrde
 		RiceGrainID:        riceGrainOrder.RiceGrainID,
 		RiceOrderID:        riceGrainOrder.RiceOrderID,
 		Weight:             riceGrainOrder.Weight,
+		Status:             riceGrainOrder.Status,
 		PlowMethod:         riceGrainOrder.RiceGrainInstance.GetPlowMethod(),
 		SowMethod:          riceGrainOrder.RiceGrainInstance.GetSowMethod(),
 		Irrigation:         riceGrainOrder.RiceGrainInstance.GetIrrigation(),

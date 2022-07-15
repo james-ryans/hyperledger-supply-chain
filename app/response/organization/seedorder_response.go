@@ -20,6 +20,7 @@ type seedOrderResponse struct {
 	SeedID             string     `json:"seed_id"`
 	RiceGrainOrderID   string     `json:"rice_grain_order_id"`
 	Weight             float32    `json:"weight"`
+	Status             string     `json:"status"`
 	StorageTemperature *float32   `json:"storage_temperature"`
 	StorageHumidity    *float32   `json:"storage_humidity"`
 	OrderedAt          *time.Time `json:"ordered_at"`
@@ -54,6 +55,7 @@ func SeedOrderResponse(seedOrder *model.SeedOrder) *seedOrderResponse {
 		SeedID:             seedOrder.SeedID,
 		RiceGrainOrderID:   seedOrder.RiceGrainOrderID,
 		Weight:             seedOrder.Weight,
+		Status:             seedOrder.Status,
 		StorageTemperature: seedOrder.SeedInstance.GetStorageTemperature(),
 		StorageHumidity:    seedOrder.SeedInstance.GetStorageHumidity(),
 		OrderedAt:          seedOrder.GetOrderedAt(),

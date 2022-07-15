@@ -4,6 +4,7 @@ type Organization struct {
 	ID          string      `json:"id"`
 	Type        string      `json:"type"`
 	Name        string      `json:"name"`
+	Code        string      `json:"code"`
 	Location    Location    `json:"location"`
 	ContactInfo ContactInfo `json:"contact_info"`
 }

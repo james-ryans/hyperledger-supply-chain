@@ -32,12 +32,14 @@ func (h *Handler) InitOrganization(c *gin.Context) {
 	orgID := os.Getenv("ORG_ID")
 	orgName := os.Getenv("ORG_NAME")
 	orgType := os.Getenv("ORG_TYPE")
+	orgCode := os.Getenv("ORG_CODE")
 	channelID := os.Getenv("FABRIC_CHANNEL_NAME")
 
 	organization := model.Organization{
 		ID:   orgID,
 		Type: orgType,
 		Name: orgName,
+		Code: orgCode,
 		Location: model.Location{
 			Province:   "North Sumatra",
 			City:       "Medan",

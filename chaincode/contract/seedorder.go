@@ -84,7 +84,7 @@ func (c *SeedOrderContract) FindByID(ctx contractapi.TransactionContextInterface
 		return nil, err
 	}
 	if seedOrder == nil {
-		return nil, fmt.Errorf("the rice grain order %s does not exist", id)
+		return nil, fmt.Errorf("the seed order %s does not exist", id)
 	}
 
 	return seedOrder, nil

@@ -25,6 +25,8 @@ func inject(d *dataSources) (*gin.Engine, error) {
 	seedRepository := repository.NewSeedRepository(d.Gateway)
 	riceGrainRepository := repository.NewRiceGrainRepository(d.Gateway)
 	riceRepository := repository.NewRiceRepository(d.Gateway)
+	riceStockpileRepository := repository.NewRiceStockpileRepository(d.Gateway)
+	riceSackRepository := repository.NewRiceSackRepository(d.Gateway)
 
 	seedOrderRepository := repository.NewSeedOrderRepository(d.Gateway)
 	riceGrainOrderRepository := repository.NewRiceGrainOrderRepository(d.Gateway)
@@ -55,6 +57,12 @@ func inject(d *dataSources) (*gin.Engine, error) {
 	})
 	riceService := service.NewRiceService(&service.RiceServiceConfig{
 		RiceRepository: riceRepository,
+	})
+	riceStockpileService := service.NewRiceStockpileService(&service.RiceStockpileServiceConfig{
+		RiceStockpileRepository: riceStockpileRepository,
+	})
+	riceSackService := service.NewRiceSackService(&service.RiceSackServiceConfig{
+		RiceSackRepository: riceSackRepository,
 	})
 
 	seedOrderService := service.NewSeedOrderService(&service.SeedOrderServiceConfig{
@@ -94,6 +102,8 @@ func inject(d *dataSources) (*gin.Engine, error) {
 		SeedService:           seedService,
 		RiceGrainService:      riceGrainService,
 		RiceService:           riceService,
+		RiceStockpileService:  riceStockpileService,
+		RiceSackService:       riceSackService,
 		SeedOrderService:      seedOrderService,
 		RiceGrainOrderService: riceGrainOrderService,
 		RiceOrderService:      riceOrderService,

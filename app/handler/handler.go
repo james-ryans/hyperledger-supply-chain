@@ -18,6 +18,8 @@ type Handler struct {
 	seedService           model.SeedService
 	riceGrainService      model.RiceGrainService
 	riceService           model.RiceService
+	riceStockpileService  model.RiceStockpileService
+	riceSackService       model.RiceSackService
 	seedOrderService      model.SeedOrderService
 	riceGrainOrderService model.RiceGrainOrderService
 	riceOrderService      model.RiceOrderService
@@ -35,6 +37,8 @@ type Config struct {
 	SeedService           model.SeedService
 	RiceGrainService      model.RiceGrainService
 	RiceService           model.RiceService
+	RiceStockpileService  model.RiceStockpileService
+	RiceSackService       model.RiceSackService
 	SeedOrderService      model.SeedOrderService
 	RiceGrainOrderService model.RiceGrainOrderService
 	RiceOrderService      model.RiceOrderService
@@ -52,6 +56,8 @@ func NewHandler(c *Config) {
 		seedService:           c.SeedService,
 		riceGrainService:      c.RiceGrainService,
 		riceService:           c.RiceService,
+		riceStockpileService:  c.RiceStockpileService,
+		riceSackService:       c.RiceSackService,
 		seedOrderService:      c.SeedOrderService,
 		riceGrainOrderService: c.RiceGrainOrderService,
 		riceOrderService:      c.RiceOrderService,
@@ -119,6 +125,13 @@ func NewHandler(c *Config) {
 	rg.POST("", h.CreateRice)
 	rg.PUT("/:riceID", h.UpdateRice)
 	rg.DELETE("/:riceID", h.DeleteRice)
+
+	rsg := c.R.Group("api/organizations/channels/:channelID/rice-stockpiles")
+	rsg.Use(middleware.AuthOrganization())
+	rsg.GET("", h.GetAllRiceStockpiles)
+	rsg.GET("/:stockID", h.GetRiceStockpile)
+	rsg.GET("/:stockID/rice-sacks", h.GetAllRiceSack)
+	rsg.GET("/rice-sacks/:sackID/print", h.PrintRiceSackQRCode)
 
 	sog := c.R.Group("api/organizations/channels/:channelID/supplier-orders")
 	sog.Use(middleware.AuthOrganization())

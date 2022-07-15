@@ -17,6 +17,8 @@ func main() {
 	seedContract := &contract.SeedContract{}
 	riceGrainContract := &contract.RiceGrainContract{}
 	riceContract := &contract.RiceContract{}
+	riceStockpileContract := &contract.RiceStockpileContract{}
+	riceSackContract := &contract.RiceSackContract{}
 
 	seedOrderContract := &contract.SeedOrderContract{}
 	riceGrainOrderContract := &contract.RiceGrainOrderContract{}
@@ -31,6 +33,8 @@ func main() {
 		seedContract,
 		riceGrainContract,
 		riceContract,
+		riceStockpileContract,
+		riceSackContract,
 		seedOrderContract,
 		riceGrainOrderContract,
 		riceOrderContract,

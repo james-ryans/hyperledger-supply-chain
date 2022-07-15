@@ -18,6 +18,7 @@ type riceOrderResponse struct {
 	SellerID           string     `json:"seller_id"`
 	RiceID             string     `json:"rice_id"`
 	Quantity           int32      `json:"quantity"`
+	Status             string     `json:"status"`
 	Grade              *string    `json:"grade"`
 	MillingDate        *time.Time `json:"milling_date"`
 	StorageTemperature *float32   `json:"storage_temperature"`
@@ -52,6 +53,7 @@ func RiceOrderResponse(riceOrder *model.RiceOrder) *riceOrderResponse {
 		SellerID:           riceOrder.SellerID,
 		RiceID:             riceOrder.RiceID,
 		Quantity:           riceOrder.Quantity,
+		Status:             riceOrder.Status,
 		Grade:              riceOrder.RiceInstance.GetGrade(),
 		MillingDate:        riceOrder.RiceInstance.GetMillingDate(),
 		StorageTemperature: riceOrder.RiceInstance.GetStorageTemperature(),
