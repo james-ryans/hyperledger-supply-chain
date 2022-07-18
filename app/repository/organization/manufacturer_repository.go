@@ -65,6 +65,7 @@ func (r *manufacturerRepository) Create(channelID string, manufacturer *model.Ma
 		manufacturer.ID,
 		manufacturer.Type,
 		manufacturer.Name,
+		manufacturer.Code,
 		manufacturer.Location.Province,
 		manufacturer.Location.City,
 		manufacturer.Location.District,

@@ -62,7 +62,7 @@ func (c *ManufacturerContract) FindByID(ctx contractapi.TransactionContextInterf
 	return &manufacturer, nil
 }
 
-func (c *ManufacturerContract) Create(ctx contractapi.TransactionContextInterface, id string, orgType string, name string, province string, city string, district string, postalCode string, address string, phone string, email string, latitude float32, longitude float32) error {
+func (c *ManufacturerContract) Create(ctx contractapi.TransactionContextInterface, id string, orgType string, name string, code string, province string, city string, district string, postalCode string, address string, phone string, email string, latitude float32, longitude float32) error {
 	err := c.authorizeRoleAsManufacturer(ctx)
 	if err != nil {
 		return err
@@ -83,6 +83,7 @@ func (c *ManufacturerContract) Create(ctx contractapi.TransactionContextInterfac
 				ID:   id,
 				Type: orgType,
 				Name: name,
+				Code: code,
 				Location: model.Location{
 					Province:   province,
 					City:       city,
