@@ -55,6 +55,7 @@ type SeedOrderRepository interface {
 	FindAllOutgoing(channelID, ordererID string) ([]*SeedOrder, error)
 	FindAllIncoming(channelID, sellerID string) ([]*SeedOrder, error)
 	FindByID(channelID, ID string) (*SeedOrder, error)
+	FindByRiceGrainOrderID(channelID, riceGrainOrderId string) (*SeedOrder, error)
 	Create(channelID string, riceOrder *SeedOrder) error
 	Accept(channelID, ID string, acceptedAt time.Time) error
 	Reject(channelID, ID string, rejectedAt time.Time, reason string) error

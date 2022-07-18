@@ -7,6 +7,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/meneketehe/hehe/app/model"
+	usermodel "github.com/meneketehe/hehe/app/model/user"
 	request "github.com/meneketehe/hehe/app/request/organization"
 	response "github.com/meneketehe/hehe/app/response/organization"
 )
@@ -164,6 +165,41 @@ func (h *Handler) ReceiveDistributedRiceOrder(c *gin.Context) {
 			"data":    nil,
 		})
 		return
+	}
+
+	riceSacks, err := h.riceSackService.GetAllRiceSackByRiceOrderID(channelID, riceOrder.ID)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"success": false,
+			"message": err.Error(),
+			"data":    nil,
+		})
+		return
+	}
+
+	var userRiceSacks []*usermodel.RiceSack
+	for _, sack := range riceSacks {
+		userRiceSack, err := h.userRiceSackService.TraceRiceSack(channelID, sack)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"success": false,
+				"message": err.Error(),
+				"data":    nil,
+			})
+			return
+		}
+
+		userRiceSack, err = h.userRiceSackService.CreateRiceSack(userRiceSack)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"success": false,
+				"message": err.Error(),
+				"data":    nil,
+			})
+			return
+		}
+
+		userRiceSacks = append(userRiceSacks, userRiceSack)
 	}
 
 	c.JSON(http.StatusOK, gin.H{

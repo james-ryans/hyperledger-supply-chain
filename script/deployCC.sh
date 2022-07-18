@@ -26,7 +26,7 @@ function dropVendorDep() {
 }
 
 function packageChaincode() {
-  setPeerEnv "superadmin.com" "SuperadminMSP" "localhost:5049"
+  setPeerEnv "superadmin.com"
 
   find "${CC_SRC_PATH}" -type f -iname '*.tar.gz' -delete
 

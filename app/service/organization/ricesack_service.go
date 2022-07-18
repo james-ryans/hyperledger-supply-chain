@@ -20,6 +20,10 @@ func (s *riceSackService) GetAllRiceSack(channelID, stockpileID string) ([]*mode
 	return s.RiceSackRepository.FindAll(channelID, stockpileID)
 }
 
+func (s *riceSackService) GetAllRiceSackByRiceOrderID(channelID, riceOrderID string) ([]*model.RiceSack, error) {
+	return s.RiceSackRepository.FindAllByRiceOrderID(channelID, riceOrderID)
+}
+
 func (s *riceSackService) GetRiceSack(channelID, ID string) (*model.RiceSack, error) {
 	return s.RiceSackRepository.FindByID(channelID, ID)
 }

@@ -25,6 +25,28 @@ Organizations:
       - Host: peer.superadmin.com
         Port: 5050
 
+  - &Retailer0Org
+    Name: Retailer0MSP
+    ID: Retailer0MSP
+    MSPDir: ../../retailer0.com/msp
+
+    Policies:
+      Readers:
+        Type: Signature
+        Rule: "OR('Retailer0MSP.member')"
+      Writers:
+        Type: Signature
+        Rule: "OR('Retailer0MSP.member')"
+      Admins:
+        Type: Signature
+        Rule: "OR('Retailer0MSP.admin')"
+      Endorsement:
+        Type: Signature
+        Rule: "OR('Retailer0MSP.peer')"
+    AnchorPeers:
+      - Host: peer.retailer0.com
+        Port: 5060
+
 Capabilities:
   Channel: &ChannelCapabilities
     V2_0: true
@@ -120,4 +142,5 @@ Profiles:
       <<: *ApplicationDefaults
       Organizations:
         - *SuperadminOrg
+        - *Retailer0Org
       Capabilities: *ApplicationCapabilities

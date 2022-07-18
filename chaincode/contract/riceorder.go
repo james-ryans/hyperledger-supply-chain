@@ -613,7 +613,7 @@ func createRiceSack(ctx contractapi.TransactionContextInterface, manufacturer *m
 		productCounterDoc.Count += 1
 		riceSackDoc := NewRiceSackDoc(model.RiceSack{
 			ID:              newUuid,
-			RiceOrderID:     riceOrderId,
+			RiceOrderID:     []string{riceOrderId},
 			RiceStockpileID: riceStockpileId,
 			Code:            fmt.Sprintf("(01)%s%06d", orgCode, productCounterDoc.Count),
 		})
@@ -657,7 +657,7 @@ func moveRiceSack(ctx contractapi.TransactionContextInterface, sourceStockpile, 
 			return err
 		}
 
-		riceSack.RiceOrderID = riceOrderId
+		riceSack.RiceOrderID = append(riceSack.RiceOrderID, riceOrderId)
 		riceSack.RiceStockpileID = targetStockpile.ID
 		riceSackDoc := NewRiceSackDoc(riceSack)
 		riceSackDocJSON, err := json.Marshal(riceSackDoc)

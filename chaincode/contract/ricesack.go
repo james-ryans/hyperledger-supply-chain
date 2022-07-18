@@ -50,6 +50,32 @@ func (c *RiceSackContract) FindAll(ctx contractapi.TransactionContextInterface, 
 	return sacks, nil
 }
 
+func (c *RiceSackContract) FindAllByRiceOrderId(ctx contractapi.TransactionContextInterface, riceOrderId string) ([]*model.RiceSack, error) {
+	query := fmt.Sprintf(`{"selector":{"doc_type":"ricesack","rice_order_id":{"$elemMatch":{"$eq":"%s"}}}}`, riceOrderId)
+	resultIterator, err := ctx.GetStub().GetQueryResult(query)
+	if err != nil {
+		return nil, err
+	}
+	defer resultIterator.Close()
+
+	sacks := make([]*model.RiceSack, 0)
+	for resultIterator.HasNext() {
+		result, err := resultIterator.Next()
+		if err != nil {
+			return nil, err
+		}
+
+		var sack model.RiceSack
+		err = json.Unmarshal(result.Value, &sack)
+		if err != nil {
+			return nil, err
+		}
+		sacks = append(sacks, &sack)
+	}
+
+	return sacks, nil
+}
+
 func (c *RiceSackContract) FindByID(ctx contractapi.TransactionContextInterface, id string) (*model.RiceSack, error) {
 	sack, err := getRiceSack(ctx, id)
 	if err != nil {

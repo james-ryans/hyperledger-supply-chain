@@ -75,6 +75,24 @@ func (r *seedOrderRepository) FindByID(channelID, ID string) (*model.SeedOrder, 
 	return &seedOrder, nil
 }
 
+func (r *seedOrderRepository) FindByRiceGrainOrderID(channelID, riceGrainOrderID string) (*model.SeedOrder, error) {
+	network := r.Fabric.GetNetwork(channelID)
+	contract := network.GetContract(os.Getenv("FABRIC_CHAINCODE_NAME"))
+
+	seedOrderJSON, err := contract.EvaluateTransaction("SeedOrderContract:FindByRiceGrainOrderID", riceGrainOrderID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to evaluate transaction %w", err)
+	}
+
+	seedOrder := model.SeedOrder{}
+	err = json.Unmarshal(seedOrderJSON, &seedOrder)
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse result: %w", err)
+	}
+
+	return &seedOrder, err
+}
+
 func (r *seedOrderRepository) Create(channelID string, seedOrder *model.SeedOrder) error {
 	network := r.Fabric.GetNetwork(channelID)
 	contract := network.GetContract(os.Getenv("FABRIC_CHAINCODE_NAME"))

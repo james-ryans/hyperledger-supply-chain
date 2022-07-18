@@ -90,6 +90,32 @@ func (c *SeedOrderContract) FindByID(ctx contractapi.TransactionContextInterface
 	return seedOrder, nil
 }
 
+func (c *SeedOrderContract) FindByRiceGrainOrderID(ctx contractapi.TransactionContextInterface, id string) (*model.SeedOrder, error) {
+	query := fmt.Sprintf(`{"selector":{"doc_type":"seedorder","rice_grain_order_id":"%s"}}`, id)
+	resultIterator, err := ctx.GetStub().GetQueryResult(query)
+	if err != nil {
+		return nil, err
+	}
+	defer resultIterator.Close()
+
+	if !resultIterator.HasNext() {
+		return nil, fmt.Errorf("the seed order does not exists")
+	}
+
+	seedOrderJSON, err := resultIterator.Next()
+	if err != nil {
+		return nil, err
+	}
+
+	var seedOrder *model.SeedOrder
+	err = json.Unmarshal(seedOrderJSON.Value, &seedOrder)
+	if err != nil {
+		return nil, err
+	}
+
+	return seedOrder, nil
+}
+
 func (c *SeedOrderContract) Create(ctx contractapi.TransactionContextInterface, id string, ordererId string, sellerId string, seedId string, riceGrainOrderId string, weight float32, orderedAt time.Time) error {
 	err := c.authorizeRoleAsProducer(ctx)
 	if err != nil {

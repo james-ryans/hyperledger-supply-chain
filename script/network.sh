@@ -2,14 +2,14 @@
 
 function networkUp() {
   createSuperadminOrg
-  createGlobalChannel
-
   createSupplier0Org
   createProducer0Org
   createManufacturer0Org
   createDistributor0Org
   createRetailer0Org
+
   createChannel0
+  createGlobalChannel
 }
 
 function createSuperadminOrg() {
@@ -121,6 +121,7 @@ function createGlobalChannel() {
   ordererJoinChannel globalchannel superadmin.com localhost:4050
 
   peerJoinChannel globalchannel superadmin.com SuperadminMSP localhost:5050
+  peerJoinChannel globalchannel retailer0.com Retailer0MSP localhost:5060
 }
 
 function createChannel0() {
@@ -148,6 +149,10 @@ function createChannel0() {
 
 function deployCC() {
   ./script/deployCC.sh "${1}" "${2}" "${3}" "${4}" "${5}"
+}
+
+function deployGCC() {
+  ./script/deployGCC.sh "${1}" "${2}" "${3}" "${4}" "${5}"
 }
 
 function networkDown() {
@@ -208,6 +213,9 @@ elif [ "$MODE" == "down" ]; then
   infoln "Stopping network"
   networkDown
 elif [ "$MODE" == "deployCC" ]; then
-  infoln "Deploying chaincode"
+  infoln "Deploying chaincode on org channel"
   deployCC "${2}" "${3}" "${4}" "${5}" "${6}"
+elif [ "$MODE" == "deployGCC" ]; then
+  infoln "Deploying chaincode on global"
+  deployGCC "${2}" "${3}" "${4}" "${5}" "${6}"
 fi

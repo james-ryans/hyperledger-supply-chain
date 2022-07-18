@@ -37,6 +37,24 @@ func (r *riceSackRepository) FindAll(channelID, stockpileID string) ([]*model.Ri
 	return riceSacks, nil
 }
 
+func (r *riceSackRepository) FindAllByRiceOrderID(channelID, riceOrderID string) ([]*model.RiceSack, error) {
+	network := r.Fabric.GetNetwork(channelID)
+	contract := network.GetContract(os.Getenv("FABRIC_CHAINCODE_NAME"))
+
+	riceSacksJSON, err := contract.EvaluateTransaction("RiceSackContract:FindAllByRiceOrderId", riceOrderID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to evaluate transaction %w", err)
+	}
+
+	var riceSacks []*model.RiceSack
+	err = json.Unmarshal(riceSacksJSON, &riceSacks)
+	if err != nil {
+		return nil, fmt.Errorf("failed to parsed result: %w", err)
+	}
+
+	return riceSacks, nil
+}
+
 func (r *riceSackRepository) FindByID(channelID, ID string) (*model.RiceSack, error) {
 	network := r.Fabric.GetNetwork(channelID)
 	contract := network.GetContract(os.Getenv("FABRIC_CHAINCODE_NAME"))

@@ -22,7 +22,7 @@ func main() {
 	flag.Parse()
 
 	var err error
-	if asOrg != nil {
+	if *asOrg != "" {
 		err = godotenv.Load(fmt.Sprintf(".env.%s", *asOrg))
 	} else {
 		err = godotenv.Load(".env")

@@ -6,6 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/meneketehe/hehe/app/handler/middleware"
 	"github.com/meneketehe/hehe/app/model"
+	usermodel "github.com/meneketehe/hehe/app/model/user"
 )
 
 type Handler struct {
@@ -23,6 +24,7 @@ type Handler struct {
 	seedOrderService      model.SeedOrderService
 	riceGrainOrderService model.RiceGrainOrderService
 	riceOrderService      model.RiceOrderService
+	userRiceSackService   usermodel.RiceSackService
 	MaxBodyBytes          int64
 }
 
@@ -42,6 +44,7 @@ type Config struct {
 	SeedOrderService      model.SeedOrderService
 	RiceGrainOrderService model.RiceGrainOrderService
 	RiceOrderService      model.RiceOrderService
+	UserRiceSackService   usermodel.RiceSackService
 	MaxBodyBytes          int64
 }
 
@@ -61,6 +64,7 @@ func NewHandler(c *Config) {
 		seedOrderService:      c.SeedOrderService,
 		riceGrainOrderService: c.RiceGrainOrderService,
 		riceOrderService:      c.RiceOrderService,
+		userRiceSackService:   c.UserRiceSackService,
 		MaxBodyBytes:          c.MaxBodyBytes,
 	}
 
@@ -71,6 +75,10 @@ func NewHandler(c *Config) {
 			"data":    nil,
 		})
 	})
+
+	ursg := c.R.Group("api/users/rice-sacks")
+	ursg.Use(middleware.AuthUser())
+	ursg.GET("/:code", h.GetRiceSack)
 
 	ag := c.R.Group("api/organizations/account")
 	ag.Use(middleware.AuthOrganization())

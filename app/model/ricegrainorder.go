@@ -113,6 +113,7 @@ type RiceGrainOrderRepository interface {
 	FindAllIncoming(channelID, sellerID string) ([]*RiceGrainOrder, error)
 	FindAllAcceptedIncoming(channelID, sellerID string) ([]*RiceGrainOrder, error)
 	FindByID(channelID, ID string) (*RiceGrainOrder, error)
+	FindByRiceOrderID(channelID, riceOrderID string) (*RiceGrainOrder, error)
 	Create(channelID string, riceOrder *RiceGrainOrder) error
 	Accept(channelID, ID string, acceptedAt time.Time) error
 	Reject(channelID, ID string, rejectedAt time.Time, reason string) error

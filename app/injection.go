@@ -9,7 +9,9 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/meneketehe/hehe/app/handler"
 	repository "github.com/meneketehe/hehe/app/repository/organization"
+	userrepository "github.com/meneketehe/hehe/app/repository/user"
 	service "github.com/meneketehe/hehe/app/service/organization"
+	userservice "github.com/meneketehe/hehe/app/service/user"
 	cors "github.com/rs/cors/wrapper/gin"
 )
 
@@ -75,6 +77,22 @@ func inject(d *dataSources) (*gin.Engine, error) {
 		RiceOrderRepository: riceOrderRepository,
 	})
 
+	userRiceSackRepository := userrepository.NewRiceSackRepository(d.Gateway)
+	userRiceSackService := userservice.NewRiceSackService(&userservice.RiceSackServiceConfig{
+		SupplierRepository:       supplierRepository,
+		ProducerRepository:       producerRepository,
+		ManufacturerRepository:   manufacturerRepository,
+		DistributorRepository:    distributorRepository,
+		RetailerRepository:       retailerRepository,
+		SeedRepository:           seedRepository,
+		RiceGrainRepository:      riceGrainRepository,
+		RiceRepository:           riceRepository,
+		SeedOrderRepository:      seedOrderRepository,
+		RiceGrainOrderRepository: riceGrainOrderRepository,
+		RiceOrderRepository:      riceOrderRepository,
+		RiceSackRepository:       userRiceSackRepository,
+	})
+
 	router := gin.Default()
 
 	origin := os.Getenv("CORS_ORIGIN")
@@ -107,6 +125,7 @@ func inject(d *dataSources) (*gin.Engine, error) {
 		SeedOrderService:      seedOrderService,
 		RiceGrainOrderService: riceGrainOrderService,
 		RiceOrderService:      riceOrderService,
+		UserRiceSackService:   userRiceSackService,
 		MaxBodyBytes:          mbb,
 	})
 
