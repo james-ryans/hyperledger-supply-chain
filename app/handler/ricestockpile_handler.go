@@ -43,10 +43,20 @@ func (h *Handler) GetRiceStockpile(c *gin.Context) {
 		return
 	}
 
+	sacks, err := h.riceSackService.GetAllRiceSack(channelID, pile.ID)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{
+			"success": false,
+			"message": err.Error(),
+			"data":    nil,
+		})
+		return
+	}
+
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,
 		"message": nil,
-		"data":    response.RiceStockpileResponse(pile),
+		"data":    response.RiceStockpileResponse(pile, sacks),
 	})
 }
 

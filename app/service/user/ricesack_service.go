@@ -1,6 +1,9 @@
 package userservice
 
 import (
+	"encoding/json"
+	"log"
+
 	"github.com/meneketehe/hehe/app/model"
 	usermodel "github.com/meneketehe/hehe/app/model/user"
 )
@@ -144,10 +147,16 @@ func (s *riceSackService) TraceRiceSack(channelID string, riceSack *model.RiceSa
 	}
 
 	userRiceSack := &usermodel.RiceSack{
-		Code:     riceSack.Code,
-		Comments: []usermodel.Comment{},
-		Traces:   traces,
+		Code:   riceSack.Code,
+		RiceID: rice0.ID,
+		Traces: traces,
 	}
+
+	JSON, err := json.Marshal(userRiceSack)
+	if err != nil {
+		panic(err)
+	}
+	log.Printf("%s\n", JSON)
 
 	return userRiceSack, nil
 }

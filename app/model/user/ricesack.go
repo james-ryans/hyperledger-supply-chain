@@ -8,9 +8,9 @@ import (
 )
 
 type RiceSack struct {
-	Code     string    `json:"code"`
-	Comments []Comment `json:"comments"`
-	Traces   []Trace   `json:"traces"`
+	Code   string  `json:"code"`
+	RiceID string  `json:"rice_id"`
+	Traces []Trace `json:"traces"`
 }
 
 type RiceSackService interface {
@@ -37,9 +37,9 @@ func UnmarshalRiceSack(riceSackJSON []byte) (*RiceSack, error) {
 		return nil, fmt.Errorf("failed to unmarshal code")
 	}
 
-	err = json.Unmarshal(riceSackObject["comments"], &riceSack.Comments)
+	err = json.Unmarshal(riceSackObject["rice_id"], &riceSack.RiceID)
 	if err != nil {
-		return nil, fmt.Errorf("failed to unmarshal comments")
+		return nil, fmt.Errorf("failed to unmarshal rice_id")
 	}
 
 	tracesArray, err := unmarshalArray(riceSackObject["traces"])

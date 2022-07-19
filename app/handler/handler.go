@@ -24,8 +24,10 @@ type Handler struct {
 	seedOrderService      model.SeedOrderService
 	riceGrainOrderService model.RiceGrainOrderService
 	riceOrderService      model.RiceOrderService
+	userService           usermodel.UserService
 	userRiceSackService   usermodel.RiceSackService
 	scanHistoryService    usermodel.ScanHistoryService
+	commentService        usermodel.CommentService
 	MaxBodyBytes          int64
 }
 
@@ -45,8 +47,10 @@ type Config struct {
 	SeedOrderService      model.SeedOrderService
 	RiceGrainOrderService model.RiceGrainOrderService
 	RiceOrderService      model.RiceOrderService
+	UserService           usermodel.UserService
 	UserRiceSackService   usermodel.RiceSackService
 	ScanHistoryService    usermodel.ScanHistoryService
+	CommentService        usermodel.CommentService
 	MaxBodyBytes          int64
 }
 
@@ -66,8 +70,10 @@ func NewHandler(c *Config) {
 		seedOrderService:      c.SeedOrderService,
 		riceGrainOrderService: c.RiceGrainOrderService,
 		riceOrderService:      c.RiceOrderService,
+		userService:           c.UserService,
 		userRiceSackService:   c.UserRiceSackService,
 		scanHistoryService:    c.ScanHistoryService,
+		commentService:        c.CommentService,
 		MaxBodyBytes:          c.MaxBodyBytes,
 	}
 
@@ -79,6 +85,11 @@ func NewHandler(c *Config) {
 		})
 	})
 
+	uag := c.R.Group("api/users/account")
+	uag.Use(middleware.AuthUser())
+	uag.GET("", h.GetMeAsUser)
+	uag.POST("/init", h.InitUser)
+
 	ursg := c.R.Group("api/users/rice-sacks")
 	ursg.Use(middleware.AuthUser())
 	ursg.GET("/:code", h.GetRiceSack)
@@ -86,6 +97,11 @@ func NewHandler(c *Config) {
 	ushg := c.R.Group("api/users/scan-histories")
 	ushg.Use(middleware.AuthUser())
 	ushg.GET("", h.GetScanHistories)
+
+	ucg := c.R.Group("api/users/comments")
+	ucg.GET("/:riceID", h.GetComments)
+	ucg.Use(middleware.AuthUser())
+	ucg.POST("/:riceID", h.WriteComment)
 
 	ag := c.R.Group("api/organizations/account")
 	ag.Use(middleware.AuthOrganization())
