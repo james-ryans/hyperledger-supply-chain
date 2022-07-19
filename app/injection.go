@@ -78,6 +78,8 @@ func inject(d *dataSources) (*gin.Engine, error) {
 	})
 
 	userRiceSackRepository := userrepository.NewRiceSackRepository(d.Gateway)
+	scanHistoryRepository := userrepository.NewScanHistoryRepository(d.Gateway)
+
 	userRiceSackService := userservice.NewRiceSackService(&userservice.RiceSackServiceConfig{
 		SupplierRepository:       supplierRepository,
 		ProducerRepository:       producerRepository,
@@ -91,6 +93,9 @@ func inject(d *dataSources) (*gin.Engine, error) {
 		RiceGrainOrderRepository: riceGrainOrderRepository,
 		RiceOrderRepository:      riceOrderRepository,
 		RiceSackRepository:       userRiceSackRepository,
+	})
+	scanHistoryService := userservice.NewScanHistoryService(&userservice.ScanHistoryServiceConfig{
+		ScanHistoryRepository: scanHistoryRepository,
 	})
 
 	router := gin.Default()
@@ -126,6 +131,7 @@ func inject(d *dataSources) (*gin.Engine, error) {
 		RiceGrainOrderService: riceGrainOrderService,
 		RiceOrderService:      riceOrderService,
 		UserRiceSackService:   userRiceSackService,
+		ScanHistoryService:    scanHistoryService,
 		MaxBodyBytes:          mbb,
 	})
 

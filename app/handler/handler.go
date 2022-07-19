@@ -25,6 +25,7 @@ type Handler struct {
 	riceGrainOrderService model.RiceGrainOrderService
 	riceOrderService      model.RiceOrderService
 	userRiceSackService   usermodel.RiceSackService
+	scanHistoryService    usermodel.ScanHistoryService
 	MaxBodyBytes          int64
 }
 
@@ -45,6 +46,7 @@ type Config struct {
 	RiceGrainOrderService model.RiceGrainOrderService
 	RiceOrderService      model.RiceOrderService
 	UserRiceSackService   usermodel.RiceSackService
+	ScanHistoryService    usermodel.ScanHistoryService
 	MaxBodyBytes          int64
 }
 
@@ -65,6 +67,7 @@ func NewHandler(c *Config) {
 		riceGrainOrderService: c.RiceGrainOrderService,
 		riceOrderService:      c.RiceOrderService,
 		userRiceSackService:   c.UserRiceSackService,
+		scanHistoryService:    c.ScanHistoryService,
 		MaxBodyBytes:          c.MaxBodyBytes,
 	}
 
@@ -79,6 +82,10 @@ func NewHandler(c *Config) {
 	ursg := c.R.Group("api/users/rice-sacks")
 	ursg.Use(middleware.AuthUser())
 	ursg.GET("/:code", h.GetRiceSack)
+
+	ushg := c.R.Group("api/users/scan-histories")
+	ushg.Use(middleware.AuthUser())
+	ushg.GET("", h.GetScanHistories)
 
 	ag := c.R.Group("api/organizations/account")
 	ag.Use(middleware.AuthOrganization())

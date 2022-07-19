@@ -3,7 +3,9 @@ package contract
 import (
 	"encoding/json"
 	"fmt"
+	"strings"
 
+	"github.com/google/uuid"
 	"github.com/hyperledger/fabric-contract-api-go/contractapi"
 	usermodel "github.com/meneketehe/hehe/app/model/user"
 )
@@ -24,7 +26,7 @@ func NewRiceSackDoc(riceSack usermodel.RiceSack) RiceSackDoc {
 	}
 }
 
-func (c *RiceSackContract) FindByCode(ctx contractapi.TransactionContextInterface, code string) (string, error) {
+func (c *RiceSackContract) FindByCode(ctx contractapi.TransactionContextInterface, userId, code string) (string, error) {
 	sack, err := getRiceSack(ctx, code)
 	if err != nil {
 		return "", err
@@ -36,6 +38,32 @@ func (c *RiceSackContract) FindByCode(ctx contractapi.TransactionContextInterfac
 	sackJSON, err := json.Marshal(sack)
 	if err != nil {
 		return "", fmt.Errorf("failed to parse result: %w", err)
+	}
+
+	id, err := newDeterministicUuid(fmt.Sprintf("%s", ctx.GetStub().GetTxID()))
+	if err != nil {
+		return "", err
+	}
+
+	scanAt, err := ctx.GetStub().GetTxTimestamp()
+	if err != nil {
+		return "", err
+	}
+
+	scanHistoryDoc := NewScanHistoryDoc(usermodel.ScanHistory{
+		ID:           id,
+		UserID:       userId,
+		RiceSackCode: sack.Code,
+		ScanAt:       scanAt.AsTime(),
+	})
+	scanHistoryDocJSON, err := json.Marshal(scanHistoryDoc)
+	if err != nil {
+		return "", err
+	}
+
+	err = ctx.GetStub().PutState(scanHistoryDoc.ID, scanHistoryDocJSON)
+	if err != nil {
+		return "", err
 	}
 
 	return fmt.Sprintf("%s", sackJSON), nil
@@ -71,4 +99,13 @@ func getRiceSack(ctx contractapi.TransactionContextInterface, code string) (*use
 	}
 
 	return riceSack, nil
+}
+
+func newDeterministicUuid(input string) (string, error) {
+	id, err := uuid.NewRandomFromReader(strings.NewReader(fmt.Sprintf("%16s", input)))
+	if err != nil {
+		return "", err
+	}
+
+	return id.String(), nil
 }

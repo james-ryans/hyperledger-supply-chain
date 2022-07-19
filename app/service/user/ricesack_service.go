@@ -52,8 +52,8 @@ func NewRiceSackService(c *RiceSackServiceConfig) usermodel.RiceSackService {
 	}
 }
 
-func (s *riceSackService) FindRiceSackByCode(code string) (*usermodel.RiceSack, error) {
-	return s.RiceSackRepository.FindByCode(code)
+func (s *riceSackService) GetRiceSackByCode(userID, code string) (*usermodel.RiceSack, error) {
+	return s.RiceSackRepository.FindByCode(userID, code)
 }
 
 func (s *riceSackService) CreateRiceSack(riceSack *usermodel.RiceSack) (*usermodel.RiceSack, error) {

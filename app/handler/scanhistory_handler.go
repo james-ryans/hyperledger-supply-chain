@@ -7,11 +7,10 @@ import (
 	userresponse "github.com/meneketehe/hehe/app/response/user"
 )
 
-func (h *Handler) GetRiceSack(c *gin.Context) {
+func (h *Handler) GetScanHistories(c *gin.Context) {
 	userID := c.MustGet("userID").(string)
-	code := c.Param("code")
 
-	riceSack, err := h.userRiceSackService.GetRiceSackByCode(userID, code)
+	scanHistories, err := h.scanHistoryService.GetAllScanHistories(userID)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"success": false,
@@ -24,6 +23,6 @@ func (h *Handler) GetRiceSack(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,
 		"message": nil,
-		"data":    userresponse.RiceSackResponse(riceSack),
+		"data":    userresponse.ScanHistoriesResponse(scanHistories),
 	})
 }

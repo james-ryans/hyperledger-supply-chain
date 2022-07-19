@@ -9,8 +9,12 @@ import (
 
 func main() {
 	riceSackContract := &contract.RiceSackContract{}
+	scanHistoryContract := &contract.ScanHistoryContract{}
 
-	chaincode, err := contractapi.NewChaincode(riceSackContract)
+	chaincode, err := contractapi.NewChaincode(
+		riceSackContract,
+		scanHistoryContract,
+	)
 	if err != nil {
 		log.Panicf("Error creating chaincode: %v", err)
 	}

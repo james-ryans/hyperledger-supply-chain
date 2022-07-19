@@ -14,13 +14,13 @@ type RiceSack struct {
 }
 
 type RiceSackService interface {
-	FindRiceSackByCode(code string) (*RiceSack, error)
+	GetRiceSackByCode(userID, code string) (*RiceSack, error)
 	CreateRiceSack(sack *RiceSack) (*RiceSack, error)
 	TraceRiceSack(channelID string, riceSack *model.RiceSack) (*RiceSack, error)
 }
 
 type RiceSackRepository interface {
-	FindByCode(code string) (*RiceSack, error)
+	FindByCode(userID, code string) (*RiceSack, error)
 	Create(sack *RiceSack) error
 }
 

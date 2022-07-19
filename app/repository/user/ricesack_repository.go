@@ -19,13 +19,13 @@ func NewRiceSackRepository(fabric *client.Gateway) usermodel.RiceSackRepository 
 	}
 }
 
-func (r *riceSackRepository) FindByCode(code string) (*usermodel.RiceSack, error) {
+func (r *riceSackRepository) FindByCode(userID, code string) (*usermodel.RiceSack, error) {
 	network := r.Fabric.GetNetwork(os.Getenv("FABRIC_GLOBALCHANNEL_NAME"))
 	contract := network.GetContract(os.Getenv("FABRIC_GLOBALCHAINCODE_NAME"))
 
-	riceSackJSON, err := contract.EvaluateTransaction("RiceSackContract:FindByCode", code)
+	riceSackJSON, err := contract.SubmitTransaction("RiceSackContract:FindByCode", userID, code)
 	if err != nil {
-		return nil, fmt.Errorf("failed to evaluate transaction %w", err)
+		return nil, fmt.Errorf("failed to submit transaction: %w", err)
 	}
 
 	riceSack, err := usermodel.UnmarshalRiceSack(riceSackJSON)
