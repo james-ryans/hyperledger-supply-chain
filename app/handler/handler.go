@@ -87,7 +87,7 @@ func NewHandler(c *Config) {
 
 	uag := c.R.Group("api/users/account")
 	uag.Use(middleware.AuthUser())
-	uag.GET("", h.GetMeAsUser)
+	uag.GET("/me", h.GetMeAsUser)
 	uag.POST("/init", h.InitUser)
 
 	ursg := c.R.Group("api/users/rice-sacks")
