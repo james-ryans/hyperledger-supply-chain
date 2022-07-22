@@ -46,7 +46,23 @@ func (r *userRepository) Create(user *usermodel.User) error {
 		user.ID,
 		user.Name,
 		user.Email,
-		user.Password,
+	)
+	if err != nil {
+		return fmt.Errorf("failed to submit transanction: %w", err)
+	}
+
+	return nil
+}
+
+func (r *userRepository) Update(user *usermodel.User) error {
+	network := r.Fabric.GetNetwork(os.Getenv("FABRIC_GLOBALCHANNEL_NAME"))
+	contract := network.GetContract(os.Getenv("FABRIC_GLOBALCHAINCODE_NAME"))
+
+	_, err := contract.SubmitTransaction(
+		"UserContract:Update",
+		user.ID,
+		user.Name,
+		user.Email,
 	)
 	if err != nil {
 		return fmt.Errorf("failed to submit transanction: %w", err)

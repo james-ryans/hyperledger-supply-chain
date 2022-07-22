@@ -2,7 +2,6 @@ package userservice
 
 import (
 	usermodel "github.com/meneketehe/hehe/app/model/user"
-	"golang.org/x/crypto/bcrypt"
 )
 
 type userService struct {
@@ -31,7 +30,10 @@ func (s *userService) CreateUser(user *usermodel.User) (*usermodel.User, error) 
 	return user, nil
 }
 
-func (s *userService) HashPassword(password string) (string, error) {
-	bytes, err := bcrypt.GenerateFromPassword([]byte(password), 14)
-	return string(bytes), err
+func (s *userService) UpdateUser(user *usermodel.User) (*usermodel.User, error) {
+	if err := s.UserRepository.Update(user); err != nil {
+		return nil, err
+	}
+
+	return user, nil
 }

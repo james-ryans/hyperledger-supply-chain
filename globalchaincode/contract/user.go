@@ -36,13 +36,12 @@ func (c *UserContract) FindById(ctx contractapi.TransactionContextInterface, id 
 	return user, nil
 }
 
-func (c *UserContract) Create(ctx contractapi.TransactionContextInterface, id, name, email, password string) error {
+func (c *UserContract) Create(ctx contractapi.TransactionContextInterface, id, name, email string) error {
 	userDoc := NewUserDoc(
 		usermodel.User{
 			ID:            id,
 			Name:          name,
 			Email:         email,
-			Password:      password,
 			ScanHistories: []usermodel.ScanHistory{},
 		},
 	)
@@ -52,6 +51,23 @@ func (c *UserContract) Create(ctx contractapi.TransactionContextInterface, id, n
 	}
 
 	return ctx.GetStub().PutState(id, userDocJSON)
+}
+
+func (c *UserContract) Update(ctx contractapi.TransactionContextInterface, id, name, email string) error {
+	user, err := getUser(ctx, id)
+	if err != nil {
+		return fmt.Errorf("user %s does not exist", id)
+	}
+
+	userDoc := NewUserDoc(*user)
+	userDoc.Name = name
+	userDoc.Email = email
+	userDocJSON, err := json.Marshal(userDoc)
+	if err != nil {
+		return err
+	}
+
+	return ctx.GetStub().PutState(userDoc.ID, userDocJSON)
 }
 
 func getUser(ctx contractapi.TransactionContextInterface, id string) (*usermodel.User, error) {

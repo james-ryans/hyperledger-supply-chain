@@ -3,9 +3,13 @@ package main
 import (
 	"fmt"
 	"log"
+	"net/http"
 	"os"
 	"strconv"
+	"strings"
 
+	"github.com/gin-contrib/sessions"
+	"github.com/gin-contrib/sessions/cookie"
 	"github.com/gin-gonic/gin"
 	"github.com/meneketehe/hehe/app/handler"
 	repository "github.com/meneketehe/hehe/app/repository/organization"
@@ -77,11 +81,15 @@ func inject(d *dataSources) (*gin.Engine, error) {
 		RiceOrderRepository: riceOrderRepository,
 	})
 
+	userAccountRepository := userrepository.NewUserAccountRepository(d.Couch)
 	userRepository := userrepository.NewUserRepository(d.Gateway)
 	userRiceSackRepository := userrepository.NewRiceSackRepository(d.Gateway)
 	scanHistoryRepository := userrepository.NewScanHistoryRepository(d.Gateway)
 	commentRepository := userrepository.NewCommentRepository(d.Gateway)
 
+	userAccountService := userservice.NewUserAccountService(&userservice.UserAccountServiceConfig{
+		UserAccountRepository: userAccountRepository,
+	})
 	userService := userservice.NewUserService(&userservice.UserServiceConfig{
 		UserRepository: userRepository,
 	})
@@ -108,13 +116,29 @@ func inject(d *dataSources) (*gin.Engine, error) {
 
 	router := gin.Default()
 
-	origin := os.Getenv("CORS_ORIGIN")
+	origin := strings.Split(os.Getenv("CORS_ORIGIN"), ",")
+	log.Printf("Allow CORS to: %s", origin)
 	c := cors.New(cors.Options{
-		AllowedOrigins:   []string{origin},
+		AllowedOrigins:   origin,
 		AllowCredentials: true,
-		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE"},
+		AllowedMethods:   []string{"OPTION", "GET", "POST", "PUT", "DELETE"},
 	})
 	router.Use(c)
+
+	secret := os.Getenv("SESSION_SECRET")
+	secure, err := strconv.ParseBool(os.Getenv("SESSION_SECURE"))
+	if err != nil {
+		return nil, err
+	}
+	store := cookie.NewStore([]byte(secret))
+	store.Options(sessions.Options{
+		Path:     "/",
+		MaxAge:   24 * 60 * 60,
+		Secure:   secure,
+		HttpOnly: true,
+		SameSite: http.SameSiteNoneMode,
+	})
+	router.Use(sessions.Sessions(os.Getenv("APP_NAME"), store))
 
 	maxBodyBytes := os.Getenv("MAX_BODY_BYTES")
 	mbb, err := strconv.ParseInt(maxBodyBytes, 0, 64)
@@ -138,6 +162,7 @@ func inject(d *dataSources) (*gin.Engine, error) {
 		SeedOrderService:      seedOrderService,
 		RiceGrainOrderService: riceGrainOrderService,
 		RiceOrderService:      riceOrderService,
+		UserAccountService:    userAccountService,
 		UserService:           userService,
 		UserRiceSackService:   userRiceSackService,
 		ScanHistoryService:    scanHistoryService,

@@ -24,6 +24,7 @@ type Handler struct {
 	seedOrderService      model.SeedOrderService
 	riceGrainOrderService model.RiceGrainOrderService
 	riceOrderService      model.RiceOrderService
+	userAccountService    usermodel.UserAccountService
 	userService           usermodel.UserService
 	userRiceSackService   usermodel.RiceSackService
 	scanHistoryService    usermodel.ScanHistoryService
@@ -47,6 +48,7 @@ type Config struct {
 	SeedOrderService      model.SeedOrderService
 	RiceGrainOrderService model.RiceGrainOrderService
 	RiceOrderService      model.RiceOrderService
+	UserAccountService    usermodel.UserAccountService
 	UserService           usermodel.UserService
 	UserRiceSackService   usermodel.RiceSackService
 	ScanHistoryService    usermodel.ScanHistoryService
@@ -70,6 +72,7 @@ func NewHandler(c *Config) {
 		seedOrderService:      c.SeedOrderService,
 		riceGrainOrderService: c.RiceGrainOrderService,
 		riceOrderService:      c.RiceOrderService,
+		userAccountService:    c.UserAccountService,
 		userService:           c.UserService,
 		userRiceSackService:   c.UserRiceSackService,
 		scanHistoryService:    c.ScanHistoryService,
@@ -86,9 +89,13 @@ func NewHandler(c *Config) {
 	})
 
 	uag := c.R.Group("api/users/account")
+	uag.POST("/register", h.RegisterUser)
+	uag.POST("/login", h.LoginUser)
+	uag.POST("/logout", h.LogoutUser)
+
 	uag.Use(middleware.AuthUser())
 	uag.GET("/me", h.GetMeAsUser)
-	uag.POST("/init", h.InitUser)
+	uag.PUT("/edit-profile", h.EditUserProfile)
 
 	ursg := c.R.Group("api/users/rice-sacks")
 	ursg.Use(middleware.AuthUser())
@@ -161,7 +168,6 @@ func NewHandler(c *Config) {
 	rsg.Use(middleware.AuthOrganization())
 	rsg.GET("", h.GetAllRiceStockpiles)
 	rsg.GET("/:stockID", h.GetRiceStockpile)
-	rsg.GET("/:stockID/rice-sacks", h.GetAllRiceSack)
 	rsg.GET("/rice-sacks/:sackID/print", h.PrintRiceSackQRCode)
 
 	sog := c.R.Group("api/organizations/channels/:channelID/supplier-orders")
