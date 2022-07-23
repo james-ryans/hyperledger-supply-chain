@@ -41,7 +41,7 @@ func (s *organizationAccountService) GetOrganizationAccountByEmail(email string)
 
 func (s *organizationAccountService) Login(email, password string) (*model.OrganizationAccount, error) {
 	account, err := s.OrganizationAccountRepository.FindByEmail(email)
-	if err != nil {
+	if err != nil || account == nil {
 		return nil, fmt.Errorf("invalid email and password combination")
 	}
 
