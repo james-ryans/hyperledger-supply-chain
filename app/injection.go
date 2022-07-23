@@ -22,6 +22,7 @@ import (
 func inject(d *dataSources) (*gin.Engine, error) {
 	log.Println("Injecting services")
 
+	organizationAccountRepository := repository.NewOrganizationAccountRepository(d.Couch)
 	supplierRepository := repository.NewSupplierRepository(d.Gateway)
 	producerRepository := repository.NewProducerRepository(d.Gateway)
 	manufacturerRepository := repository.NewManufacturerRepository(d.Gateway)
@@ -38,6 +39,9 @@ func inject(d *dataSources) (*gin.Engine, error) {
 	riceGrainOrderRepository := repository.NewRiceGrainOrderRepository(d.Gateway)
 	riceOrderRepository := repository.NewRiceOrderRepository(d.Gateway)
 
+	organizationAccountService := service.NewOrganizationAccountService(&service.OrganizationAccountServiceConfig{
+		OrganizationAccountRepository: organizationAccountRepository,
+	})
 	organizationService := service.NewOrganizationService()
 	supplierService := service.NewSupplierService(&service.SupplierServiceConfig{
 		SupplierRepository: supplierRepository,
@@ -147,27 +151,28 @@ func inject(d *dataSources) (*gin.Engine, error) {
 	}
 
 	handler.NewHandler(&handler.Config{
-		R:                     router,
-		OrganizationService:   organizationService,
-		SupplierService:       supplierService,
-		ProducerService:       producerService,
-		ManufacturerService:   manufacturerService,
-		DistributorService:    distributorService,
-		RetailerService:       retailerService,
-		SeedService:           seedService,
-		RiceGrainService:      riceGrainService,
-		RiceService:           riceService,
-		RiceStockpileService:  riceStockpileService,
-		RiceSackService:       riceSackService,
-		SeedOrderService:      seedOrderService,
-		RiceGrainOrderService: riceGrainOrderService,
-		RiceOrderService:      riceOrderService,
-		UserAccountService:    userAccountService,
-		UserService:           userService,
-		UserRiceSackService:   userRiceSackService,
-		ScanHistoryService:    scanHistoryService,
-		CommentService:        commentService,
-		MaxBodyBytes:          mbb,
+		R:                          router,
+		OrganizationAccountService: organizationAccountService,
+		OrganizationService:        organizationService,
+		SupplierService:            supplierService,
+		ProducerService:            producerService,
+		ManufacturerService:        manufacturerService,
+		DistributorService:         distributorService,
+		RetailerService:            retailerService,
+		SeedService:                seedService,
+		RiceGrainService:           riceGrainService,
+		RiceService:                riceService,
+		RiceStockpileService:       riceStockpileService,
+		RiceSackService:            riceSackService,
+		SeedOrderService:           seedOrderService,
+		RiceGrainOrderService:      riceGrainOrderService,
+		RiceOrderService:           riceOrderService,
+		UserAccountService:         userAccountService,
+		UserService:                userService,
+		UserRiceSackService:        userRiceSackService,
+		ScanHistoryService:         scanHistoryService,
+		CommentService:             commentService,
+		MaxBodyBytes:               mbb,
 	})
 
 	return router, nil

@@ -10,74 +10,77 @@ import (
 )
 
 type Handler struct {
-	organizationService   model.OrganizationService
-	supplierService       model.SupplierService
-	producerService       model.ProducerService
-	manufacturerService   model.ManufacturerService
-	distributorService    model.DistributorService
-	retailerService       model.RetailerService
-	seedService           model.SeedService
-	riceGrainService      model.RiceGrainService
-	riceService           model.RiceService
-	riceStockpileService  model.RiceStockpileService
-	riceSackService       model.RiceSackService
-	seedOrderService      model.SeedOrderService
-	riceGrainOrderService model.RiceGrainOrderService
-	riceOrderService      model.RiceOrderService
-	userAccountService    usermodel.UserAccountService
-	userService           usermodel.UserService
-	userRiceSackService   usermodel.RiceSackService
-	scanHistoryService    usermodel.ScanHistoryService
-	commentService        usermodel.CommentService
-	MaxBodyBytes          int64
+	organizationAccountService model.OrganizationAccountService
+	organizationService        model.OrganizationService
+	supplierService            model.SupplierService
+	producerService            model.ProducerService
+	manufacturerService        model.ManufacturerService
+	distributorService         model.DistributorService
+	retailerService            model.RetailerService
+	seedService                model.SeedService
+	riceGrainService           model.RiceGrainService
+	riceService                model.RiceService
+	riceStockpileService       model.RiceStockpileService
+	riceSackService            model.RiceSackService
+	seedOrderService           model.SeedOrderService
+	riceGrainOrderService      model.RiceGrainOrderService
+	riceOrderService           model.RiceOrderService
+	userAccountService         usermodel.UserAccountService
+	userService                usermodel.UserService
+	userRiceSackService        usermodel.RiceSackService
+	scanHistoryService         usermodel.ScanHistoryService
+	commentService             usermodel.CommentService
+	MaxBodyBytes               int64
 }
 
 type Config struct {
-	R                     *gin.Engine
-	OrganizationService   model.OrganizationService
-	SupplierService       model.SupplierService
-	ProducerService       model.ProducerService
-	ManufacturerService   model.ManufacturerService
-	DistributorService    model.DistributorService
-	RetailerService       model.RetailerService
-	SeedService           model.SeedService
-	RiceGrainService      model.RiceGrainService
-	RiceService           model.RiceService
-	RiceStockpileService  model.RiceStockpileService
-	RiceSackService       model.RiceSackService
-	SeedOrderService      model.SeedOrderService
-	RiceGrainOrderService model.RiceGrainOrderService
-	RiceOrderService      model.RiceOrderService
-	UserAccountService    usermodel.UserAccountService
-	UserService           usermodel.UserService
-	UserRiceSackService   usermodel.RiceSackService
-	ScanHistoryService    usermodel.ScanHistoryService
-	CommentService        usermodel.CommentService
-	MaxBodyBytes          int64
+	R                          *gin.Engine
+	OrganizationAccountService model.OrganizationAccountService
+	OrganizationService        model.OrganizationService
+	SupplierService            model.SupplierService
+	ProducerService            model.ProducerService
+	ManufacturerService        model.ManufacturerService
+	DistributorService         model.DistributorService
+	RetailerService            model.RetailerService
+	SeedService                model.SeedService
+	RiceGrainService           model.RiceGrainService
+	RiceService                model.RiceService
+	RiceStockpileService       model.RiceStockpileService
+	RiceSackService            model.RiceSackService
+	SeedOrderService           model.SeedOrderService
+	RiceGrainOrderService      model.RiceGrainOrderService
+	RiceOrderService           model.RiceOrderService
+	UserAccountService         usermodel.UserAccountService
+	UserService                usermodel.UserService
+	UserRiceSackService        usermodel.RiceSackService
+	ScanHistoryService         usermodel.ScanHistoryService
+	CommentService             usermodel.CommentService
+	MaxBodyBytes               int64
 }
 
 func NewHandler(c *Config) {
 	h := &Handler{
-		organizationService:   c.OrganizationService,
-		supplierService:       c.SupplierService,
-		producerService:       c.ProducerService,
-		manufacturerService:   c.ManufacturerService,
-		distributorService:    c.DistributorService,
-		retailerService:       c.RetailerService,
-		seedService:           c.SeedService,
-		riceGrainService:      c.RiceGrainService,
-		riceService:           c.RiceService,
-		riceStockpileService:  c.RiceStockpileService,
-		riceSackService:       c.RiceSackService,
-		seedOrderService:      c.SeedOrderService,
-		riceGrainOrderService: c.RiceGrainOrderService,
-		riceOrderService:      c.RiceOrderService,
-		userAccountService:    c.UserAccountService,
-		userService:           c.UserService,
-		userRiceSackService:   c.UserRiceSackService,
-		scanHistoryService:    c.ScanHistoryService,
-		commentService:        c.CommentService,
-		MaxBodyBytes:          c.MaxBodyBytes,
+		organizationAccountService: c.OrganizationAccountService,
+		organizationService:        c.OrganizationService,
+		supplierService:            c.SupplierService,
+		producerService:            c.ProducerService,
+		manufacturerService:        c.ManufacturerService,
+		distributorService:         c.DistributorService,
+		retailerService:            c.RetailerService,
+		seedService:                c.SeedService,
+		riceGrainService:           c.RiceGrainService,
+		riceService:                c.RiceService,
+		riceStockpileService:       c.RiceStockpileService,
+		riceSackService:            c.RiceSackService,
+		seedOrderService:           c.SeedOrderService,
+		riceGrainOrderService:      c.RiceGrainOrderService,
+		riceOrderService:           c.RiceOrderService,
+		userAccountService:         c.UserAccountService,
+		userService:                c.UserService,
+		userRiceSackService:        c.UserRiceSackService,
+		scanHistoryService:         c.ScanHistoryService,
+		commentService:             c.CommentService,
+		MaxBodyBytes:               c.MaxBodyBytes,
 	}
 
 	c.R.NoRoute(func(c *gin.Context) {
@@ -111,9 +114,11 @@ func NewHandler(c *Config) {
 	ucg.POST("/:riceID", h.WriteComment)
 
 	ag := c.R.Group("api/organizations/account")
+	ag.POST("/login", h.LoginOrganization)
+	ag.POST("/logout", h.LogoutOrganization)
+
 	ag.Use(middleware.AuthOrganization())
 	ag.GET("/me", h.GetMeAsOrganization)
-	ag.POST("/init", h.InitOrganization)
 
 	sug := c.R.Group("api/organizations/channels/:channelID/suppliers")
 	sug.Use(middleware.AuthOrganization())

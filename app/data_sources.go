@@ -8,8 +8,11 @@ import (
 
 	_ "github.com/go-kivik/couchdb/v3"
 	"github.com/go-kivik/kivik/v3"
+	"github.com/google/uuid"
 	"github.com/hyperledger/fabric-gateway/pkg/client"
 	"github.com/meneketehe/hehe/app/fabric"
+	"github.com/meneketehe/hehe/app/model"
+	service "github.com/meneketehe/hehe/app/service/organization"
 )
 
 type dataSources struct {
@@ -43,7 +46,31 @@ func initDS() (*dataSources, error) {
 		return nil, fmt.Errorf("error opening couch db: %w", err)
 	}
 
-	_ = couch.CreateDB(context.TODO(), "users")
+	if os.Getenv("ORG_ROLE") == "superadmin" {
+		_ = couch.CreateDB(context.TODO(), "users")
+	}
+
+	err = couch.CreateDB(context.TODO(), "admins")
+	if err == nil {
+		db := couch.DB(context.TODO(), "admins")
+
+		hashedPassword, err := service.HashPassword(os.Getenv("ORG_PASSWORD"))
+		if err != nil {
+			return nil, fmt.Errorf("error hash password: %v", err)
+		}
+
+		account := model.OrganizationAccount{
+			ID:             uuid.New().String(),
+			Role:           os.Getenv("ORG_ROLE"),
+			OrganizationID: os.Getenv("ORG_ID"),
+			Email:          os.Getenv("ORG_EMAIL"),
+			Password:       hashedPassword,
+		}
+		_, err = db.Put(context.TODO(), account.ID, account)
+		if err != nil {
+			return nil, fmt.Errorf("error seeding admin account: %v", err)
+		}
+	}
 
 	return &dataSources{
 		Gateway: gateway,

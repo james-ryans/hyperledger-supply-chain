@@ -22,7 +22,7 @@ func NewUserAccountService(c *UserAccountServiceConfig) usermodel.UserAccountSer
 	}
 }
 
-func (s userAccountService) GetUserAccountByID(ID string) (*usermodel.UserAccount, error) {
+func (s *userAccountService) GetUserAccountByID(ID string) (*usermodel.UserAccount, error) {
 	account, err := s.UserAccountRepository.FindByID(ID)
 	if err != nil {
 		return nil, err
@@ -31,7 +31,7 @@ func (s userAccountService) GetUserAccountByID(ID string) (*usermodel.UserAccoun
 	return account, nil
 }
 
-func (s userAccountService) GetUserAccountByEmail(email string) (*usermodel.UserAccount, error) {
+func (s *userAccountService) GetUserAccountByEmail(email string) (*usermodel.UserAccount, error) {
 	account, err := s.UserAccountRepository.FindByEmail(email)
 	if err != nil {
 		return nil, err
@@ -40,7 +40,7 @@ func (s userAccountService) GetUserAccountByEmail(email string) (*usermodel.User
 	return account, nil
 }
 
-func (s userAccountService) Register(account *usermodel.UserAccount) (*usermodel.UserAccount, error) {
+func (s *userAccountService) Register(account *usermodel.UserAccount) (*usermodel.UserAccount, error) {
 	hashedPassword, err := HashPassword(account.Password)
 	if err != nil {
 		return nil, err
@@ -52,7 +52,7 @@ func (s userAccountService) Register(account *usermodel.UserAccount) (*usermodel
 	return s.UserAccountRepository.Create(account)
 }
 
-func (s userAccountService) Login(email, password string) (*usermodel.UserAccount, error) {
+func (s *userAccountService) Login(email, password string) (*usermodel.UserAccount, error) {
 	account, err := s.UserAccountRepository.FindByEmail(email)
 	if err != nil {
 		return nil, fmt.Errorf("invalid email and password combination")
@@ -65,7 +65,7 @@ func (s userAccountService) Login(email, password string) (*usermodel.UserAccoun
 	return account, nil
 }
 
-func (s userAccountService) EditProfile(account *usermodel.UserAccount) (*usermodel.UserAccount, error) {
+func (s *userAccountService) EditProfile(account *usermodel.UserAccount) (*usermodel.UserAccount, error) {
 	hashedPassword, err := HashPassword(account.Password)
 	if err != nil {
 		return nil, err

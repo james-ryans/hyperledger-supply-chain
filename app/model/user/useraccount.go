@@ -4,7 +4,7 @@ type UserAccount struct {
 	ID       string `json:"_id"`
 	Rev      string `json:"_rev,omitempty"`
 	Name     string `json:"name"`
-	Email    string `json:"email"`
+	Email    string `json:"emπail"`
 	Password string `json:"password"`
 }
 
