@@ -48,6 +48,7 @@ func initDS() (*dataSources, error) {
 
 	if os.Getenv("ORG_ROLE") == "superadmin" {
 		_ = couch.CreateDB(context.TODO(), "users")
+		_ = couch.CreateDB(context.TODO(), "organizations")
 	}
 
 	err = couch.CreateDB(context.TODO(), "admins")

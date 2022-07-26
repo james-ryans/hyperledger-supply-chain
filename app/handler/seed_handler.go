@@ -54,12 +54,13 @@ func (h *Handler) GetSeed(c *gin.Context) {
 
 func (h *Handler) CreateSeed(c *gin.Context) {
 	orgID := c.MustGet("orgID").(string)
+	role := c.MustGet("role").(string)
 	channelID := c.Param("channelID")
 
-	if me, err := h.organizationService.GetMe(); err != nil || me.Type != "supplier" {
+	if role != "supplier" {
 		c.JSON(http.StatusForbidden, gin.H{
 			"success": false,
-			"message": fmt.Errorf("only supplier role can create seed asset, you are %s", me.Type).Error(),
+			"message": fmt.Errorf("only supplier role can create seed asset, you are %s", role).Error(),
 			"data":    nil,
 		})
 		return

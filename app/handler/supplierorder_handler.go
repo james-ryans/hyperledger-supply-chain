@@ -33,13 +33,14 @@ func (h *Handler) GetAllIncomingSeedOrder(c *gin.Context) {
 
 func (h *Handler) AcceptSeedOrder(c *gin.Context) {
 	orgID := c.MustGet("orgID").(string)
+	role := c.MustGet("role").(string)
 	channelID := c.Param("channelID")
 	orderID := c.Param("orderID")
 
-	if me, err := h.organizationService.GetMe(); err != nil || me.Type != "supplier" {
+	if role != "supplier" {
 		c.JSON(http.StatusForbidden, gin.H{
 			"success": false,
-			"message": fmt.Errorf("only supplier role can accept seed order, you are %s", me.Type).Error(),
+			"message": fmt.Errorf("only supplier role can accept seed order, you are %s", role).Error(),
 			"data":    nil,
 		})
 		return
@@ -83,13 +84,14 @@ func (h *Handler) AcceptSeedOrder(c *gin.Context) {
 
 func (h *Handler) RejectSeedOrder(c *gin.Context) {
 	orgID := c.MustGet("orgID").(string)
+	role := c.MustGet("role").(string)
 	channelID := c.Param("channelID")
 	orderID := c.Param("orderID")
 
-	if me, err := h.organizationService.GetMe(); err != nil || me.Type != "supplier" {
+	if role != "supplier" {
 		c.JSON(http.StatusForbidden, gin.H{
 			"success": false,
-			"message": fmt.Errorf("only supplier role can reject seed order, you are %s", me.Type).Error(),
+			"message": fmt.Errorf("only supplier role can reject seed order, you are %s", role).Error(),
 			"data":    nil,
 		})
 		return
@@ -138,13 +140,14 @@ func (h *Handler) RejectSeedOrder(c *gin.Context) {
 
 func (h *Handler) ShipSeedOrder(c *gin.Context) {
 	orgID := c.MustGet("orgID").(string)
+	role := c.MustGet("role").(string)
 	channelID := c.Param("channelID")
 	orderID := c.Param("orderID")
 
-	if me, err := h.organizationService.GetMe(); err != nil || me.Type != "supplier" {
+	if role != "supplier" {
 		c.JSON(http.StatusForbidden, gin.H{
 			"success": false,
-			"message": fmt.Errorf("only supplier role can ship seed order, you are %s", me.Type).Error(),
+			"message": fmt.Errorf("only supplier role can ship seed order, you are %s", role).Error(),
 			"data":    nil,
 		})
 		return

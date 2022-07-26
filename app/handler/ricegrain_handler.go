@@ -54,12 +54,13 @@ func (h *Handler) GetRiceGrain(c *gin.Context) {
 
 func (h *Handler) CreateRiceGrain(c *gin.Context) {
 	orgID := c.MustGet("orgID").(string)
+	role := c.MustGet("role").(string)
 	channelID := c.Param("channelID")
 
-	if me, err := h.organizationService.GetMe(); err != nil || me.Type != "producer" {
+	if role != "producer" {
 		c.JSON(http.StatusForbidden, gin.H{
 			"success": false,
-			"message": fmt.Errorf("only producer role can create rice grain asset, you are %s", me.Type).Error(),
+			"message": fmt.Errorf("only producer role can create rice grain asset, you are %s", role).Error(),
 			"data":    nil,
 		})
 		return

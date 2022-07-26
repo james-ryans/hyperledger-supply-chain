@@ -54,12 +54,13 @@ func (h *Handler) GetRice(c *gin.Context) {
 
 func (h *Handler) CreateRice(c *gin.Context) {
 	orgID := c.MustGet("orgID").(string)
+	role := c.MustGet("role").(string)
 	channelID := c.Param("channelID")
 
-	if me, err := h.organizationService.GetMe(); err != nil || me.Type != "manufacturer" {
+	if role != "manufacturer" {
 		c.JSON(http.StatusForbidden, gin.H{
 			"success": false,
-			"message": fmt.Errorf("only manufacturer role can create rice asset, you are %s", me.Type).Error(),
+			"message": fmt.Errorf("only manufacturer role can create rice asset, you are %s", role).Error(),
 			"data":    nil,
 		})
 		return

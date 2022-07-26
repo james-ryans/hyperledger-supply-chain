@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
@@ -23,6 +24,7 @@ func inject(d *dataSources) (*gin.Engine, error) {
 	log.Println("Injecting services")
 
 	organizationAccountRepository := repository.NewOrganizationAccountRepository(d.Couch)
+	globalOrganizationRepository := repository.NewGlobalOrganizationRepository(d.Couch)
 	supplierRepository := repository.NewSupplierRepository(d.Gateway)
 	producerRepository := repository.NewProducerRepository(d.Gateway)
 	manufacturerRepository := repository.NewManufacturerRepository(d.Gateway)
@@ -42,7 +44,9 @@ func inject(d *dataSources) (*gin.Engine, error) {
 	organizationAccountService := service.NewOrganizationAccountService(&service.OrganizationAccountServiceConfig{
 		OrganizationAccountRepository: organizationAccountRepository,
 	})
-	organizationService := service.NewOrganizationService()
+	globalOrganizationService := service.NewGlobalOrganizationService(&service.GlobalOrganizationServiceConfig{
+		GlobalOrganizationRepository: globalOrganizationRepository,
+	})
 	supplierService := service.NewSupplierService(&service.SupplierServiceConfig{
 		SupplierRepository: supplierRepository,
 	})
@@ -144,6 +148,15 @@ func inject(d *dataSources) (*gin.Engine, error) {
 	})
 	router.Use(sessions.Sessions(os.Getenv("APP_NAME"), store))
 
+	JSON, _ := json.Marshal(sessions.Options{
+		Path:     "/",
+		MaxAge:   24 * 60 * 60,
+		Secure:   secure,
+		HttpOnly: true,
+		SameSite: http.SameSiteNoneMode,
+	})
+	log.Printf("sessions: %s\n", JSON)
+
 	maxBodyBytes := os.Getenv("MAX_BODY_BYTES")
 	mbb, err := strconv.ParseInt(maxBodyBytes, 0, 64)
 	if err != nil {
@@ -153,7 +166,7 @@ func inject(d *dataSources) (*gin.Engine, error) {
 	handler.NewHandler(&handler.Config{
 		R:                          router,
 		OrganizationAccountService: organizationAccountService,
-		OrganizationService:        organizationService,
+		GlobalOrganizationService:  globalOrganizationService,
 		SupplierService:            supplierService,
 		ProducerService:            producerService,
 		ManufacturerService:        manufacturerService,

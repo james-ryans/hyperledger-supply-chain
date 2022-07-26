@@ -54,7 +54,7 @@ func (s *userAccountService) Register(account *usermodel.UserAccount) (*usermode
 
 func (s *userAccountService) Login(email, password string) (*usermodel.UserAccount, error) {
 	account, err := s.UserAccountRepository.FindByEmail(email)
-	if err != nil {
+	if err != nil || account == nil {
 		return nil, fmt.Errorf("invalid email and password combination")
 	}
 

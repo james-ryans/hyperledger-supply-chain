@@ -56,12 +56,13 @@ func (h *Handler) GetDistributedRiceOrder(c *gin.Context) {
 
 func (h *Handler) CreateDistributedRiceOrder(c *gin.Context) {
 	orgID := c.MustGet("orgID").(string)
+	role := c.MustGet("role").(string)
 	channelID := c.Param("channelID")
 
-	if me, err := h.organizationService.GetMe(); err != nil || me.Type != "retailer" {
+	if role != "retailer" {
 		c.JSON(http.StatusForbidden, gin.H{
 			"success": false,
-			"message": fmt.Errorf("only retailer role can create this order, you are %s", me.Type).Error(),
+			"message": fmt.Errorf("only retailer role can create this order, you are %s", role).Error(),
 			"data":    nil,
 		})
 		return
@@ -126,13 +127,14 @@ func (h *Handler) CreateDistributedRiceOrder(c *gin.Context) {
 
 func (h *Handler) ReceiveDistributedRiceOrder(c *gin.Context) {
 	orgID := c.MustGet("orgID").(string)
+	role := c.MustGet("role").(string)
 	channelID := c.Param("channelID")
 	orderID := c.Param("orderID")
 
-	if me, err := h.organizationService.GetMe(); err != nil || me.Type != "retailer" {
+	if role != "retailer" {
 		c.JSON(http.StatusForbidden, gin.H{
 			"success": false,
-			"message": fmt.Errorf("only retailer role can receive distribution of rice order, you are %s", me.Type).Error(),
+			"message": fmt.Errorf("only retailer role can receive distribution of rice order, you are %s", role).Error(),
 			"data":    nil,
 		})
 		return

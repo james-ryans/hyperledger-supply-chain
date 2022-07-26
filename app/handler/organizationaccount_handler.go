@@ -39,8 +39,6 @@ func (h *Handler) LoginOrganization(c *gin.Context) {
 	}
 	req.Sanitize()
 
-	log.Printf("%s %s\n", req.Email, req.Password)
-
 	account, err := h.organizationAccountService.Login(req.Email, req.Password)
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{
@@ -54,6 +52,7 @@ func (h *Handler) LoginOrganization(c *gin.Context) {
 	session := sessions.Default(c)
 	session.Set("adminId", account.ID)
 	session.Set("orgId", account.OrganizationID)
+	session.Set("role", account.Role)
 	if err := session.Save(); err != nil {
 		log.Printf("Error setting the session: %v\n", err.Error())
 	}
@@ -68,10 +67,12 @@ func (h *Handler) LoginOrganization(c *gin.Context) {
 func (h *Handler) LogoutOrganization(c *gin.Context) {
 	c.Set("adminID", nil)
 	c.Set("orgID", nil)
+	c.Set("role", nil)
 
 	session := sessions.Default(c)
 	session.Set("adminId", "")
 	session.Set("orgId", "")
+	session.Set("role", "")
 	session.Clear()
 	session.Options(sessions.Options{Path: "/", MaxAge: -1})
 	if err := session.Save(); err != nil {
