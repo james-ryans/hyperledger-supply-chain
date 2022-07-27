@@ -12,6 +12,7 @@ import (
 type Handler struct {
 	organizationAccountService model.OrganizationAccountService
 	globalOrganizationService  model.GlobalOrganizationService
+	globalChannelService       model.GlobalChannelService
 	supplierService            model.SupplierService
 	producerService            model.ProducerService
 	manufacturerService        model.ManufacturerService
@@ -37,6 +38,7 @@ type Config struct {
 	R                          *gin.Engine
 	OrganizationAccountService model.OrganizationAccountService
 	GlobalOrganizationService  model.GlobalOrganizationService
+	GlobalChannelService       model.GlobalChannelService
 	SupplierService            model.SupplierService
 	ProducerService            model.ProducerService
 	ManufacturerService        model.ManufacturerService
@@ -62,6 +64,7 @@ func NewHandler(c *Config) {
 	h := &Handler{
 		organizationAccountService: c.OrganizationAccountService,
 		globalOrganizationService:  c.GlobalOrganizationService,
+		globalChannelService:       c.GlobalChannelService,
 		supplierService:            c.SupplierService,
 		producerService:            c.ProducerService,
 		manufacturerService:        c.ManufacturerService,
@@ -125,6 +128,12 @@ func NewHandler(c *Config) {
 	osg.GET("", h.GetAllOrganizations)
 	osg.GET("/:ID", h.GetOrganization)
 	osg.POST("", h.CreateOrganization)
+
+	csg := c.R.Group("api/organizations/channels")
+	csg.Use(middleware.AuthOrganization(), middleware.SuperadminRole())
+	csg.GET("", h.GetAllChannels)
+	csg.GET("/:channelID", h.GetChannel)
+	csg.POST("", h.CreateChannel)
 
 	sug := c.R.Group("api/organizations/channels/:channelID/suppliers")
 	sug.Use(middleware.AuthOrganization())

@@ -25,6 +25,8 @@ func inject(d *dataSources) (*gin.Engine, error) {
 
 	organizationAccountRepository := repository.NewOrganizationAccountRepository(d.Couch)
 	globalOrganizationRepository := repository.NewGlobalOrganizationRepository(d.Couch)
+	globalChannelRepository := repository.NewGlobalChannelRepository(d.Couch)
+
 	supplierRepository := repository.NewSupplierRepository(d.Gateway)
 	producerRepository := repository.NewProducerRepository(d.Gateway)
 	manufacturerRepository := repository.NewManufacturerRepository(d.Gateway)
@@ -47,6 +49,10 @@ func inject(d *dataSources) (*gin.Engine, error) {
 	globalOrganizationService := service.NewGlobalOrganizationService(&service.GlobalOrganizationServiceConfig{
 		GlobalOrganizationRepository: globalOrganizationRepository,
 	})
+	globalChannelService := service.NewGlobalChannelService(&service.GlobalChannelServiceConfig{
+		GlobalChannelRepository: globalChannelRepository,
+	})
+
 	supplierService := service.NewSupplierService(&service.SupplierServiceConfig{
 		SupplierRepository: supplierRepository,
 	})
@@ -167,6 +173,7 @@ func inject(d *dataSources) (*gin.Engine, error) {
 		R:                          router,
 		OrganizationAccountService: organizationAccountService,
 		GlobalOrganizationService:  globalOrganizationService,
+		GlobalChannelService:       globalChannelService,
 		SupplierService:            supplierService,
 		ProducerService:            producerService,
 		ManufacturerService:        manufacturerService,

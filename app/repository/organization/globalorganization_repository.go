@@ -18,12 +18,44 @@ func NewGlobalOrganizationRepository(couch *kivik.Client) model.GlobalOrganizati
 	}
 }
 
-func (r *globalOrganizationRepository) FindAll() ([]*model.GlobalOrganization, error) {
+func (r *globalOrganizationRepository) FindAll(filters map[string]string) ([]*model.GlobalOrganization, error) {
 	db := r.Couch.DB(context.TODO(), "organizations")
 	row, err := db.Find(
 		context.TODO(),
 		gin.H{
-			"selector": gin.H{},
+			"selector": filters,
+		},
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	orgs := make([]*model.GlobalOrganization, 0)
+	for row.Next() {
+		var org model.GlobalOrganization
+		if err := row.ScanDoc(&org); err != nil {
+			return nil, err
+		}
+
+		orgs = append(orgs, &org)
+	}
+	if row.Err() != nil {
+		return nil, row.Err()
+	}
+
+	return orgs, nil
+}
+
+func (r *globalOrganizationRepository) FindByIDs(IDs []string) ([]*model.GlobalOrganization, error) {
+	db := r.Couch.DB(context.TODO(), "organizations")
+	row, err := db.Find(
+		context.TODO(),
+		gin.H{
+			"selector": gin.H{
+				"_id": gin.H{
+					"$in": IDs,
+				},
+			},
 		},
 	)
 	if err != nil {

@@ -11,7 +11,12 @@ import (
 )
 
 func (h *Handler) GetAllOrganizations(c *gin.Context) {
-	orgs, err := h.globalOrganizationService.GetAllOrganizations()
+	filters := map[string]string{}
+	if role, exists := c.GetQuery("role"); exists {
+		filters["role"] = role
+	}
+
+	orgs, err := h.globalOrganizationService.GetAllOrganizations(filters)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"success": false,

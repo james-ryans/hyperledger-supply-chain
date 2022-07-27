@@ -13,7 +13,8 @@ type GlobalOrganization struct {
 }
 
 type GlobalOrganizationService interface {
-	GetAllOrganizations() ([]*GlobalOrganization, error)
+	GetAllOrganizations(filters map[string]string) ([]*GlobalOrganization, error)
+	GetOrganizationsByIDs(ID []string) ([]*GlobalOrganization, error)
 	GetOrganization(ID string) (*GlobalOrganization, error)
 	CheckCodeExists(code string) (bool, error)
 	CheckMSPIDExists(MSPID string) (bool, error)
@@ -22,7 +23,8 @@ type GlobalOrganizationService interface {
 }
 
 type GlobalOrganizationRepository interface {
-	FindAll() ([]*GlobalOrganization, error)
+	FindAll(filters map[string]string) ([]*GlobalOrganization, error)
+	FindByIDs(IDs []string) ([]*GlobalOrganization, error)
 	FindByID(ID string) (*GlobalOrganization, error)
 	FindByCode(code string) (*GlobalOrganization, error)
 	FindByMSPID(MSPID string) (*GlobalOrganization, error)

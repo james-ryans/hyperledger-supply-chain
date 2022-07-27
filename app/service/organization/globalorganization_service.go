@@ -19,8 +19,17 @@ func NewGlobalOrganizationService(c *GlobalOrganizationServiceConfig) model.Glob
 	}
 }
 
-func (s *globalOrganizationService) GetAllOrganizations() ([]*model.GlobalOrganization, error) {
-	orgs, err := s.GlobalOrganizationRepository.FindAll()
+func (s *globalOrganizationService) GetAllOrganizations(filters map[string]string) ([]*model.GlobalOrganization, error) {
+	orgs, err := s.GlobalOrganizationRepository.FindAll(filters)
+	if err != nil {
+		return nil, err
+	}
+
+	return orgs, nil
+}
+
+func (s *globalOrganizationService) GetOrganizationsByIDs(IDs []string) ([]*model.GlobalOrganization, error) {
+	orgs, err := s.GlobalOrganizationRepository.FindByIDs(IDs)
 	if err != nil {
 		return nil, err
 	}
