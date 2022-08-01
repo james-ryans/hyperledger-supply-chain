@@ -11,8 +11,11 @@ import (
 )
 
 func (h *Handler) GetRiceGrains(c *gin.Context) {
-	orgID := c.MustGet("orgID").(string)
 	channelID := c.Param("channelID")
+	orgID := c.Query("org_id")
+	if orgID == "" {
+		orgID = c.MustGet("orgID").(string)
+	}
 
 	riceGrains, err := h.riceGrainService.GetAllRiceGrains(channelID, orgID)
 	if err != nil {

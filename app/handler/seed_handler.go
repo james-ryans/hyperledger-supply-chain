@@ -11,8 +11,11 @@ import (
 )
 
 func (h *Handler) GetSeeds(c *gin.Context) {
-	orgID := c.MustGet("orgID").(string)
 	channelID := c.Param("channelID")
+	orgID := c.Query("org_id")
+	if orgID == "" {
+		orgID = c.MustGet("orgID").(string)
+	}
 
 	seeds, err := h.seedService.GetAllSeeds(channelID, orgID)
 	if err != nil {

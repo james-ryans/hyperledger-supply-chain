@@ -9,8 +9,11 @@ import (
 )
 
 func (h *Handler) GetAllRiceStockpiles(c *gin.Context) {
-	orgID := c.MustGet("orgID").(string)
 	channelID := c.Param("channelID")
+	orgID := c.Query("org_id")
+	if orgID == "" {
+		orgID = c.MustGet("orgID").(string)
+	}
 
 	riceStockpiles, err := h.riceStockpileService.GetAllRiceStockpile(channelID, orgID)
 	if err != nil {
