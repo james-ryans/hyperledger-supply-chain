@@ -82,6 +82,7 @@ func (h *Handler) RegisterUser(c *gin.Context) {
 			"message": err.Error(),
 			"data":    nil,
 		})
+		return
 	}
 
 	session := sessions.Default(c)
