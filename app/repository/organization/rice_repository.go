@@ -27,8 +27,8 @@ func (r *riceRepository) FindAll(channelID, orgID string) (*[]model.Rice, error)
 
 	queryString, err := json.Marshal(gin.H{
 		"selector": gin.H{
-			"doc_type":    "ricegrain",
-			"supplier_id": orgID,
+			"doc_type":        "rice",
+			"manufacturer_id": orgID,
 		},
 	})
 	if err != nil {
