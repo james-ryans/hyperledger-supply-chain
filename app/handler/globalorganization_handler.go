@@ -149,7 +149,7 @@ func (h *Handler) CreateOrganization(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,
-		"message": nil,
+		"message": "create organization success",
 		"data":    response.GlobalOrganizationResponse(org),
 	})
 }
