@@ -37,7 +37,7 @@ func bindData(c *gin.Context, req Request) bool {
 
 		c.JSON(http.StatusUnprocessableEntity, gin.H{
 			"success": false,
-			"message": "Data validation error.",
+			"message": "data validation error",
 			"data":    model.ToFieldErrorsResponse(&errors),
 		})
 		return false
