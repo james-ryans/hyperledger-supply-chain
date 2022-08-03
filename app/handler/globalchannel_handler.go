@@ -80,7 +80,7 @@ func (h *Handler) CreateChannel(c *gin.Context) {
 	if exists {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"success": false,
-			"message": fmt.Errorf("organization with %s name already exists", req.Name).Error(),
+			"message": fmt.Errorf("channel with %s name already exists", req.Name).Error(),
 			"data":    nil,
 		})
 		return
