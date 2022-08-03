@@ -262,11 +262,10 @@ func (h *Handler) ShipDistributedRiceOrder(c *gin.Context) {
 		return
 	}
 
-	var req request.ShipRiceOrderRequest
+	var req request.ShipDistributionRiceOrderRequest
 	if ok := bindData(c, &req); !ok {
 		return
 	}
-	req.Sanitize()
 
 	riceOrder, err := h.riceOrderService.GetRiceOrderByID(channelID, orderID)
 	if err != nil {
@@ -297,7 +296,7 @@ func (h *Handler) ShipDistributedRiceOrder(c *gin.Context) {
 		return
 	}
 
-	err = h.riceOrderService.ShipDistributionRiceOrder(channelID, riceOrder, time.Now(), req.Grade, req.MillingDate, req.StorageTemperature, req.StorageHumidity)
+	err = h.riceOrderService.ShipDistributionRiceOrder(channelID, riceOrder, time.Now(), req.StorageTemperature, req.StorageHumidity)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"success": false,

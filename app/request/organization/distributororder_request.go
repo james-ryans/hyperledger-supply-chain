@@ -18,3 +18,15 @@ func (r CreateRiceOrderRequest) Validate() error {
 		validation.Field(&r.Quantity, validation.Required),
 	)
 }
+
+type ShipDistributionRiceOrderRequest struct {
+	StorageTemperature float32 `json:"storage_temperature"`
+	StorageHumidity    float32 `json:"storage_humidity"`
+}
+
+func (r ShipDistributionRiceOrderRequest) Validate() error {
+	return validation.ValidateStruct(&r,
+		validation.Field(&r.StorageTemperature, validation.Required, validation.Min(float64(0)), validation.Max(float64(100))),
+		validation.Field(&r.StorageHumidity, validation.Required, validation.Min(float64(0)), validation.Max(float64(100))),
+	)
+}

@@ -169,7 +169,7 @@ func (r *riceOrderRepository) Ship(channelID string, ID string, shippedAt time.T
 	return nil
 }
 
-func (r *riceOrderRepository) ShipDistribution(channelID string, ID string, shippedAt time.Time, grade string, millingDate time.Time, storageTemperature float32, storageHumidity float32) error {
+func (r *riceOrderRepository) ShipDistribution(channelID string, ID string, shippedAt time.Time, storageTemperature float32, storageHumidity float32) error {
 	network := r.Fabric.GetNetwork(channelID)
 	contract := network.GetContract(os.Getenv("FABRIC_CHAINCODE_NAME"))
 
@@ -177,8 +177,6 @@ func (r *riceOrderRepository) ShipDistribution(channelID string, ID string, ship
 		"RiceOrderContract:ShipDistribution",
 		ID,
 		shippedAt.Format(time.RFC3339),
-		grade,
-		millingDate.Format(time.RFC3339),
 		strconv.FormatFloat(float64(storageTemperature), 'f', -1, 32),
 		strconv.FormatFloat(float64(storageHumidity), 'f', -1, 32),
 	)

@@ -31,6 +31,14 @@ func (r *RiceOrder) Ship(shipAt time.Time, grade string, millingDate time.Time, 
 	}
 }
 
+func (r *RiceOrder) ShipDistribution(shipAt time.Time, storageTemperature float32, storageHumidity float32) {
+	r.Order.Ship(shipAt)
+	r.RiceInstance = &RiceInstance{
+		StorageTemperature: storageTemperature,
+		StorageHumidity:    storageHumidity,
+	}
+}
+
 func (r *RiceInstance) GetGrade() *string {
 	if r == nil {
 		return nil
@@ -69,7 +77,7 @@ type RiceOrderService interface {
 	AcceptDistributionRiceOrder(channelID string, riceOrder *RiceOrder, acceptedAt time.Time) error
 	RejectRiceOrder(channelID string, riceOrder *RiceOrder, rejectedAt time.Time, reason string) error
 	ShipRiceOrder(channelID string, riceOrder *RiceOrder, shippedAt time.Time, grade string, millingDate time.Time, storageTemperature float32, storageHumidity float32) error
-	ShipDistributionRiceOrder(channelID string, riceOrder *RiceOrder, shippedAt time.Time, grade string, millingDate time.Time, storageTemperature float32, storageHumidity float32) error
+	ShipDistributionRiceOrder(channelID string, riceOrder *RiceOrder, shippedAt time.Time, storageTemperature float32, storageHumidity float32) error
 	ReceiveRiceOrder(channelID string, riceOrder *RiceOrder, receivedAt time.Time) error
 	ReceiveDistributionRiceOrder(channelID string, riceOrder *RiceOrder, receivedAt time.Time) error
 }
@@ -84,7 +92,7 @@ type RiceOrderRepository interface {
 	AcceptDistribution(channelID, ID string, acceptedAt time.Time) error
 	Reject(channelID, ID string, rejectedAt time.Time, reason string) error
 	Ship(channelID, ID string, shippedAt time.Time, grade string, millingDate time.Time, storageTemperature float32, storageHumidity float32) error
-	ShipDistribution(channelID, ID string, shippedAt time.Time, grade string, millingDate time.Time, storageTemperature float32, storageHumidity float32) error
+	ShipDistribution(channelID, ID string, shippedAt time.Time, storageTemperature float32, storageHumidity float32) error
 	Receive(channelID, ID string, receivedAt time.Time) error
 	ReceiveDistribution(channelID, ID string, receivedAt time.Time) error
 }
