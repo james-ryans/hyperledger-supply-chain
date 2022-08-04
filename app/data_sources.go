@@ -5,13 +5,14 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"time"
 
 	_ "github.com/go-kivik/couchdb/v3"
 	"github.com/go-kivik/kivik/v3"
-	"github.com/google/uuid"
 	"github.com/hyperledger/fabric-gateway/pkg/client"
 	"github.com/meneketehe/hehe/app/fabric"
 	"github.com/meneketehe/hehe/app/model"
+	"github.com/meneketehe/hehe/app/model/enum"
 	service "github.com/meneketehe/hehe/app/service/organization"
 )
 
@@ -62,11 +63,13 @@ func initDS() (*dataSources, error) {
 		}
 
 		account := model.OrganizationAccount{
-			ID:             uuid.New().String(),
+			ID:             os.Getenv("ORG_ADMIN_ID"),
 			Role:           os.Getenv("ORG_ROLE"),
+			Type:           enum.OrgAccAdmin,
 			OrganizationID: os.Getenv("ORG_ID"),
 			Email:          os.Getenv("ORG_EMAIL"),
 			Password:       hashedPassword,
+			RegisteredAt:   time.Now(),
 		}
 		_, err = db.Put(context.TODO(), account.ID, account)
 		if err != nil {

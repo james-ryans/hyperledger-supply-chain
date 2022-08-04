@@ -135,6 +135,14 @@ func NewHandler(c *Config) {
 	csg.GET("/:channelID", h.GetChannel)
 	csg.POST("", h.CreateChannel)
 
+	usg := c.R.Group("api/organizations/users")
+	usg.Use(middleware.AuthOrganization(), middleware.AuthOrganization())
+	usg.GET("", h.GetAllUsers)
+	usg.GET("/:ID", h.GetUser)
+	usg.POST("", h.CreateUser)
+	usg.PUT("/:ID", h.UpdateUser)
+	usg.DELETE("/:ID", h.DeleteUser)
+
 	sug := c.R.Group("api/organizations/channels/:channelID/suppliers")
 	sug.Use(middleware.AuthOrganization())
 	sug.GET("", h.GetSuppliers)

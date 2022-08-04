@@ -3,6 +3,7 @@ package service
 import (
 	"fmt"
 
+	"github.com/google/uuid"
 	"github.com/meneketehe/hehe/app/model"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -19,6 +20,15 @@ func NewOrganizationAccountService(c *OrganizationAccountServiceConfig) model.Or
 	return &organizationAccountService{
 		OrganizationAccountRepository: c.OrganizationAccountRepository,
 	}
+}
+
+func (s *organizationAccountService) GetAllOrganizationUserAccounts() ([]*model.OrganizationAccount, error) {
+	account, err := s.OrganizationAccountRepository.FindAllUser()
+	if err != nil {
+		return nil, err
+	}
+
+	return account, nil
 }
 
 func (s *organizationAccountService) GetOrganizationAccountByID(ID string) (*model.OrganizationAccount, error) {
@@ -60,6 +70,50 @@ func (s *organizationAccountService) ChangePassword(account *model.OrganizationA
 	account.Password = hashedPassword
 
 	return s.OrganizationAccountRepository.Update(account)
+}
+
+func (s *organizationAccountService) CreateUser(acc *model.OrganizationAccount) (*model.OrganizationAccount, error) {
+	hashedPassword, err := HashPassword(acc.Password)
+	if err != nil {
+		return nil, err
+	}
+
+	acc.ID = uuid.New().String()
+	acc.Password = hashedPassword
+
+	acc, err = s.OrganizationAccountRepository.Create(acc)
+	if err != nil {
+		return nil, err
+	}
+
+	return acc, nil
+}
+
+func (s *organizationAccountService) UpdateUser(acc *model.OrganizationAccount, changePassword bool) (*model.OrganizationAccount, error) {
+	if changePassword {
+		hashedPassword, err := HashPassword(acc.Password)
+		if err != nil {
+			return nil, err
+		}
+
+		acc.Password = hashedPassword
+	}
+
+	acc, err := s.OrganizationAccountRepository.Update(acc)
+	if err != nil {
+		return nil, err
+	}
+
+	return acc, nil
+}
+
+func (s *organizationAccountService) DeleteUser(acc *model.OrganizationAccount) error {
+	err := s.OrganizationAccountRepository.Delete(acc)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func HashPassword(password string) (string, error) {

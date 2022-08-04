@@ -4,9 +4,13 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
+	"time"
 
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
+	"github.com/meneketehe/hehe/app/model"
+	"github.com/meneketehe/hehe/app/model/enum"
 	request "github.com/meneketehe/hehe/app/request/organization"
 	response "github.com/meneketehe/hehe/app/response/organization"
 	service "github.com/meneketehe/hehe/app/service/organization"
@@ -128,6 +132,178 @@ func (h *Handler) ChangePasswordOrganization(c *gin.Context) {
 	c.JSON(http.StatusCreated, gin.H{
 		"success": true,
 		"message": "change password success",
+		"data":    nil,
+	})
+}
+
+func (h *Handler) GetAllUsers(c *gin.Context) {
+	accs, err := h.organizationAccountService.GetAllOrganizationUserAccounts()
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"success": false,
+			"message": err.Error(),
+			"data":    nil,
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"success": true,
+		"message": nil,
+		"data":    response.OrgUsersResponse(accs),
+	})
+}
+
+func (h *Handler) GetUser(c *gin.Context) {
+	ID := c.Param("ID")
+
+	acc, err := h.organizationAccountService.GetOrganizationAccountByID(ID)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"success": false,
+			"message": err.Error(),
+			"data":    nil,
+		})
+		return
+	}
+	if acc == nil {
+		c.JSON(http.StatusNotFound, gin.H{
+			"success": false,
+			"message": fmt.Errorf("user not found").Error(),
+			"data":    nil,
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"success": true,
+		"message": nil,
+		"data":    response.OrgUserResponse(acc),
+	})
+}
+
+func (h *Handler) CreateUser(c *gin.Context) {
+	orgID := c.MustGet("orgID").(string)
+	role := c.MustGet("role").(string)
+
+	var req request.CreateUserRequest
+	if ok := bindData(c, &req); !ok {
+		return
+	}
+	req.Sanitize()
+
+	acc, err := h.organizationAccountService.GetOrganizationAccountByEmail(req.Email)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"success": false,
+			"message": err.Error(),
+			"data":    nil,
+		})
+		return
+	}
+	if acc != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"success": false,
+			"message": fmt.Errorf("an account with that email already exists").Error(),
+			"data":    nil,
+		})
+		return
+	}
+
+	input := &model.OrganizationAccount{
+		Role:           role,
+		Type:           enum.OrgAccUser,
+		OrganizationID: orgID,
+		Name:           req.Name,
+		Email:          req.Email,
+		Phone:          req.Phone,
+		Password:       req.Password,
+		RegisteredAt:   time.Now(),
+	}
+
+	acc, err = h.organizationAccountService.CreateUser(input)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"success": false,
+			"message": err.Error(),
+			"data":    nil,
+		})
+		return
+	}
+
+	c.JSON(http.StatusCreated, gin.H{
+		"success": true,
+		"message": "create user success",
+		"data":    response.OrgUserResponse(acc),
+	})
+}
+
+func (h *Handler) UpdateUser(c *gin.Context) {
+	var req request.UpdateUserRequest
+	if ok := bindData(c, &req); !ok {
+		return
+	}
+	req.Sanitize()
+
+	ID := c.Param("ID")
+	acc, err := h.organizationAccountService.GetOrganizationAccountByID(ID)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"success": false,
+			"message": err.Error(),
+			"data":    nil,
+		})
+		return
+	}
+
+	acc.Name = req.Name
+	acc.Phone = req.Phone
+	if req.ChangePassword {
+		acc.Password = req.Password
+	}
+
+	acc, err = h.organizationAccountService.UpdateUser(acc, req.ChangePassword)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"success": false,
+			"message": err.Error(),
+			"data":    nil,
+		})
+		return
+	}
+
+	c.JSON(http.StatusCreated, gin.H{
+		"success": true,
+		"message": "update user success",
+		"data":    response.OrgUserResponse(acc),
+	})
+}
+
+func (h *Handler) DeleteUser(c *gin.Context) {
+	ID := c.Param("ID")
+	acc, err := h.organizationAccountService.GetOrganizationAccountByID(ID)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"success": false,
+			"message": err.Error(),
+			"data":    nil,
+		})
+		return
+	}
+
+	err = h.organizationAccountService.DeleteUser(acc)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"success": false,
+			"message": err.Error(),
+			"data":    nil,
+		})
+		return
+	}
+
+	c.JSON(http.StatusCreated, gin.H{
+		"success": true,
+		"message": "delete user success",
 		"data":    nil,
 	})
 }
