@@ -50,20 +50,36 @@ func (c *RiceSackContract) FindByCode(ctx contractapi.TransactionContextInterfac
 		return "", err
 	}
 
-	scanHistoryDoc := NewScanHistoryDoc(usermodel.ScanHistory{
-		ID:           id,
-		UserID:       userId,
-		RiceSackCode: sack.Code,
-		ScanAt:       scanAt.AsTime(),
-	})
-	scanHistoryDocJSON, err := json.Marshal(scanHistoryDoc)
+	lastTrace := sack.Traces[len(sack.Traces)-1]
+
+	riceJSON, err := json.Marshal(lastTrace.Commodity)
 	if err != nil {
 		return "", err
 	}
 
-	err = ctx.GetStub().PutState(scanHistoryDoc.ID, scanHistoryDocJSON)
+	var rice usermodel.Rice
+	err = json.Unmarshal(riceJSON, &rice)
 	if err != nil {
 		return "", err
+	}
+
+	if userId != "" {
+		scanHistoryDoc := NewScanHistoryDoc(usermodel.ScanHistory{
+			ID:           id,
+			UserID:       userId,
+			RiceSackCode: sack.Code,
+			Name:         fmt.Sprintf("%s - %s - %s", rice.BrandName, lastTrace.Organization.Name, sack.Code),
+			ScanAt:       scanAt.AsTime(),
+		})
+		scanHistoryDocJSON, err := json.Marshal(scanHistoryDoc)
+		if err != nil {
+			return "", err
+		}
+
+		err = ctx.GetStub().PutState(scanHistoryDoc.ID, scanHistoryDocJSON)
+		if err != nil {
+			return "", err
+		}
 	}
 
 	return fmt.Sprintf("%s", sackJSON), nil

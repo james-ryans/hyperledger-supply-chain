@@ -9,6 +9,7 @@ import (
 type scanHistoryResponse struct {
 	ID           string    `json:"id"`
 	RiceSackCode string    `json:"rice_sack_code"`
+	Name         string    `json:"name"`
 	ScanAt       time.Time `json:"scan_at"`
 }
 
@@ -25,6 +26,7 @@ func ScanHistoryResponse(scanHistory *usermodel.ScanHistory) *scanHistoryRespons
 	return &scanHistoryResponse{
 		ID:           scanHistory.ID,
 		RiceSackCode: scanHistory.RiceSackCode,
+		Name:         scanHistory.Name,
 		ScanAt:       scanHistory.ScanAt,
 	}
 }

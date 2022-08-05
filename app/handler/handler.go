@@ -104,7 +104,6 @@ func NewHandler(c *Config) {
 	uag.PUT("/edit-profile", h.EditUserProfile)
 
 	ursg := c.R.Group("api/users/rice-sacks")
-	ursg.Use(middleware.AuthUser())
 	ursg.GET("/:code", h.GetRiceSack)
 
 	ushg := c.R.Group("api/users/scan-histories")
@@ -117,6 +116,7 @@ func NewHandler(c *Config) {
 	ucg.POST("/:riceID", h.WriteComment)
 
 	ag := c.R.Group("api/organizations/account")
+	ag.POST("/init", h.InitOrganization)
 	ag.POST("/login", h.LoginOrganization)
 	ag.POST("/logout", h.LogoutOrganization)
 

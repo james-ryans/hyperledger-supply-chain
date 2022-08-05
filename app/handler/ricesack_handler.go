@@ -3,13 +3,21 @@ package handler
 import (
 	"net/http"
 
+	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
 	userresponse "github.com/meneketehe/hehe/app/response/user"
 )
 
 func (h *Handler) GetRiceSack(c *gin.Context) {
-	userID := c.MustGet("userID").(string)
+	session := sessions.Default(c)
+
 	code := c.Param("code")
+	fromHistory := c.Query("from_history")
+
+	userID := ""
+	if fromHistory != "true" && session.Get("userId") != nil {
+		userID = session.Get("userId").(string)
+	}
 
 	riceSack, err := h.userRiceSackService.GetRiceSackByCode(userID, code)
 	if err != nil {
