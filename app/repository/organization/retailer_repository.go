@@ -6,22 +6,25 @@ import (
 	"os"
 	"strconv"
 
-	"github.com/hyperledger/fabric-gateway/pkg/client"
+	"github.com/hyperledger/fabric-sdk-go/pkg/gateway"
 	"github.com/meneketehe/hehe/app/model"
 )
 
 type retailerRepository struct {
-	Fabric *client.Gateway
+	Fabric *gateway.Gateway
 }
 
-func NewRetailerRepository(fabric *client.Gateway) model.RetailerRepository {
+func NewRetailerRepository(fabric *gateway.Gateway) model.RetailerRepository {
 	return &retailerRepository{
 		Fabric: fabric,
 	}
 }
 
 func (r *retailerRepository) FindAll(channelID string) ([]*model.Retailer, error) {
-	network := r.Fabric.GetNetwork(channelID)
+	network, err := r.Fabric.GetNetwork(channelID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get network %s: %w", channelID, err)
+	}
 	contract := network.GetContract(os.Getenv("FABRIC_CHAINCODE_NAME"))
 
 	retailersJSON, err := contract.EvaluateTransaction("RetailerContract:FindAll")
@@ -39,7 +42,10 @@ func (r *retailerRepository) FindAll(channelID string) ([]*model.Retailer, error
 }
 
 func (r *retailerRepository) FindByID(channelID, ID string) (*model.Retailer, error) {
-	network := r.Fabric.GetNetwork(channelID)
+	network, err := r.Fabric.GetNetwork(channelID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get network %s: %w", channelID, err)
+	}
 	contract := network.GetContract(os.Getenv("FABRIC_CHAINCODE_NAME"))
 
 	retailerJSON, err := contract.EvaluateTransaction("RetailerContract:FindByID", ID)
@@ -57,10 +63,13 @@ func (r *retailerRepository) FindByID(channelID, ID string) (*model.Retailer, er
 }
 
 func (r *retailerRepository) Create(channelID string, retailer *model.Retailer) error {
-	network := r.Fabric.GetNetwork(channelID)
+	network, err := r.Fabric.GetNetwork(channelID)
+	if err != nil {
+		return fmt.Errorf("failed to get network %s: %w", channelID, err)
+	}
 	contract := network.GetContract(os.Getenv("FABRIC_CHAINCODE_NAME"))
 
-	_, err := contract.SubmitTransaction(
+	_, err = contract.SubmitTransaction(
 		"RetailerContract:Create",
 		retailer.ID,
 		retailer.Type,

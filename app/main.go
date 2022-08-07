@@ -70,7 +70,8 @@ func main() {
 	defer cancel()
 
 	// shutdown data sources
-	if err := ds.Gateway.Close(); err != nil {
+	ds.Gateway.Close()
+	if err := ds.Couch.Close(context.TODO()); err != nil {
 		log.Fatalf("A problem occurred gracefully shutting down data sources: %v\n", err)
 	}
 

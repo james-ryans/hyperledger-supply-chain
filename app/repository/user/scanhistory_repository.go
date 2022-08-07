@@ -5,22 +5,25 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/hyperledger/fabric-gateway/pkg/client"
+	"github.com/hyperledger/fabric-sdk-go/pkg/gateway"
 	usermodel "github.com/meneketehe/hehe/app/model/user"
 )
 
 type scanHistoryRepository struct {
-	Fabric *client.Gateway
+	Fabric *gateway.Gateway
 }
 
-func NewScanHistoryRepository(fabric *client.Gateway) usermodel.ScanHistoryRepository {
+func NewScanHistoryRepository(fabric *gateway.Gateway) usermodel.ScanHistoryRepository {
 	return &scanHistoryRepository{
 		Fabric: fabric,
 	}
 }
 
 func (r *scanHistoryRepository) FindAll(userID string) ([]*usermodel.ScanHistory, error) {
-	network := r.Fabric.GetNetwork(os.Getenv("FABRIC_GLOBALCHANNEL_NAME"))
+	network, err := r.Fabric.GetNetwork(os.Getenv("FABRIC_GLOBALCHANNEL_NAME"))
+	if err != nil {
+		return nil, fmt.Errorf("failed to get network %s: %w", os.Getenv("FABRIC_GLOBALCHANNEL_NAME"), err)
+	}
 	contract := network.GetContract(os.Getenv("FABRIC_GLOBALCHAINCODE_NAME"))
 
 	scanHistoriesJSON, err := contract.EvaluateTransaction("ScanHistoryContract:FindAll", userID)

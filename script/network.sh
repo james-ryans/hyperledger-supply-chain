@@ -7,6 +7,7 @@ function networkUp() {
   createManufacturer0Org
   createDistributor0Org
   createRetailer0Org
+  createCCP
 
   createChannel0
   createGlobalChannel
@@ -108,6 +109,11 @@ function createRetailer0Org() {
     -f organizations/retailer0.com/docker-compose-peer.yaml up -d 2>&1
 }
 
+function createCCP() {
+  infoln "Generating CCP files for Org1 and Org2"
+  . ./script/ccp-generate.sh
+}
+
 function createGlobalChannel() {
   infoln "Creating Global Channel"
 
@@ -156,6 +162,8 @@ function deployGCC() {
 }
 
 function networkDown() {
+  rm -rf ./app/wallet
+
   downDockerContainers retailer0.com
   downDockerContainers distributor0.com
   downDockerContainers manufacturer0.com

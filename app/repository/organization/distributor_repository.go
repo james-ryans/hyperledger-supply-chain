@@ -6,22 +6,25 @@ import (
 	"os"
 	"strconv"
 
-	"github.com/hyperledger/fabric-gateway/pkg/client"
+	"github.com/hyperledger/fabric-sdk-go/pkg/gateway"
 	"github.com/meneketehe/hehe/app/model"
 )
 
 type distributorRepository struct {
-	Fabric *client.Gateway
+	Fabric *gateway.Gateway
 }
 
-func NewDistributorRepository(fabric *client.Gateway) model.DistributorRepository {
+func NewDistributorRepository(fabric *gateway.Gateway) model.DistributorRepository {
 	return &distributorRepository{
 		Fabric: fabric,
 	}
 }
 
 func (r *distributorRepository) FindAll(channelID string) ([]*model.Distributor, error) {
-	network := r.Fabric.GetNetwork(channelID)
+	network, err := r.Fabric.GetNetwork(channelID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get network %s: %w", channelID, err)
+	}
 	contract := network.GetContract(os.Getenv("FABRIC_CHAINCODE_NAME"))
 
 	distributorsJSON, err := contract.EvaluateTransaction("DistributorContract:FindAll")
@@ -39,7 +42,10 @@ func (r *distributorRepository) FindAll(channelID string) ([]*model.Distributor,
 }
 
 func (r *distributorRepository) FindByID(channelID, ID string) (*model.Distributor, error) {
-	network := r.Fabric.GetNetwork(channelID)
+	network, err := r.Fabric.GetNetwork(channelID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get network %s: %w", channelID, err)
+	}
 	contract := network.GetContract(os.Getenv("FABRIC_CHAINCODE_NAME"))
 
 	distributorJSON, err := contract.EvaluateTransaction("DistributorContract:FindByID", ID)
@@ -57,10 +63,13 @@ func (r *distributorRepository) FindByID(channelID, ID string) (*model.Distribut
 }
 
 func (r *distributorRepository) Create(channelID string, distributor *model.Distributor) error {
-	network := r.Fabric.GetNetwork(channelID)
+	network, err := r.Fabric.GetNetwork(channelID)
+	if err != nil {
+		return fmt.Errorf("failed to get network %s: %w", channelID, err)
+	}
 	contract := network.GetContract(os.Getenv("FABRIC_CHAINCODE_NAME"))
 
-	_, err := contract.SubmitTransaction(
+	_, err = contract.SubmitTransaction(
 		"DistributorContract:Create",
 		distributor.ID,
 		distributor.Type,

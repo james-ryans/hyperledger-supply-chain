@@ -1,0 +1,35 @@
+---
+name: hehe-${ORGDOTCOM}
+version: 1.0.0
+client:
+  organization: ${ORGDOTCOM}
+  connection:
+    timeout:
+      peer:
+        endorser: '300'
+organizations:
+  ${ORGDOTCOM}:
+    mspid: ${ORG}MSP
+    peers:
+    - peer.${ORGDOTCOM}
+    certificateAuthorities:
+    - ca.${ORGDOTCOM}
+peers:
+  peer.${ORGDOTCOM}:
+    url: grpcs://localhost:${P0PORT}
+    tlsCACerts:
+      pem: |
+          ${PEERPEM}
+    grpcOptions:
+      ssl-target-name-override: peer.${ORGDOTCOM}
+      hostnameOverride: peer.${ORGDOTCOM}
+certificateAuthorities:
+  ca.${ORGDOTCOM}:
+    url: https://localhost:${CAPORT}
+    caName: ca.${ORGDOTCOM}
+    tlsCACerts:
+      pem: 
+        - |
+          ${CAPEM}
+    httpOptions:
+      verify: false

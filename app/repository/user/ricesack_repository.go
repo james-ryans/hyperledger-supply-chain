@@ -5,22 +5,25 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/hyperledger/fabric-gateway/pkg/client"
+	"github.com/hyperledger/fabric-sdk-go/pkg/gateway"
 	usermodel "github.com/meneketehe/hehe/app/model/user"
 )
 
 type riceSackRepository struct {
-	Fabric *client.Gateway
+	Fabric *gateway.Gateway
 }
 
-func NewRiceSackRepository(fabric *client.Gateway) usermodel.RiceSackRepository {
+func NewRiceSackRepository(fabric *gateway.Gateway) usermodel.RiceSackRepository {
 	return &riceSackRepository{
 		Fabric: fabric,
 	}
 }
 
 func (r *riceSackRepository) FindByCode(userID, code string) (*usermodel.RiceSack, error) {
-	network := r.Fabric.GetNetwork(os.Getenv("FABRIC_GLOBALCHANNEL_NAME"))
+	network, err := r.Fabric.GetNetwork(os.Getenv("FABRIC_GLOBALCHANNEL_NAME"))
+	if err != nil {
+		return nil, fmt.Errorf("failed to get network %s: %w", os.Getenv("FABRIC_GLOBALCHANNEL_NAME"), err)
+	}
 	contract := network.GetContract(os.Getenv("FABRIC_GLOBALCHAINCODE_NAME"))
 
 	riceSackJSON, err := contract.SubmitTransaction("RiceSackContract:FindByCode", userID, code)
@@ -37,7 +40,10 @@ func (r *riceSackRepository) FindByCode(userID, code string) (*usermodel.RiceSac
 }
 
 func (r *riceSackRepository) Create(sack *usermodel.RiceSack) error {
-	network := r.Fabric.GetNetwork(os.Getenv("FABRIC_GLOBALCHANNEL_NAME"))
+	network, err := r.Fabric.GetNetwork(os.Getenv("FABRIC_GLOBALCHANNEL_NAME"))
+	if err != nil {
+		return fmt.Errorf("failed to get network %s: %w", os.Getenv("FABRIC_GLOBALCHANNEL_NAME"), err)
+	}
 	contract := network.GetContract(os.Getenv("FABRIC_GLOBALCHAINCODE_NAME"))
 
 	sackJSON, err := json.Marshal(sack)

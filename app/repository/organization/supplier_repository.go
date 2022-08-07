@@ -6,22 +6,25 @@ import (
 	"os"
 	"strconv"
 
-	"github.com/hyperledger/fabric-gateway/pkg/client"
+	"github.com/hyperledger/fabric-sdk-go/pkg/gateway"
 	"github.com/meneketehe/hehe/app/model"
 )
 
 type supplierRepository struct {
-	Fabric *client.Gateway
+	Fabric *gateway.Gateway
 }
 
-func NewSupplierRepository(fabric *client.Gateway) model.SupplierRepository {
+func NewSupplierRepository(fabric *gateway.Gateway) model.SupplierRepository {
 	return &supplierRepository{
 		Fabric: fabric,
 	}
 }
 
 func (r *supplierRepository) FindAll(channelID string) ([]*model.Supplier, error) {
-	network := r.Fabric.GetNetwork(channelID)
+	network, err := r.Fabric.GetNetwork(channelID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get network %s: %w", channelID, err)
+	}
 	contract := network.GetContract(os.Getenv("FABRIC_CHAINCODE_NAME"))
 
 	suppliersJSON, err := contract.EvaluateTransaction("SupplierContract:FindAll")
@@ -39,7 +42,10 @@ func (r *supplierRepository) FindAll(channelID string) ([]*model.Supplier, error
 }
 
 func (r *supplierRepository) FindByID(channelID, ID string) (*model.Supplier, error) {
-	network := r.Fabric.GetNetwork(channelID)
+	network, err := r.Fabric.GetNetwork(channelID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get network %s: %w", channelID, err)
+	}
 	contract := network.GetContract(os.Getenv("FABRIC_CHAINCODE_NAME"))
 
 	supplierJSON, err := contract.EvaluateTransaction("SupplierContract:FindByID", ID)
@@ -57,10 +63,13 @@ func (r *supplierRepository) FindByID(channelID, ID string) (*model.Supplier, er
 }
 
 func (r *supplierRepository) Create(channelID string, supplier *model.Supplier) error {
-	network := r.Fabric.GetNetwork(channelID)
+	network, err := r.Fabric.GetNetwork(channelID)
+	if err != nil {
+		return fmt.Errorf("failed to get network %s: %w", channelID, err)
+	}
 	contract := network.GetContract(os.Getenv("FABRIC_CHAINCODE_NAME"))
 
-	_, err := contract.SubmitTransaction(
+	_, err = contract.SubmitTransaction(
 		"SupplierContract:Create",
 		supplier.ID,
 		supplier.Type,

@@ -6,6 +6,8 @@ vendor/
 *.tar.gz
 log.txt
 
+app/wallet
+
 organizations/*/*
 !organizations/*/fabric-ca/
 organizations/*/fabric-ca/*

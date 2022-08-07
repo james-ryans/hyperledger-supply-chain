@@ -5,22 +5,25 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/hyperledger/fabric-gateway/pkg/client"
+	"github.com/hyperledger/fabric-sdk-go/pkg/gateway"
 	"github.com/meneketehe/hehe/app/model"
 )
 
 type riceStockpileRepository struct {
-	Fabric *client.Gateway
+	Fabric *gateway.Gateway
 }
 
-func NewRiceStockpileRepository(fabric *client.Gateway) model.RiceStockpileRepository {
+func NewRiceStockpileRepository(fabric *gateway.Gateway) model.RiceStockpileRepository {
 	return &riceStockpileRepository{
 		Fabric: fabric,
 	}
 }
 
 func (r *riceStockpileRepository) FindAll(channelID, vendorID string) ([]*model.RiceStockpile, error) {
-	network := r.Fabric.GetNetwork(channelID)
+	network, err := r.Fabric.GetNetwork(channelID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get network %s: %w", channelID, err)
+	}
 	contract := network.GetContract(os.Getenv("FABRIC_CHAINCODE_NAME"))
 
 	riceStockpilesJSON, err := contract.EvaluateTransaction("RiceStockpileContract:FindAll", vendorID)
@@ -38,7 +41,10 @@ func (r *riceStockpileRepository) FindAll(channelID, vendorID string) ([]*model.
 }
 
 func (r *riceStockpileRepository) FindByID(channelID, ID string) (*model.RiceStockpile, error) {
-	network := r.Fabric.GetNetwork(channelID)
+	network, err := r.Fabric.GetNetwork(channelID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get network %s: %w", channelID, err)
+	}
 	contract := network.GetContract(os.Getenv("FABRIC_CHAINCODE_NAME"))
 
 	riceStockpileJSON, err := contract.EvaluateTransaction("RiceStockpileContract:FindByID", ID)
@@ -56,7 +62,10 @@ func (r *riceStockpileRepository) FindByID(channelID, ID string) (*model.RiceSto
 }
 
 func (r *riceStockpileRepository) FindByVendorIDAndRiceID(channelID, vendorID, riceID string) (*model.RiceStockpile, error) {
-	network := r.Fabric.GetNetwork(channelID)
+	network, err := r.Fabric.GetNetwork(channelID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get network %s: %w", channelID, err)
+	}
 	contract := network.GetContract(os.Getenv("FABRIC_CHAINCODE_NAME"))
 
 	riceStockpileJSON, err := contract.EvaluateTransaction("RiceStockpileContract:FindByVendorIDAndRiceID", vendorID, riceID)

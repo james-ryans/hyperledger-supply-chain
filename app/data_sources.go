@@ -9,7 +9,7 @@ import (
 
 	_ "github.com/go-kivik/couchdb/v3"
 	"github.com/go-kivik/kivik/v3"
-	"github.com/hyperledger/fabric-gateway/pkg/client"
+	"github.com/hyperledger/fabric-sdk-go/pkg/gateway"
 	"github.com/meneketehe/hehe/app/fabric"
 	"github.com/meneketehe/hehe/app/model"
 	"github.com/meneketehe/hehe/app/model/enum"
@@ -17,24 +17,15 @@ import (
 )
 
 type dataSources struct {
-	Gateway *client.Gateway
+	Gateway *gateway.Gateway
 	Couch   *kivik.Client
 }
 
 func initDS() (*dataSources, error) {
 	log.Printf("Initializing data sources\n")
-	fabricCreds := fabric.Credentials{
-		MSPID:        os.Getenv("FABRIC_MSP_ID"),
-		PeerEndpoint: os.Getenv("FABRIC_PEER_ENDPOINT"),
-		GatewayPeer:  os.Getenv("FABRIC_GATEWAY_PEER"),
-		CertPath:     os.Getenv("FABRIC_CERT_PATH"),
-		KeyPath:      os.Getenv("FABRIC_KEY_PATH"),
-		TLSCertPath:  os.Getenv("FABRIC_TLS_CERT_PATH"),
-	}
-	fabricConfig := fabric.DefaultConfig()
 
 	log.Printf("Connecting to Fabric Gateway\n")
-	gateway, err := fabric.Connect(fabricCreds, fabricConfig)
+	gw, err := fabric.Connect()
 	if err != nil {
 		return nil, fmt.Errorf("error opening fabric gateway: %w", err)
 	}
@@ -79,7 +70,7 @@ func initDS() (*dataSources, error) {
 	}
 
 	return &dataSources{
-		Gateway: gateway,
+		Gateway: gw,
 		Couch:   couch,
 	}, nil
 }

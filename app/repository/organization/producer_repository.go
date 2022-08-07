@@ -6,22 +6,25 @@ import (
 	"os"
 	"strconv"
 
-	"github.com/hyperledger/fabric-gateway/pkg/client"
+	"github.com/hyperledger/fabric-sdk-go/pkg/gateway"
 	"github.com/meneketehe/hehe/app/model"
 )
 
 type producerRepository struct {
-	Fabric *client.Gateway
+	Fabric *gateway.Gateway
 }
 
-func NewProducerRepository(fabric *client.Gateway) model.ProducerRepository {
+func NewProducerRepository(fabric *gateway.Gateway) model.ProducerRepository {
 	return &producerRepository{
 		Fabric: fabric,
 	}
 }
 
 func (r *producerRepository) FindAll(channelID string) ([]*model.Producer, error) {
-	network := r.Fabric.GetNetwork(channelID)
+	network, err := r.Fabric.GetNetwork(channelID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get network %s: %w", channelID, err)
+	}
 	contract := network.GetContract(os.Getenv("FABRIC_CHAINCODE_NAME"))
 
 	producersJSON, err := contract.EvaluateTransaction("ProducerContract:FindAll")
@@ -39,7 +42,10 @@ func (r *producerRepository) FindAll(channelID string) ([]*model.Producer, error
 }
 
 func (r *producerRepository) FindByID(channelID, ID string) (*model.Producer, error) {
-	network := r.Fabric.GetNetwork(channelID)
+	network, err := r.Fabric.GetNetwork(channelID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get network %s: %w", channelID, err)
+	}
 	contract := network.GetContract(os.Getenv("FABRIC_CHAINCODE_NAME"))
 
 	producerJSON, err := contract.EvaluateTransaction("ProducerContract:FindByID", ID)
@@ -57,10 +63,13 @@ func (r *producerRepository) FindByID(channelID, ID string) (*model.Producer, er
 }
 
 func (r *producerRepository) Create(channelID string, producer *model.Producer) error {
-	network := r.Fabric.GetNetwork(channelID)
+	network, err := r.Fabric.GetNetwork(channelID)
+	if err != nil {
+		return fmt.Errorf("failed to get network %s: %w", channelID, err)
+	}
 	contract := network.GetContract(os.Getenv("FABRIC_CHAINCODE_NAME"))
 
-	_, err := contract.SubmitTransaction(
+	_, err = contract.SubmitTransaction(
 		"ProducerContract:Create",
 		producer.ID,
 		producer.Type,

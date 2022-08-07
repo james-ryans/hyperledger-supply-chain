@@ -7,22 +7,25 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/hyperledger/fabric-gateway/pkg/client"
+	"github.com/hyperledger/fabric-sdk-go/pkg/gateway"
 	"github.com/meneketehe/hehe/app/model"
 )
 
 type riceGrainOrderRepository struct {
-	Fabric *client.Gateway
+	Fabric *gateway.Gateway
 }
 
-func NewRiceGrainOrderRepository(fabric *client.Gateway) model.RiceGrainOrderRepository {
+func NewRiceGrainOrderRepository(fabric *gateway.Gateway) model.RiceGrainOrderRepository {
 	return &riceGrainOrderRepository{
 		Fabric: fabric,
 	}
 }
 
 func (r *riceGrainOrderRepository) FindAllOutgoing(channelID, ordererID string) ([]*model.RiceGrainOrder, error) {
-	network := r.Fabric.GetNetwork(channelID)
+	network, err := r.Fabric.GetNetwork(channelID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get network %s: %w", channelID, err)
+	}
 	contract := network.GetContract(os.Getenv("FABRIC_CHAINCODE_NAME"))
 
 	riceGrainOrdersJSON, err := contract.EvaluateTransaction("RiceGrainOrderContract:FindAllOutgoing", ordererID)
@@ -40,7 +43,10 @@ func (r *riceGrainOrderRepository) FindAllOutgoing(channelID, ordererID string) 
 }
 
 func (r *riceGrainOrderRepository) FindAllIncoming(channelID, sellerID string) ([]*model.RiceGrainOrder, error) {
-	network := r.Fabric.GetNetwork(channelID)
+	network, err := r.Fabric.GetNetwork(channelID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get network %s: %w", channelID, err)
+	}
 	contract := network.GetContract(os.Getenv("FABRIC_CHAINCODE_NAME"))
 
 	riceGrainOrdersJSON, err := contract.EvaluateTransaction("RiceGrainOrderContract:FindAllIncoming", sellerID)
@@ -58,7 +64,10 @@ func (r *riceGrainOrderRepository) FindAllIncoming(channelID, sellerID string) (
 }
 
 func (r *riceGrainOrderRepository) FindAllAcceptedIncoming(channelID, sellerID string) ([]*model.RiceGrainOrder, error) {
-	network := r.Fabric.GetNetwork(channelID)
+	network, err := r.Fabric.GetNetwork(channelID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get network %s: %w", channelID, err)
+	}
 	contract := network.GetContract(os.Getenv("FABRIC_CHAINCODE_NAME"))
 
 	riceGrainOrdersJSON, err := contract.EvaluateTransaction("RiceGrainOrderContract:FindAllAcceptedIncoming", sellerID)
@@ -76,7 +85,10 @@ func (r *riceGrainOrderRepository) FindAllAcceptedIncoming(channelID, sellerID s
 }
 
 func (r *riceGrainOrderRepository) FindByID(channelID, ID string) (*model.RiceGrainOrder, error) {
-	network := r.Fabric.GetNetwork(channelID)
+	network, err := r.Fabric.GetNetwork(channelID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get network %s: %w", channelID, err)
+	}
 	contract := network.GetContract(os.Getenv("FABRIC_CHAINCODE_NAME"))
 
 	riceGrainOrderJSON, err := contract.EvaluateTransaction("RiceGrainOrderContract:FindByID", ID)
@@ -94,7 +106,10 @@ func (r *riceGrainOrderRepository) FindByID(channelID, ID string) (*model.RiceGr
 }
 
 func (r *riceGrainOrderRepository) FindByRiceOrderID(channelID, riceOrderID string) (*model.RiceGrainOrder, error) {
-	network := r.Fabric.GetNetwork(channelID)
+	network, err := r.Fabric.GetNetwork(channelID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get network %s: %w", channelID, err)
+	}
 	contract := network.GetContract(os.Getenv("FABRIC_CHAINCODE_NAME"))
 
 	riceGrainOrderJSON, err := contract.EvaluateTransaction("RiceGrainOrderContract:FindByRiceOrderID", riceOrderID)
@@ -112,10 +127,13 @@ func (r *riceGrainOrderRepository) FindByRiceOrderID(channelID, riceOrderID stri
 }
 
 func (r *riceGrainOrderRepository) Create(channelID string, riceGrainOrder *model.RiceGrainOrder) error {
-	network := r.Fabric.GetNetwork(channelID)
+	network, err := r.Fabric.GetNetwork(channelID)
+	if err != nil {
+		return fmt.Errorf("failed to get network %s: %w", channelID, err)
+	}
 	contract := network.GetContract(os.Getenv("FABRIC_CHAINCODE_NAME"))
 
-	_, err := contract.SubmitTransaction(
+	_, err = contract.SubmitTransaction(
 		"RiceGrainOrderContract:Create",
 		riceGrainOrder.ID,
 		riceGrainOrder.OrdererID,
@@ -133,10 +151,13 @@ func (r *riceGrainOrderRepository) Create(channelID string, riceGrainOrder *mode
 }
 
 func (r *riceGrainOrderRepository) Accept(channelID, ID string, acceptedAt time.Time) error {
-	network := r.Fabric.GetNetwork(channelID)
+	network, err := r.Fabric.GetNetwork(channelID)
+	if err != nil {
+		return fmt.Errorf("failed to get network %s: %w", channelID, err)
+	}
 	contract := network.GetContract(os.Getenv("FABRIC_CHAINCODE_NAME"))
 
-	_, err := contract.SubmitTransaction("RiceGrainOrderContract:Accept", ID, acceptedAt.Format(time.RFC3339))
+	_, err = contract.SubmitTransaction("RiceGrainOrderContract:Accept", ID, acceptedAt.Format(time.RFC3339))
 	if err != nil {
 		return fmt.Errorf("failed to submit transaction: %w", err)
 	}
@@ -145,10 +166,13 @@ func (r *riceGrainOrderRepository) Accept(channelID, ID string, acceptedAt time.
 }
 
 func (r *riceGrainOrderRepository) Reject(channelID, ID string, rejectedAt time.Time, reason string) error {
-	network := r.Fabric.GetNetwork(channelID)
+	network, err := r.Fabric.GetNetwork(channelID)
+	if err != nil {
+		return fmt.Errorf("failed to get network %s: %w", channelID, err)
+	}
 	contract := network.GetContract(os.Getenv("FABRIC_CHAINCODE_NAME"))
 
-	_, err := contract.SubmitTransaction("RiceGrainOrderContract:Reject", ID, rejectedAt.Format(time.RFC3339), reason)
+	_, err = contract.SubmitTransaction("RiceGrainOrderContract:Reject", ID, rejectedAt.Format(time.RFC3339), reason)
 	if err != nil {
 		return fmt.Errorf("failed to submit transaction: %w", err)
 	}
@@ -157,10 +181,13 @@ func (r *riceGrainOrderRepository) Reject(channelID, ID string, rejectedAt time.
 }
 
 func (r *riceGrainOrderRepository) Ship(channelID string, ID string, shippedAt time.Time, plowMethod, sowMethod, irrigation, fertilization string, plantDate, harvestDate time.Time, storageTemperature, storageHumidity float32) error {
-	network := r.Fabric.GetNetwork(channelID)
+	network, err := r.Fabric.GetNetwork(channelID)
+	if err != nil {
+		return fmt.Errorf("failed to get network %s: %w", channelID, err)
+	}
 	contract := network.GetContract(os.Getenv("FABRIC_CHAINCODE_NAME"))
 
-	_, err := contract.SubmitTransaction(
+	_, err = contract.SubmitTransaction(
 		"RiceGrainOrderContract:Ship",
 		ID,
 		shippedAt.Format(time.RFC3339),
@@ -181,10 +208,13 @@ func (r *riceGrainOrderRepository) Ship(channelID string, ID string, shippedAt t
 }
 
 func (r *riceGrainOrderRepository) Receive(channelID string, ID string, receivedAt time.Time) error {
-	network := r.Fabric.GetNetwork(channelID)
+	network, err := r.Fabric.GetNetwork(channelID)
+	if err != nil {
+		return fmt.Errorf("failed to get network %s: %w", channelID, err)
+	}
 	contract := network.GetContract(os.Getenv("FABRIC_CHAINCODE_NAME"))
 
-	_, err := contract.SubmitTransaction("RiceGrainOrderContract:Receive", ID, receivedAt.Format(time.RFC3339))
+	_, err = contract.SubmitTransaction("RiceGrainOrderContract:Receive", ID, receivedAt.Format(time.RFC3339))
 	if err != nil {
 		return fmt.Errorf("failed to submit transaction: %w", err)
 	}

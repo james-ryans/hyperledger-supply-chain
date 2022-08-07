@@ -7,22 +7,25 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
-	"github.com/hyperledger/fabric-gateway/pkg/client"
+	"github.com/hyperledger/fabric-sdk-go/pkg/gateway"
 	"github.com/meneketehe/hehe/app/model"
 )
 
 type seedRepository struct {
-	Fabric *client.Gateway
+	Fabric *gateway.Gateway
 }
 
-func NewSeedRepository(fabric *client.Gateway) model.SeedRepository {
+func NewSeedRepository(fabric *gateway.Gateway) model.SeedRepository {
 	return &seedRepository{
 		Fabric: fabric,
 	}
 }
 
 func (r *seedRepository) FindAll(channelID, orgID string) (*[]model.Seed, error) {
-	network := r.Fabric.GetNetwork(channelID)
+	network, err := r.Fabric.GetNetwork(channelID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get network %s: %w", channelID, err)
+	}
 	contract := network.GetContract(os.Getenv("FABRIC_CHAINCODE_NAME"))
 
 	queryString, err := json.Marshal(gin.H{
@@ -50,7 +53,10 @@ func (r *seedRepository) FindAll(channelID, orgID string) (*[]model.Seed, error)
 }
 
 func (r *seedRepository) FindByID(channelID, ID string) (*model.Seed, error) {
-	network := r.Fabric.GetNetwork(channelID)
+	network, err := r.Fabric.GetNetwork(channelID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get network %s: %w", channelID, err)
+	}
 	contract := network.GetContract(os.Getenv("FABRIC_CHAINCODE_NAME"))
 
 	seedJSON, err := contract.EvaluateTransaction("SeedContract:ReadSeed", ID)
@@ -68,10 +74,13 @@ func (r *seedRepository) FindByID(channelID, ID string) (*model.Seed, error) {
 }
 
 func (r *seedRepository) Create(channelID string, seed *model.Seed) error {
-	network := r.Fabric.GetNetwork(channelID)
+	network, err := r.Fabric.GetNetwork(channelID)
+	if err != nil {
+		return fmt.Errorf("failed to get network %s: %w", channelID, err)
+	}
 	contract := network.GetContract(os.Getenv("FABRIC_CHAINCODE_NAME"))
 
-	_, err := contract.SubmitTransaction("SeedContract:CreateSeed", seed.ID, seed.SupplierID, seed.VarietyName, strconv.FormatFloat(float64(seed.PlantAge), 'f', -1, 32), seed.PlantShape, strconv.FormatFloat(float64(seed.PlantHeight), 'f', -1, 32), seed.LeafShape)
+	_, err = contract.SubmitTransaction("SeedContract:CreateSeed", seed.ID, seed.SupplierID, seed.VarietyName, strconv.FormatFloat(float64(seed.PlantAge), 'f', -1, 32), seed.PlantShape, strconv.FormatFloat(float64(seed.PlantHeight), 'f', -1, 32), seed.LeafShape)
 	if err != nil {
 		return fmt.Errorf("failed to submit transaction: %w", err)
 	}
@@ -80,10 +89,13 @@ func (r *seedRepository) Create(channelID string, seed *model.Seed) error {
 }
 
 func (r *seedRepository) Update(channelID string, seed *model.Seed) error {
-	network := r.Fabric.GetNetwork(channelID)
+	network, err := r.Fabric.GetNetwork(channelID)
+	if err != nil {
+		return fmt.Errorf("failed to get network %s: %w", channelID, err)
+	}
 	contract := network.GetContract(os.Getenv("FABRIC_CHAINCODE_NAME"))
 
-	_, err := contract.SubmitTransaction("SeedContract:UpdateSeed", seed.ID, seed.SupplierID, seed.VarietyName, strconv.FormatFloat(float64(seed.PlantAge), 'f', -1, 32), seed.PlantShape, strconv.FormatFloat(float64(seed.PlantHeight), 'f', -1, 32), seed.LeafShape)
+	_, err = contract.SubmitTransaction("SeedContract:UpdateSeed", seed.ID, seed.SupplierID, seed.VarietyName, strconv.FormatFloat(float64(seed.PlantAge), 'f', -1, 32), seed.PlantShape, strconv.FormatFloat(float64(seed.PlantHeight), 'f', -1, 32), seed.LeafShape)
 	if err != nil {
 		return fmt.Errorf("failed to submit transaction: %w", err)
 	}
@@ -92,10 +104,13 @@ func (r *seedRepository) Update(channelID string, seed *model.Seed) error {
 }
 
 func (r *seedRepository) Delete(channelID, ID string) error {
-	network := r.Fabric.GetNetwork(channelID)
+	network, err := r.Fabric.GetNetwork(channelID)
+	if err != nil {
+		return fmt.Errorf("failed to get network %s: %w", channelID, err)
+	}
 	contract := network.GetContract(os.Getenv("FABRIC_CHAINCODE_NAME"))
 
-	_, err := contract.SubmitTransaction("SeedContract:DeleteSeed", ID)
+	_, err = contract.SubmitTransaction("SeedContract:DeleteSeed", ID)
 	if err != nil {
 		return fmt.Errorf("failed to submit transaction: %w", err)
 	}

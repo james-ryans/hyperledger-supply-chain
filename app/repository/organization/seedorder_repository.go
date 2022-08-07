@@ -7,22 +7,25 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/hyperledger/fabric-gateway/pkg/client"
+	"github.com/hyperledger/fabric-sdk-go/pkg/gateway"
 	"github.com/meneketehe/hehe/app/model"
 )
 
 type seedOrderRepository struct {
-	Fabric *client.Gateway
+	Fabric *gateway.Gateway
 }
 
-func NewSeedOrderRepository(fabric *client.Gateway) model.SeedOrderRepository {
+func NewSeedOrderRepository(fabric *gateway.Gateway) model.SeedOrderRepository {
 	return &seedOrderRepository{
 		Fabric: fabric,
 	}
 }
 
 func (r *seedOrderRepository) FindAllOutgoing(channelID, ordererID string) ([]*model.SeedOrder, error) {
-	network := r.Fabric.GetNetwork(channelID)
+	network, err := r.Fabric.GetNetwork(channelID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get network %s: %w", channelID, err)
+	}
 	contract := network.GetContract(os.Getenv("FABRIC_CHAINCODE_NAME"))
 
 	seedOrdersJSON, err := contract.EvaluateTransaction("SeedOrderContract:FindAllOutgoing", ordererID)
@@ -40,7 +43,10 @@ func (r *seedOrderRepository) FindAllOutgoing(channelID, ordererID string) ([]*m
 }
 
 func (r *seedOrderRepository) FindAllIncoming(channelID, sellerID string) ([]*model.SeedOrder, error) {
-	network := r.Fabric.GetNetwork(channelID)
+	network, err := r.Fabric.GetNetwork(channelID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get network %s: %w", channelID, err)
+	}
 	contract := network.GetContract(os.Getenv("FABRIC_CHAINCODE_NAME"))
 
 	seedOrdersJSON, err := contract.EvaluateTransaction("SeedOrderContract:FindAllIncoming", sellerID)
@@ -58,7 +64,10 @@ func (r *seedOrderRepository) FindAllIncoming(channelID, sellerID string) ([]*mo
 }
 
 func (r *seedOrderRepository) FindByID(channelID, ID string) (*model.SeedOrder, error) {
-	network := r.Fabric.GetNetwork(channelID)
+	network, err := r.Fabric.GetNetwork(channelID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get network %s: %w", channelID, err)
+	}
 	contract := network.GetContract(os.Getenv("FABRIC_CHAINCODE_NAME"))
 
 	seedOrderJSON, err := contract.EvaluateTransaction("SeedOrderContract:FindByID", ID)
@@ -76,7 +85,10 @@ func (r *seedOrderRepository) FindByID(channelID, ID string) (*model.SeedOrder, 
 }
 
 func (r *seedOrderRepository) FindByRiceGrainOrderID(channelID, riceGrainOrderID string) (*model.SeedOrder, error) {
-	network := r.Fabric.GetNetwork(channelID)
+	network, err := r.Fabric.GetNetwork(channelID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get network %s: %w", channelID, err)
+	}
 	contract := network.GetContract(os.Getenv("FABRIC_CHAINCODE_NAME"))
 
 	seedOrderJSON, err := contract.EvaluateTransaction("SeedOrderContract:FindByRiceGrainOrderID", riceGrainOrderID)
@@ -94,10 +106,13 @@ func (r *seedOrderRepository) FindByRiceGrainOrderID(channelID, riceGrainOrderID
 }
 
 func (r *seedOrderRepository) Create(channelID string, seedOrder *model.SeedOrder) error {
-	network := r.Fabric.GetNetwork(channelID)
+	network, err := r.Fabric.GetNetwork(channelID)
+	if err != nil {
+		return fmt.Errorf("failed to get network %s: %w", channelID, err)
+	}
 	contract := network.GetContract(os.Getenv("FABRIC_CHAINCODE_NAME"))
 
-	_, err := contract.SubmitTransaction(
+	_, err = contract.SubmitTransaction(
 		"SeedOrderContract:Create",
 		seedOrder.ID,
 		seedOrder.OrdererID,
@@ -115,10 +130,13 @@ func (r *seedOrderRepository) Create(channelID string, seedOrder *model.SeedOrde
 }
 
 func (r *seedOrderRepository) Accept(channelID string, ID string, acceptedAt time.Time) error {
-	network := r.Fabric.GetNetwork(channelID)
+	network, err := r.Fabric.GetNetwork(channelID)
+	if err != nil {
+		return fmt.Errorf("failed to get network %s: %w", channelID, err)
+	}
 	contract := network.GetContract(os.Getenv("FABRIC_CHAINCODE_NAME"))
 
-	_, err := contract.SubmitTransaction("SeedOrderContract:Accept", ID, acceptedAt.Format(time.RFC3339))
+	_, err = contract.SubmitTransaction("SeedOrderContract:Accept", ID, acceptedAt.Format(time.RFC3339))
 	if err != nil {
 		return fmt.Errorf("failed to submit transaction: %w", err)
 	}
@@ -127,10 +145,13 @@ func (r *seedOrderRepository) Accept(channelID string, ID string, acceptedAt tim
 }
 
 func (r *seedOrderRepository) Reject(channelID string, ID string, rejectedAt time.Time, reason string) error {
-	network := r.Fabric.GetNetwork(channelID)
+	network, err := r.Fabric.GetNetwork(channelID)
+	if err != nil {
+		return fmt.Errorf("failed to get network %s: %w", channelID, err)
+	}
 	contract := network.GetContract(os.Getenv("FABRIC_CHAINCODE_NAME"))
 
-	_, err := contract.SubmitTransaction("SeedOrderContract:Reject", ID, rejectedAt.Format(time.RFC3339), reason)
+	_, err = contract.SubmitTransaction("SeedOrderContract:Reject", ID, rejectedAt.Format(time.RFC3339), reason)
 	if err != nil {
 		return fmt.Errorf("failed to submit transaction: %w", err)
 	}
@@ -139,10 +160,13 @@ func (r *seedOrderRepository) Reject(channelID string, ID string, rejectedAt tim
 }
 
 func (r *seedOrderRepository) Ship(channelID string, ID string, shippedAt time.Time, storageTemperature, storageHumidity float32) error {
-	network := r.Fabric.GetNetwork(channelID)
+	network, err := r.Fabric.GetNetwork(channelID)
+	if err != nil {
+		return fmt.Errorf("failed to get network %s: %w", channelID, err)
+	}
 	contract := network.GetContract(os.Getenv("FABRIC_CHAINCODE_NAME"))
 
-	_, err := contract.SubmitTransaction(
+	_, err = contract.SubmitTransaction(
 		"SeedOrderContract:Ship",
 		ID,
 		shippedAt.Format(time.RFC3339),
@@ -157,10 +181,13 @@ func (r *seedOrderRepository) Ship(channelID string, ID string, shippedAt time.T
 }
 
 func (r *seedOrderRepository) Receive(channelID string, ID string, receivedAt time.Time) error {
-	network := r.Fabric.GetNetwork(channelID)
+	network, err := r.Fabric.GetNetwork(channelID)
+	if err != nil {
+		return fmt.Errorf("failed to get network %s: %w", channelID, err)
+	}
 	contract := network.GetContract(os.Getenv("FABRIC_CHAINCODE_NAME"))
 
-	_, err := contract.SubmitTransaction("SeedOrderContract:Receive", ID, receivedAt.Format(time.RFC3339))
+	_, err = contract.SubmitTransaction("SeedOrderContract:Receive", ID, receivedAt.Format(time.RFC3339))
 	if err != nil {
 		return fmt.Errorf("failed to submit transaction: %w", err)
 	}

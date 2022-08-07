@@ -5,22 +5,25 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/hyperledger/fabric-gateway/pkg/client"
+	"github.com/hyperledger/fabric-sdk-go/pkg/gateway"
 	usermodel "github.com/meneketehe/hehe/app/model/user"
 )
 
 type userRepository struct {
-	Fabric *client.Gateway
+	Fabric *gateway.Gateway
 }
 
-func NewUserRepository(fabric *client.Gateway) usermodel.UserRepository {
+func NewUserRepository(fabric *gateway.Gateway) usermodel.UserRepository {
 	return &userRepository{
 		Fabric: fabric,
 	}
 }
 
 func (r *userRepository) FindByID(ID string) (*usermodel.User, error) {
-	network := r.Fabric.GetNetwork(os.Getenv("FABRIC_GLOBALCHANNEL_NAME"))
+	network, err := r.Fabric.GetNetwork(os.Getenv("FABRIC_GLOBALCHANNEL_NAME"))
+	if err != nil {
+		return nil, fmt.Errorf("failed to get network %s: %w", os.Getenv("FABRIC_GLOBALCHANNEL_NAME"), err)
+	}
 	contract := network.GetContract(os.Getenv("FABRIC_GLOBALCHAINCODE_NAME"))
 
 	userJSON, err := contract.EvaluateTransaction("UserContract:FindById", ID)
@@ -38,10 +41,13 @@ func (r *userRepository) FindByID(ID string) (*usermodel.User, error) {
 }
 
 func (r *userRepository) Create(user *usermodel.User) error {
-	network := r.Fabric.GetNetwork(os.Getenv("FABRIC_GLOBALCHANNEL_NAME"))
+	network, err := r.Fabric.GetNetwork(os.Getenv("FABRIC_GLOBALCHANNEL_NAME"))
+	if err != nil {
+		return fmt.Errorf("failed to get network %s: %w", os.Getenv("FABRIC_GLOBALCHANNEL_NAME"), err)
+	}
 	contract := network.GetContract(os.Getenv("FABRIC_GLOBALCHAINCODE_NAME"))
 
-	_, err := contract.SubmitTransaction(
+	_, err = contract.SubmitTransaction(
 		"UserContract:Create",
 		user.ID,
 		user.Name,
@@ -55,10 +61,13 @@ func (r *userRepository) Create(user *usermodel.User) error {
 }
 
 func (r *userRepository) Update(user *usermodel.User) error {
-	network := r.Fabric.GetNetwork(os.Getenv("FABRIC_GLOBALCHANNEL_NAME"))
+	network, err := r.Fabric.GetNetwork(os.Getenv("FABRIC_GLOBALCHANNEL_NAME"))
+	if err != nil {
+		return fmt.Errorf("failed to get network %s: %w", os.Getenv("FABRIC_GLOBALCHANNEL_NAME"), err)
+	}
 	contract := network.GetContract(os.Getenv("FABRIC_GLOBALCHAINCODE_NAME"))
 
-	_, err := contract.SubmitTransaction(
+	_, err = contract.SubmitTransaction(
 		"UserContract:Update",
 		user.ID,
 		user.Name,

@@ -6,22 +6,25 @@ import (
 	"os"
 	"strconv"
 
-	"github.com/hyperledger/fabric-gateway/pkg/client"
+	"github.com/hyperledger/fabric-sdk-go/pkg/gateway"
 	"github.com/meneketehe/hehe/app/model"
 )
 
 type manufacturerRepository struct {
-	Fabric *client.Gateway
+	Fabric *gateway.Gateway
 }
 
-func NewManufacturerRepository(fabric *client.Gateway) model.ManufacturerRepository {
+func NewManufacturerRepository(fabric *gateway.Gateway) model.ManufacturerRepository {
 	return &manufacturerRepository{
 		Fabric: fabric,
 	}
 }
 
 func (r *manufacturerRepository) FindAll(channelID string) ([]*model.Manufacturer, error) {
-	network := r.Fabric.GetNetwork(channelID)
+	network, err := r.Fabric.GetNetwork(channelID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get network %s: %w", channelID, err)
+	}
 	contract := network.GetContract(os.Getenv("FABRIC_CHAINCODE_NAME"))
 
 	manufacturersJSON, err := contract.EvaluateTransaction("ManufacturerContract:FindAll")
@@ -39,7 +42,10 @@ func (r *manufacturerRepository) FindAll(channelID string) ([]*model.Manufacture
 }
 
 func (r *manufacturerRepository) FindByID(channelID, ID string) (*model.Manufacturer, error) {
-	network := r.Fabric.GetNetwork(channelID)
+	network, err := r.Fabric.GetNetwork(channelID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get network %s: %w", channelID, err)
+	}
 	contract := network.GetContract(os.Getenv("FABRIC_CHAINCODE_NAME"))
 
 	manufacturerJSON, err := contract.EvaluateTransaction("ManufacturerContract:FindByID", ID)
@@ -57,10 +63,13 @@ func (r *manufacturerRepository) FindByID(channelID, ID string) (*model.Manufact
 }
 
 func (r *manufacturerRepository) Create(channelID string, manufacturer *model.Manufacturer) error {
-	network := r.Fabric.GetNetwork(channelID)
+	network, err := r.Fabric.GetNetwork(channelID)
+	if err != nil {
+		return fmt.Errorf("failed to get network %s: %w", channelID, err)
+	}
 	contract := network.GetContract(os.Getenv("FABRIC_CHAINCODE_NAME"))
 
-	_, err := contract.SubmitTransaction(
+	_, err = contract.SubmitTransaction(
 		"ManufacturerContract:Create",
 		manufacturer.ID,
 		manufacturer.Type,

@@ -5,22 +5,25 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/hyperledger/fabric-gateway/pkg/client"
+	"github.com/hyperledger/fabric-sdk-go/pkg/gateway"
 	"github.com/meneketehe/hehe/app/model"
 )
 
 type riceSackRepository struct {
-	Fabric *client.Gateway
+	Fabric *gateway.Gateway
 }
 
-func NewRiceSackRepository(fabric *client.Gateway) model.RiceSackRepository {
+func NewRiceSackRepository(fabric *gateway.Gateway) model.RiceSackRepository {
 	return &riceSackRepository{
 		Fabric: fabric,
 	}
 }
 
 func (r *riceSackRepository) FindAll(channelID, stockpileID string) ([]*model.RiceSack, error) {
-	network := r.Fabric.GetNetwork(channelID)
+	network, err := r.Fabric.GetNetwork(channelID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get network %s: %w", channelID, err)
+	}
 	contract := network.GetContract(os.Getenv("FABRIC_CHAINCODE_NAME"))
 
 	riceSacksJSON, err := contract.EvaluateTransaction("RiceSackContract:FindAll", stockpileID)
@@ -38,7 +41,10 @@ func (r *riceSackRepository) FindAll(channelID, stockpileID string) ([]*model.Ri
 }
 
 func (r *riceSackRepository) FindAllByRiceOrderID(channelID, riceOrderID string) ([]*model.RiceSack, error) {
-	network := r.Fabric.GetNetwork(channelID)
+	network, err := r.Fabric.GetNetwork(channelID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get network %s: %w", channelID, err)
+	}
 	contract := network.GetContract(os.Getenv("FABRIC_CHAINCODE_NAME"))
 
 	riceSacksJSON, err := contract.EvaluateTransaction("RiceSackContract:FindAllByRiceOrderId", riceOrderID)
@@ -56,7 +62,10 @@ func (r *riceSackRepository) FindAllByRiceOrderID(channelID, riceOrderID string)
 }
 
 func (r *riceSackRepository) FindByID(channelID, ID string) (*model.RiceSack, error) {
-	network := r.Fabric.GetNetwork(channelID)
+	network, err := r.Fabric.GetNetwork(channelID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get network %s: %w", channelID, err)
+	}
 	contract := network.GetContract(os.Getenv("FABRIC_CHAINCODE_NAME"))
 
 	riceSackJSON, err := contract.EvaluateTransaction("RiceSackContract:FindByID", ID)

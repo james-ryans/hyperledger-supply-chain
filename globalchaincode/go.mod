@@ -22,7 +22,7 @@ require (
 	github.com/gobuffalo/packr v1.30.1 // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/hyperledger/fabric-chaincode-go v0.0.0-20200424173110-d7076418f212 // indirect
-	github.com/hyperledger/fabric-protos-go v0.0.0-20200424173316-dd554ba3746e // indirect
+	github.com/hyperledger/fabric-protos-go v0.0.0-20200707132912-fee30f3ccd23 // indirect
 	github.com/joho/godotenv v1.4.0 // indirect
 	github.com/mailru/easyjson v0.0.0-20190626092158-b2ccc519800e // indirect
 	github.com/rogpeppe/go-internal v1.3.0 // indirect

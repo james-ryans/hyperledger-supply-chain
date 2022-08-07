@@ -1,141 +1,79 @@
 package fabric
 
 import (
-	"crypto/x509"
 	"fmt"
 	"io/ioutil"
-	"path"
+	"log"
+	"os"
 	"path/filepath"
-	"time"
 
-	"github.com/hyperledger/fabric-gateway/pkg/client"
-	"github.com/hyperledger/fabric-gateway/pkg/identity"
+	"github.com/hyperledger/fabric-sdk-go/pkg/core/config"
+	"github.com/hyperledger/fabric-sdk-go/pkg/gateway"
 	"github.com/meneketehe/hehe/app/helper"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials"
 )
 
-type Credentials struct {
-	MSPID        string
-	PeerEndpoint string
-	GatewayPeer  string
-	CertPath     string
-	KeyPath      string
-	TLSCertPath  string
-}
-
-type Config struct {
-	EvaluateTimeout     int32
-	EndorseTimeout      int32
-	SubmitTimeout       int32
-	CommitStatusTimeout int32
-}
-
 type Gateway struct {
-	*Config
-	Client *client.Gateway
+	Client *gateway.Gateway
 }
 
-func Connect(cred Credentials, conf Config) (*client.Gateway, error) {
-	clientConnection, err := newGrpcConnection(cred)
+func Connect() (*gateway.Gateway, error) {
+	err := os.Setenv("DISCOVERY_AS_LOCALHOST", "true")
 	if err != nil {
-		return nil, err
+		log.Fatalf("Error setting DISCOVERY_AS_LOCALHOST environment variable: %v", err)
 	}
 
-	id, err := newIdentity(cred)
+	wallet, err := gateway.NewFileSystemWallet("wallet")
 	if err != nil {
-		return nil, err
+		log.Fatalf("Failed to create wallet: %v", err)
 	}
 
-	sign, err := newSign(cred)
-	if err != nil {
-		return nil, err
+	orgDomain := os.Getenv("ORG_DOMAIN")
+	if !wallet.Exists(orgDomain) {
+		err = populateWallet(wallet)
+		if err != nil {
+			log.Fatalf("Failed to populate wallet contents: %v", err)
+		}
 	}
 
-	gateway, err := client.Connect(
-		id,
-		client.WithSign(sign),
-		client.WithClientConnection(clientConnection),
-		client.WithEvaluateTimeout(time.Duration(conf.EvaluateTimeout)*time.Second),
-		client.WithEndorseTimeout(time.Duration(conf.EndorseTimeout)*time.Second),
-		client.WithSubmitTimeout(time.Duration(conf.SubmitTimeout)*time.Second),
-		client.WithCommitStatusTimeout(time.Duration(conf.CommitStatusTimeout)*time.Second),
+	ccpPath := filepath.Join(helper.BasePath, "organizations", orgDomain, "peers", "connection.yaml")
+
+	gw, err := gateway.Connect(
+		gateway.WithConfig(config.FromFile(filepath.Clean(ccpPath))),
+		gateway.WithIdentity(wallet, orgDomain),
 	)
 	if err != nil {
-		return nil, err
+		log.Fatalf("Failed to connect to gateway: %v", err)
 	}
 
-	return gateway, nil
+	return gw, nil
 }
 
-func DefaultConfig() Config {
-	return Config{
-		EvaluateTimeout:     5,
-		EndorseTimeout:      15,
-		SubmitTimeout:       5,
-		CommitStatusTimeout: 60,
-	}
-}
+func populateWallet(wallet *gateway.Wallet) error {
+	orgDomain := os.Getenv("ORG_DOMAIN")
+	credPath := filepath.Join(helper.BasePath, "organizations", orgDomain, "users", fmt.Sprintf("Admin@%s", orgDomain), "msp")
 
-func newGrpcConnection(cred Credentials) (*grpc.ClientConn, error) {
-	certificate, err := loadCertificate(filepath.Join(helper.BasePath, cred.TLSCertPath))
+	certPath := filepath.Join(credPath, "signcerts", "cert.pem")
+	cert, err := ioutil.ReadFile(filepath.Clean(certPath))
 	if err != nil {
-		return nil, err
+		return err
 	}
 
-	certPool := x509.NewCertPool()
-	certPool.AddCert(certificate)
-	transportCredentials := credentials.NewClientTLSFromCert(certPool, cred.GatewayPeer)
-
-	connection, err := grpc.Dial(cred.PeerEndpoint, grpc.WithTransportCredentials(transportCredentials))
+	keyDir := filepath.Join(credPath, "keystore")
+	files, err := ioutil.ReadDir(keyDir)
 	if err != nil {
-		return nil, fmt.Errorf("failed to create gRPC connection: %w", err)
+		return err
 	}
-
-	return connection, nil
-}
-
-func loadCertificate(filename string) (*x509.Certificate, error) {
-	certificatePem, err := ioutil.ReadFile(filename)
+	if len(files) != 1 {
+		return fmt.Errorf("keystore folder should have contain one file")
+	}
+	keyPath := filepath.Join(keyDir, files[0].Name())
+	key, err := ioutil.ReadFile(filepath.Clean(keyPath))
 	if err != nil {
-		return nil, fmt.Errorf("failed to read certificate file: %w", err)
-	}
-	return identity.CertificateFromPEM(certificatePem)
-}
-
-func newIdentity(cred Credentials) (*identity.X509Identity, error) {
-	certificate, err := loadCertificate(filepath.Join(helper.BasePath, cred.CertPath))
-	if err != nil {
-		return nil, err
+		return err
 	}
 
-	id, err := identity.NewX509Identity(cred.MSPID, certificate)
-	if err != nil {
-		return nil, err
-	}
+	orgMSP := os.Getenv("FABRIC_MSP_ID")
+	id := gateway.NewX509Identity(orgMSP, string(cert), string(key))
 
-	return id, nil
-}
-
-func newSign(cred Credentials) (identity.Sign, error) {
-	files, err := ioutil.ReadDir(filepath.Join(helper.BasePath, cred.KeyPath))
-	if err != nil {
-		return nil, fmt.Errorf("failed to read private key directory: %w", err)
-	}
-	privateKeyPEM, err := ioutil.ReadFile(path.Join(helper.BasePath, cred.KeyPath, files[0].Name()))
-	if err != nil {
-		return nil, fmt.Errorf("failed to read private key file: %w", err)
-	}
-
-	privateKey, err := identity.PrivateKeyFromPEM(privateKeyPEM)
-	if err != nil {
-		return nil, err
-	}
-
-	sign, err := identity.NewPrivateKeySign(privateKey)
-	if err != nil {
-		return nil, err
-	}
-
-	return sign, nil
+	return wallet.Put(orgDomain, id)
 }
