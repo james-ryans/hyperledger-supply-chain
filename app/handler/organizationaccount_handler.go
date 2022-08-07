@@ -32,7 +32,7 @@ func (h *Handler) GetMeAsOrganization(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,
 		"message": nil,
-		"data":    response.GetMeResponse(account.ID, account.OrganizationID, account.Email, account.Role),
+		"data":    response.GetMeResponse(account),
 	})
 }
 
@@ -64,7 +64,7 @@ func (h *Handler) LoginOrganization(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,
 		"message": "login success",
-		"data":    response.GetMeResponse(account.ID, account.OrganizationID, account.Email, account.Role),
+		"data":    response.GetMeResponse(account),
 	})
 }
 

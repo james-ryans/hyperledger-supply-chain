@@ -68,6 +68,7 @@ func initDS() (*dataSources, error) {
 			Type:           enum.OrgAccAdmin,
 			OrganizationID: os.Getenv("ORG_ID"),
 			Email:          os.Getenv("ORG_EMAIL"),
+			Name:           os.Getenv("ORG_NAME"),
 			Password:       hashedPassword,
 			RegisteredAt:   time.Now(),
 		}
