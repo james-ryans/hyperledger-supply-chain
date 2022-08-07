@@ -240,6 +240,30 @@ func (c *RiceOrderContract) Reject(ctx contractapi.TransactionContextInterface, 
 	return ctx.GetStub().PutState(id, riceOrderDocJSON)
 }
 
+func (c *RiceOrderContract) RejectDistribution(ctx contractapi.TransactionContextInterface, id string, rejectedAt time.Time, reason string) error {
+	err := authorizeRoleAsDistributor(ctx)
+	if err != nil {
+		return fmt.Errorf("you are not authorized to reject distribution of rice order, %w", err)
+	}
+
+	riceOrder, err := getRiceOrder(ctx, id)
+	if err != nil {
+		return err
+	}
+	if riceOrder == nil {
+		return fmt.Errorf("the rice order %s does not exist", id)
+	}
+
+	riceOrderDoc := NewRiceOrderDoc(*riceOrder)
+	riceOrderDoc.Reject(rejectedAt, reason)
+	riceOrderDocJSON, err := json.Marshal(riceOrderDoc)
+	if err != nil {
+		return err
+	}
+
+	return ctx.GetStub().PutState(id, riceOrderDocJSON)
+}
+
 func (c *RiceOrderContract) Ship(ctx contractapi.TransactionContextInterface, id string, shippedAt time.Time, grade string, millingDate time.Time, storageTemperature float32, storageHumidity float32) error {
 	err := authorizeRoleAsManufacturer(ctx)
 	if err != nil {
@@ -264,7 +288,7 @@ func (c *RiceOrderContract) Ship(ctx contractapi.TransactionContextInterface, id
 	return ctx.GetStub().PutState(id, riceOrderDocJSON)
 }
 
-func (c *RiceOrderContract) ShipDistribution(ctx contractapi.TransactionContextInterface, id string, shippedAt time.Time, grade string, millingDate time.Time, storageTemperature float32, storageHumidity float32) error {
+func (c *RiceOrderContract) ShipDistribution(ctx contractapi.TransactionContextInterface, id string, shippedAt time.Time, storageTemperature float32, storageHumidity float32) error {
 	err := authorizeRoleAsDistributor(ctx)
 	if err != nil {
 		return fmt.Errorf("you are not authorized to ship distribution of rice order, %w", err)
@@ -279,7 +303,7 @@ func (c *RiceOrderContract) ShipDistribution(ctx contractapi.TransactionContextI
 	}
 
 	riceOrderDoc := NewRiceOrderDoc(*riceOrder)
-	riceOrderDoc.Ship(shippedAt, grade, millingDate, storageTemperature, storageHumidity)
+	riceOrderDoc.ShipDistribution(shippedAt, storageTemperature, storageHumidity)
 	riceOrderDocJSON, err := json.Marshal(riceOrderDoc)
 	if err != nil {
 		return err
