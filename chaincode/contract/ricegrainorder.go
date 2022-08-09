@@ -224,7 +224,7 @@ func (c *RiceGrainOrderContract) Reject(ctx contractapi.TransactionContextInterf
 		return err
 	}
 
-	if err := c.rejectRiceOrder(ctx, riceGrainOrder.RiceOrderID, rejectedAt, reason); err != nil {
+	if err := c.orderRiceOrder(ctx, riceGrainOrder.RiceOrderID); err != nil {
 		return err
 	}
 
@@ -346,6 +346,25 @@ func (c *RiceGrainOrderContract) riceGrainOrderExists(ctx contractapi.Transactio
 	return riceGrainOrder != nil, nil
 }
 
+func (c *RiceGrainOrderContract) orderRiceOrder(ctx contractapi.TransactionContextInterface, id string) error {
+	riceOrder, err := c.getRiceOrder(ctx, id)
+	if err != nil {
+		return err
+	}
+	if riceOrder == nil {
+		return fmt.Errorf("the rice order %s does not exist", id)
+	}
+
+	riceOrderDoc := NewRiceOrderDoc(*riceOrder)
+	riceOrderDoc.Order = model.NewOrder(riceOrderDoc.OrderedAt)
+	riceOrderDocJSON, err := json.Marshal(riceOrderDoc)
+	if err != nil {
+		return err
+	}
+
+	return ctx.GetStub().PutState(id, riceOrderDocJSON)
+}
+
 func (c *RiceGrainOrderContract) processRiceOrder(ctx contractapi.TransactionContextInterface, id string, processingAt time.Time) error {
 	riceOrder, err := c.getRiceOrder(ctx, id)
 	if err != nil {
@@ -357,25 +376,6 @@ func (c *RiceGrainOrderContract) processRiceOrder(ctx contractapi.TransactionCon
 
 	riceOrderDoc := NewRiceOrderDoc(*riceOrder)
 	riceOrderDoc.Process(processingAt)
-	riceOrderDocJSON, err := json.Marshal(riceOrderDoc)
-	if err != nil {
-		return err
-	}
-
-	return ctx.GetStub().PutState(id, riceOrderDocJSON)
-}
-
-func (c *RiceGrainOrderContract) rejectRiceOrder(ctx contractapi.TransactionContextInterface, id string, rejectedAt time.Time, reason string) error {
-	riceOrder, err := c.getRiceOrder(ctx, id)
-	if err != nil {
-		return err
-	}
-	if riceOrder == nil {
-		return fmt.Errorf("the riceo rder %s does not exist", id)
-	}
-
-	riceOrderDoc := NewRiceOrderDoc(*riceOrder)
-	riceOrderDoc.Reject(rejectedAt, reason)
 	riceOrderDocJSON, err := json.Marshal(riceOrderDoc)
 	if err != nil {
 		return err
