@@ -343,12 +343,12 @@ func (c *RiceOrderContract) Receive(ctx contractapi.TransactionContextInterface,
 		return err
 	}
 
-	manufacturer, err := getManufacturer(ctx, riceOrder.SellerID)
+	rice, err := getRice(ctx, riceOrder.RiceID)
 	if err != nil {
 		return err
 	}
 
-	err = createRiceSack(ctx, manufacturer, riceOrder.ID, riceStockpile.ID, riceOrder.Quantity)
+	err = createRiceSack(ctx, rice, riceOrder.ID, riceStockpile.ID, riceOrder.Quantity)
 	if err != nil {
 		return err
 	}
@@ -453,22 +453,22 @@ func authorizeRoleAsManufacturerOrDistributor(ctx contractapi.TransactionContext
 	return nil
 }
 
-func getManufacturer(ctx contractapi.TransactionContextInterface, id string) (*model.Manufacturer, error) {
-	manufacturerJSON, err := ctx.GetStub().GetState(id)
+func getRice(ctx contractapi.TransactionContextInterface, id string) (*model.Rice, error) {
+	riceJSON, err := ctx.GetStub().GetState(id)
 	if err != nil {
 		return nil, fmt.Errorf("failed to read from world state: %w", err)
 	}
-	if manufacturerJSON == nil {
+	if riceJSON == nil {
 		return nil, nil
 	}
 
-	var manufacturer model.Manufacturer
-	err = json.Unmarshal(manufacturerJSON, &manufacturer)
+	var rice model.Rice
+	err = json.Unmarshal(riceJSON, &rice)
 	if err != nil {
 		return nil, err
 	}
 
-	return &manufacturer, nil
+	return &rice, nil
 }
 
 func getRiceOrder(ctx contractapi.TransactionContextInterface, id string) (*model.RiceOrder, error) {
@@ -522,47 +522,6 @@ func getRiceStockpileByVendorIdAndRiceId(ctx contractapi.TransactionContextInter
 	}
 
 	return &riceStockpile, nil
-}
-
-func getManufacturerProductCounter(ctx contractapi.TransactionContextInterface, id string) (*ProductCounterDoc, error) {
-	query := fmt.Sprintf(`{"selector":{"doc_type":"productcounter","manufacturer_id":"%s"}}`, id)
-	resultIterator, err := ctx.GetStub().GetQueryResult(query)
-	if err != nil {
-		return nil, err
-	}
-	defer resultIterator.Close()
-
-	if !resultIterator.HasNext() {
-		newUuid, err := newDeterministicUuid(fmt.Sprintf("pc:%s", ctx.GetStub().GetTxID()))
-		if err != nil {
-			return nil, err
-		}
-
-		productCounterDoc := NewProductCounterDoc(newUuid, id, 0)
-		return &productCounterDoc, nil
-	}
-
-	result, err := resultIterator.Next()
-	if err != nil {
-		return nil, err
-	}
-
-	var productCounterDoc ProductCounterDoc
-	err = json.Unmarshal(result.Value, &productCounterDoc)
-	if err != nil {
-		return nil, err
-	}
-
-	return &productCounterDoc, nil
-}
-
-func putManufacturerProductCounter(ctx contractapi.TransactionContextInterface, doc *ProductCounterDoc) error {
-	docJSON, err := json.Marshal(doc)
-	if err != nil {
-		return err
-	}
-
-	return ctx.GetStub().PutState(doc.ID, docJSON)
 }
 
 func addRiceStock(ctx contractapi.TransactionContextInterface, orgId string, riceId string, qty int32) (*model.RiceStockpile, error) {
@@ -621,25 +580,18 @@ func subtractRiceStock(ctx contractapi.TransactionContextInterface, orgId string
 	return ctx.GetStub().PutState(stockDoc.ID, stockDocJSON)
 }
 
-func createRiceSack(ctx contractapi.TransactionContextInterface, manufacturer *model.Manufacturer, riceOrderId, riceStockpileId string, qty int32) error {
-	orgCode := manufacturer.Code
-	productCounterDoc, err := getManufacturerProductCounter(ctx, manufacturer.ID)
-	if err != nil {
-		return err
-	}
-
+func createRiceSack(ctx contractapi.TransactionContextInterface, rice *model.Rice, riceOrderId, riceStockpileId string, qty int32) error {
 	for i := 0; i < int(qty); i++ {
 		newUuid, err := newDeterministicUuid(fmt.Sprintf("crs%d:%s", i, ctx.GetStub().GetTxID()))
 		if err != nil {
 			return err
 		}
 
-		productCounterDoc.Count += 1
 		riceSackDoc := NewRiceSackDoc(model.RiceSack{
 			ID:              newUuid,
 			RiceOrderID:     []string{riceOrderId},
 			RiceStockpileID: riceStockpileId,
-			Code:            fmt.Sprintf("(01)%s%06d", orgCode, productCounterDoc.Count),
+			Code:            rice.Code,
 		})
 
 		riceSackDocJSON, err := json.Marshal(riceSackDoc)
@@ -651,11 +603,6 @@ func createRiceSack(ctx contractapi.TransactionContextInterface, manufacturer *m
 		if err != nil {
 			return err
 		}
-	}
-
-	err = putManufacturerProductCounter(ctx, productCounterDoc)
-	if err != nil {
-		return err
 	}
 
 	return nil

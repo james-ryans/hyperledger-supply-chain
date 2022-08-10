@@ -7,6 +7,7 @@ import (
 )
 
 type RiceRequest struct {
+	Code        string  `json:"code"`
 	BrandName   string  `json:"brand_name"`
 	Weight      float32 `json:"weight"`
 	Texture     string  `json:"texture"`
@@ -15,6 +16,7 @@ type RiceRequest struct {
 
 func (r RiceRequest) Validate() error {
 	return validation.ValidateStruct(&r,
+		validation.Field(&r.Code, validation.Required),
 		validation.Field(&r.BrandName, validation.Required),
 		validation.Field(&r.Weight, validation.Required),
 		validation.Field(&r.Texture, validation.Required),
@@ -23,6 +25,7 @@ func (r RiceRequest) Validate() error {
 }
 
 func (r *RiceRequest) Sanitize() {
+	r.Code = strings.TrimSpace(r.Code)
 	r.BrandName = strings.TrimSpace(r.BrandName)
 	r.Texture = strings.TrimSpace(r.Texture)
 }

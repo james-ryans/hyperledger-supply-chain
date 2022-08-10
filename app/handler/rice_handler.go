@@ -78,6 +78,7 @@ func (h *Handler) CreateRice(c *gin.Context) {
 
 	input := &model.Rice{
 		ManufacturerID: orgID,
+		Code:           req.Code,
 		BrandName:      req.BrandName,
 		Weight:         req.Weight,
 		Texture:        req.Texture,

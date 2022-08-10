@@ -18,7 +18,7 @@ type RiceDoc struct {
 	model.Rice
 }
 
-func (c *RiceContract) CreateRice(ctx contractapi.TransactionContextInterface, id string, manufacturerId string, brandName string, weight float32, texture string, amyloseRate float32) error {
+func (c *RiceContract) CreateRice(ctx contractapi.TransactionContextInterface, id string, manufacturerId string, code string, brandName string, weight float32, texture string, amyloseRate float32) error {
 	err := c.authorizeRoleAsManufacturer(ctx)
 	if err != nil {
 		return err
@@ -37,6 +37,7 @@ func (c *RiceContract) CreateRice(ctx contractapi.TransactionContextInterface, i
 		Rice: model.Rice{
 			ID:             id,
 			ManufacturerID: manufacturerId,
+			Code:           code,
 			BrandName:      brandName,
 			Weight:         weight,
 			Texture:        texture,
@@ -69,7 +70,7 @@ func (c *RiceContract) ReadRice(ctx contractapi.TransactionContextInterface, id 
 	return &rice, nil
 }
 
-func (c *RiceContract) UpdateRice(ctx contractapi.TransactionContextInterface, id string, manufacturerId string, brandName string, weight float32, texture string, amyloseRate float32) error {
+func (c *RiceContract) UpdateRice(ctx contractapi.TransactionContextInterface, id string, manufacturerId string, code string, brandName string, weight float32, texture string, amyloseRate float32) error {
 	err := c.authorizeRoleAsManufacturer(ctx)
 	if err != nil {
 		return err
@@ -88,6 +89,7 @@ func (c *RiceContract) UpdateRice(ctx contractapi.TransactionContextInterface, i
 		Rice: model.Rice{
 			ID:             id,
 			ManufacturerID: manufacturerId,
+			Code:           code,
 			BrandName:      brandName,
 			Weight:         weight,
 			Texture:        texture,

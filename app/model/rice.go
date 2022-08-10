@@ -3,6 +3,7 @@ package model
 type Rice struct {
 	ID             string  `json:"id"`
 	ManufacturerID string  `json:"manufacturer_id"`
+	Code           string  `json:"code"`
 	BrandName      string  `json:"brand_name"`
 	Weight         float32 `json:"weight"`
 	Texture        string  `json:"texture"`
