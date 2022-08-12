@@ -13,6 +13,12 @@ type riceOrdersResponse struct {
 	LastTransactionAt *time.Time `json:"last_transaction_at"`
 }
 
+type riceOrderDetailedResponse struct {
+	Order    *riceOrderResponse      `json:"order"`
+	Previous *riceGrainOrderResponse `json:"previous"`
+	Next     []*riceOrderResponse    `json:"next"`
+}
+
 type riceOrderResponse struct {
 	ID                 string     `json:"id"`
 	SellerID           string     `json:"seller_id"`
@@ -45,6 +51,19 @@ func RiceOrdersResponse(riceOrders []*model.RiceOrder) []*riceOrdersResponse {
 	}
 
 	return res
+}
+
+func RiceOrderDetailedResponse(riceOrder *model.RiceOrder, riceGrainOrder *model.RiceGrainOrder, riceDistributionOrders []*model.RiceOrder) *riceOrderDetailedResponse {
+	nextRiceOrder := make([]*riceOrderResponse, 0)
+	for _, order := range riceDistributionOrders {
+		nextRiceOrder = append(nextRiceOrder, RiceOrderResponse(order))
+	}
+
+	return &riceOrderDetailedResponse{
+		Order:    RiceOrderResponse(riceOrder),
+		Previous: RiceGrainOrderResponse(riceGrainOrder),
+		Next:     nextRiceOrder,
+	}
 }
 
 func RiceOrderResponse(riceOrder *model.RiceOrder) *riceOrderResponse {

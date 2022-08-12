@@ -9,6 +9,7 @@ import (
 type getMeResponse struct {
 	ID             string `json:"id"`
 	OrganizationID string `json:"organization_id"`
+	Code           string `json:"code"`
 	Type           string `json:"type"`
 	Email          string `json:"email"`
 	Name           string `json:"name"`
@@ -27,6 +28,7 @@ func GetMeResponse(acc *model.OrganizationAccount) *getMeResponse {
 	return &getMeResponse{
 		ID:             acc.ID,
 		OrganizationID: acc.OrganizationID,
+		Code:           acc.Code,
 		Type:           acc.Type,
 		Email:          acc.Email,
 		Name:           acc.Name,

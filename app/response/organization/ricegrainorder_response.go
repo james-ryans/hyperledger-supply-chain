@@ -13,6 +13,12 @@ type riceGrainOrdersResponse struct {
 	LastTransactionAt *time.Time `json:"last_transaction_at"`
 }
 
+type riceGrainOrderDetailedResponse struct {
+	Order    *riceGrainOrderResponse `json:"order"`
+	Previous *seedOrderResponse      `json:"previous"`
+	Next     *riceOrderResponse      `json:"next"`
+}
+
 type riceGrainOrderResponse struct {
 	ID                 string     `json:"id"`
 	OrdererID          string     `json:"orderer_id"`
@@ -48,6 +54,19 @@ func RiceGrainOrdersResponse(riceGrainOrders []*model.RiceGrainOrder) []*riceGra
 			Status:            riceGrainOrder.Status,
 			LastTransactionAt: riceGrainOrder.GetLastTransactionAt(),
 		})
+	}
+
+	return res
+}
+
+func RiceGrainOrderDetailedResponse(riceGrainOrder *model.RiceGrainOrder, riceOrder *model.RiceOrder, seedOrder *model.SeedOrder) *riceGrainOrderDetailedResponse {
+	res := &riceGrainOrderDetailedResponse{
+		Order: RiceGrainOrderResponse(riceGrainOrder),
+		Next:  RiceOrderResponse(riceOrder),
+	}
+
+	if seedOrder != nil {
+		res.Previous = SeedOrderResponse(seedOrder)
 	}
 
 	return res

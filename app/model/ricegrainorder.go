@@ -101,6 +101,7 @@ type RiceGrainOrderService interface {
 	GetAllIncomingRiceGrainOrder(channelID, sellerID string) ([]*RiceGrainOrder, error)
 	GetAllAcceptedIncomingRiceGrainOrder(channelID, sellerID string) ([]*RiceGrainOrder, error)
 	GetRiceGrainOrderByID(channelID, ID string) (*RiceGrainOrder, error)
+	GetRiceGrainOrderByRiceOrderID(channelID, ID string) (*RiceGrainOrder, error)
 	CreateRiceGrainOrder(channelID string, riceOrder *RiceGrainOrder) (*RiceGrainOrder, error)
 	AcceptRiceGrainOrder(channelID string, riceOrder *RiceGrainOrder, acceptedAt time.Time) error
 	RejectRiceGrainOrder(channelID string, riceOrder *RiceGrainOrder, rejectedAt time.Time, reason string) error

@@ -89,10 +89,20 @@ func (h *Handler) GetSeedOrder(c *gin.Context) {
 		return
 	}
 
+	riceGrainOrder, err := h.riceGrainOrderService.GetRiceGrainOrderByID(channelID, seedOrder.RiceGrainOrderID)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{
+			"success": false,
+			"message": err.Error(),
+			"data":    nil,
+		})
+		return
+	}
+
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,
 		"message": nil,
-		"data":    response.SeedOrderResponse(seedOrder),
+		"data":    response.SeedOrderDetailResponse(seedOrder, riceGrainOrder),
 	})
 }
 

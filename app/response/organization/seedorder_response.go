@@ -13,6 +13,11 @@ type seedOrdersResponse struct {
 	LastTransactionAt *time.Time `json:"last_transaction_at"`
 }
 
+type seedOrderDetailResponse struct {
+	Order *seedOrderResponse      `json:"order"`
+	Next  *riceGrainOrderResponse `json:"next"`
+}
+
 type seedOrderResponse struct {
 	ID                 string     `json:"id"`
 	OrdererID          string     `json:"orderer_id"`
@@ -45,6 +50,13 @@ func SeedOrdersResponse(seedOrders []*model.SeedOrder) []*seedOrdersResponse {
 	}
 
 	return res
+}
+
+func SeedOrderDetailResponse(seedOrder *model.SeedOrder, riceGrainOrder *model.RiceGrainOrder) *seedOrderDetailResponse {
+	return &seedOrderDetailResponse{
+		Order: SeedOrderResponse(seedOrder),
+		Next:  RiceGrainOrderResponse(riceGrainOrder),
+	}
 }
 
 func SeedOrderResponse(seedOrder *model.SeedOrder) *seedOrderResponse {

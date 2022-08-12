@@ -44,6 +44,7 @@ type SeedOrderService interface {
 	GetAllOutgoingSeedOrder(channelID, ordererID string) ([]*SeedOrder, error)
 	GetAllIncomingSeedOrder(channelID, sellerID string) ([]*SeedOrder, error)
 	GetSeedOrderByID(channelID, ID string) (*SeedOrder, error)
+	GetSeedOrderByRiceGrainID(channelID, ID string) (*SeedOrder, error)
 	CreateSeedOrder(channelID string, seedOrder *SeedOrder) (*SeedOrder, error)
 	AcceptSeedOrder(channelID string, seedOrder *SeedOrder, acceptedAt time.Time) error
 	RejectSeedOrder(channelID string, seedOrder *SeedOrder, rejectedAt time.Time, reason string) error

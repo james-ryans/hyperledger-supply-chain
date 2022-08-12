@@ -35,6 +35,10 @@ func (s *seedOrderService) GetSeedOrderByID(channelID, ID string) (*model.SeedOr
 	return s.SeedOrderRepository.FindByID(channelID, ID)
 }
 
+func (s *seedOrderService) GetSeedOrderByRiceGrainID(channelID, ID string) (*model.SeedOrder, error) {
+	return s.SeedOrderRepository.FindByRiceGrainOrderID(channelID, ID)
+}
+
 func (s *seedOrderService) CreateSeedOrder(channelID string, seedOrder *model.SeedOrder) (*model.SeedOrder, error) {
 	seedOrder.ID = uuid.New().String()
 

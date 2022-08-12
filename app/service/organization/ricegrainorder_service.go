@@ -39,6 +39,10 @@ func (s *riceGrainOrderService) GetRiceGrainOrderByID(channelID, ID string) (*mo
 	return s.RiceGrainOrderRepository.FindByID(channelID, ID)
 }
 
+func (s *riceGrainOrderService) GetRiceGrainOrderByRiceOrderID(channelID, ID string) (*model.RiceGrainOrder, error) {
+	return s.RiceGrainOrderRepository.FindByRiceOrderID(channelID, ID)
+}
+
 func (s *riceGrainOrderService) CreateRiceGrainOrder(channelID string, riceGrainOrder *model.RiceGrainOrder) (*model.RiceGrainOrder, error) {
 	riceGrainOrder.ID = uuid.New().String()
 

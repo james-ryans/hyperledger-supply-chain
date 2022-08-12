@@ -8,6 +8,7 @@ type OrganizationAccount struct {
 	Role           string    `json:"role"`
 	Type           string    `json:"type"`
 	OrganizationID string    `json:"organization_id"`
+	Code           string    `json:"code"`
 	Name           string    `json:"name"`
 	Email          string    `json:"email"`
 	Phone          string    `json:"phone"`

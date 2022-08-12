@@ -110,10 +110,33 @@ func (h *Handler) GetRiceGrainOrder(c *gin.Context) {
 		return
 	}
 
+	riceOrder, err := h.riceOrderService.GetRiceOrderByID(channelID, riceGrainOrder.RiceOrderID)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{
+			"success": false,
+			"message": err.Error(),
+			"data":    nil,
+		})
+		return
+	}
+
+	seedOrder := new(model.SeedOrder)
+	if riceGrainOrder.Status == enum.OrderProcessing || riceGrainOrder.Status == enum.OrderAvailable || riceGrainOrder.Status == enum.OrderShipped || riceGrainOrder.Status == enum.OrderReceived {
+		seedOrder, err = h.seedOrderService.GetSeedOrderByRiceGrainID(channelID, orderID)
+		if err != nil {
+			c.JSON(http.StatusNotFound, gin.H{
+				"success": false,
+				"message": err.Error(),
+				"data":    nil,
+			})
+			return
+		}
+	}
+
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,
 		"message": nil,
-		"data":    response.RiceGrainOrderResponse(riceGrainOrder),
+		"data":    response.RiceGrainOrderDetailedResponse(riceGrainOrder, riceOrder, seedOrder),
 	})
 }
 
