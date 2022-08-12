@@ -12,6 +12,7 @@ type Rice struct {
 
 type RiceResponse struct {
 	ID          string  `json:"id"`
+	Code        string  `json:"code"`
 	BrandName   string  `json:"brand_name"`
 	Weight      float32 `json:"weight"`
 	Texture     string  `json:"texture"`
@@ -21,6 +22,7 @@ type RiceResponse struct {
 func ToRiceResponse(rice *Rice) RiceResponse {
 	return RiceResponse{
 		ID:          rice.ID,
+		Code:        rice.Code,
 		BrandName:   rice.BrandName,
 		Weight:      rice.Weight,
 		Texture:     rice.Texture,
