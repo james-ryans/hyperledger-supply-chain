@@ -133,6 +133,7 @@ func (h *Handler) UpdateRice(c *gin.Context) {
 		return
 	}
 
+	rice.Code = req.Code
 	rice.BrandName = req.BrandName
 	rice.Weight = req.Weight
 	rice.Texture = req.Texture

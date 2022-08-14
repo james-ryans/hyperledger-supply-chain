@@ -95,7 +95,7 @@ func (r *riceRepository) Update(channelID string, rice *model.Rice) error {
 	}
 	contract := network.GetContract(os.Getenv("FABRIC_CHAINCODE_NAME"))
 
-	_, err = contract.SubmitTransaction("RiceContract:UpdateRice", rice.ID, rice.ManufacturerID, rice.BrandName, strconv.FormatFloat(float64(rice.Weight), 'f', -1, 32), rice.Texture, strconv.FormatFloat(float64(rice.AmyloseRate), 'f', -1, 32))
+	_, err = contract.SubmitTransaction("RiceContract:UpdateRice", rice.ID, rice.ManufacturerID, rice.Code, rice.BrandName, strconv.FormatFloat(float64(rice.Weight), 'f', -1, 32), rice.Texture, strconv.FormatFloat(float64(rice.AmyloseRate), 'f', -1, 32))
 	if err != nil {
 		return fmt.Errorf("failed to submit transaction: %w", err)
 	}
