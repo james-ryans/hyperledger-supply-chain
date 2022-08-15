@@ -16,7 +16,7 @@ type Gateway struct {
 	Client *gateway.Gateway
 }
 
-func Connect() (*gateway.Gateway, error) {
+func Connect(orgDomain string) (*gateway.Gateway, error) {
 	err := os.Setenv("DISCOVERY_AS_LOCALHOST", "true")
 	if err != nil {
 		log.Fatalf("Error setting DISCOVERY_AS_LOCALHOST environment variable: %v", err)
@@ -27,7 +27,9 @@ func Connect() (*gateway.Gateway, error) {
 		log.Fatalf("Failed to create wallet: %v", err)
 	}
 
-	orgDomain := os.Getenv("ORG_DOMAIN")
+	if orgDomain == "" {
+		orgDomain = os.Getenv("ORG_DOMAIN")
+	}
 	if !wallet.Exists(orgDomain) {
 		err = populateWallet(wallet)
 		if err != nil {

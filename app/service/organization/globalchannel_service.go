@@ -13,6 +13,7 @@ import (
 
 	"github.com/Jeffail/gabs/v2"
 	"github.com/google/uuid"
+	"github.com/meneketehe/hehe/app/fabric"
 	"github.com/meneketehe/hehe/app/helper"
 	"github.com/meneketehe/hehe/app/model"
 )
@@ -158,6 +159,106 @@ func (s *globalChannelService) JoinChannel(name, blockPath string, orgs []*model
 		approveForMyOrg(org, name)
 	}
 	commitCCDef(orgs, name)
+
+	for _, org := range orgs {
+		gw, err := fabric.Connect(org.Domain)
+		if err != nil {
+			return fmt.Errorf("error opening fabric gateway: %w", err)
+		}
+
+		network, err := gw.GetNetwork(name)
+		if err != nil {
+			return fmt.Errorf("failed to get network %s: %w", name, err)
+		}
+		contract := network.GetContract("cc")
+
+		switch org.Role {
+		case "supplier":
+			_, err = contract.SubmitTransaction(
+				"SupplierContract:Create",
+				org.ID,
+				org.Role,
+				org.Name,
+				org.Location.Province,
+				org.Location.City,
+				org.Location.District,
+				org.Location.PostalCode,
+				org.Location.Address,
+				org.ContactInfo.Phone,
+				org.ContactInfo.Email,
+				strconv.FormatFloat(float64(org.Location.Coordinate.Longitude), 'f', -1, 32),
+				strconv.FormatFloat(float64(org.Location.Coordinate.Latitude), 'f', -1, 32),
+			)
+		case "producer":
+			_, err = contract.SubmitTransaction(
+				"ProducerContract:Create",
+				org.ID,
+				org.Role,
+				org.Name,
+				org.Location.Province,
+				org.Location.City,
+				org.Location.District,
+				org.Location.PostalCode,
+				org.Location.Address,
+				org.ContactInfo.Phone,
+				org.ContactInfo.Email,
+				strconv.FormatFloat(float64(org.Location.Coordinate.Longitude), 'f', -1, 32),
+				strconv.FormatFloat(float64(org.Location.Coordinate.Latitude), 'f', -1, 32),
+			)
+		case "manufacturer":
+			_, err = contract.SubmitTransaction(
+				"ManufacturerContract:Create",
+				org.ID,
+				org.Role,
+				org.Name,
+				org.Code,
+				org.Location.Province,
+				org.Location.City,
+				org.Location.District,
+				org.Location.PostalCode,
+				org.Location.Address,
+				org.ContactInfo.Phone,
+				org.ContactInfo.Email,
+				strconv.FormatFloat(float64(org.Location.Coordinate.Longitude), 'f', -1, 32),
+				strconv.FormatFloat(float64(org.Location.Coordinate.Latitude), 'f', -1, 32),
+			)
+		case "distributor":
+			_, err = contract.SubmitTransaction(
+				"DistributorContract:Create",
+				org.ID,
+				org.Role,
+				org.Name,
+				org.Location.Province,
+				org.Location.City,
+				org.Location.District,
+				org.Location.PostalCode,
+				org.Location.Address,
+				org.ContactInfo.Phone,
+				org.ContactInfo.Email,
+				strconv.FormatFloat(float64(org.Location.Coordinate.Longitude), 'f', -1, 32),
+				strconv.FormatFloat(float64(org.Location.Coordinate.Latitude), 'f', -1, 32),
+			)
+		case "retailer":
+			_, err = contract.SubmitTransaction(
+				"RetailerContract:Create",
+				org.ID,
+				org.Role,
+				org.Name,
+				org.Location.Province,
+				org.Location.City,
+				org.Location.District,
+				org.Location.PostalCode,
+				org.Location.Address,
+				org.ContactInfo.Phone,
+				org.ContactInfo.Email,
+				strconv.FormatFloat(float64(org.Location.Coordinate.Longitude), 'f', -1, 32),
+				strconv.FormatFloat(float64(org.Location.Coordinate.Latitude), 'f', -1, 32),
+			)
+		}
+		if err != nil {
+			return fmt.Errorf("failed to submit transaction: %w", err)
+		}
+	}
 
 	return nil
 }

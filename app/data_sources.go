@@ -25,7 +25,7 @@ func initDS() (*dataSources, error) {
 	log.Printf("Initializing data sources\n")
 
 	log.Printf("Connecting to Fabric Gateway\n")
-	gw, err := fabric.Connect()
+	gw, err := fabric.Connect("")
 	if err != nil {
 		return nil, fmt.Errorf("error opening fabric gateway: %w", err)
 	}
