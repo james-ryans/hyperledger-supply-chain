@@ -154,15 +154,10 @@ func (s *globalChannelService) JoinChannel(name, blockPath string, orgs []*model
 		peerJoin(org, blockPath)
 	}
 
-	out, _ = exec.Command("pushd", filepath.Join(helper.BasePath, "chaincode")).CombinedOutput()
-	log.Println(string(out))
-
 	for _, org := range orgs {
 		approveForMyOrg(org, name)
 	}
 	commitCCDef(orgs, name)
-
-	_ = exec.Command("popd").Run()
 
 	return nil
 }
@@ -208,18 +203,24 @@ func approveForMyOrg(org *model.GlobalOrganization, name string) {
 	}
 	log.Println(packageId)
 
-	out, _ = exec.Command("peer", "lifecycle", "chaincode", "approveformyorg",
-		"-o", fmt.Sprintf("localhost:%d", 6050+orgSeq),
-		"--ordererTLSHostnameOverride", fmt.Sprintf("orderer.%s", orgDomain),
-		"--tls",
-		"--cafile", filepath.Join(helper.BasePath, "organizations", orgDomain, "tlsca", fmt.Sprintf("tlsca.%s-cert.pem", orgDomain)),
-		"--channelID", name,
-		"--name", "cc",
-		"--version", "1.1",
-		"--package-id", packageId,
-		"--sequence", "1",
-	).CombinedOutput()
-	log.Println(string(out))
+	for true {
+		out, _ = exec.Command("peer", "lifecycle", "chaincode", "approveformyorg",
+			"-o", fmt.Sprintf("localhost:%d", 6050+orgSeq),
+			"--ordererTLSHostnameOverride", fmt.Sprintf("orderer.%s", orgDomain),
+			"--tls",
+			"--cafile", filepath.Join(helper.BasePath, "organizations", orgDomain, "tlsca", fmt.Sprintf("tlsca.%s-cert.pem", orgDomain)),
+			"--channelID", name,
+			"--name", "cc",
+			"--version", "1.1",
+			"--package-id", packageId,
+			"--sequence", "1",
+		).CombinedOutput()
+		log.Println(string(out))
+
+		if string(out) != "Error: failed to send transaction: got unexpected status: SERVICE_UNAVAILABLE -- no Raft leader\n" {
+			break
+		}
+	}
 }
 
 func commitCCDef(orgs []*model.GlobalOrganization, name string) {
