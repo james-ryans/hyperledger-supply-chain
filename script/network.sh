@@ -8,8 +8,8 @@ function networkUp() {
   createDistributor0Org
   createRetailer0Org
   createCCP
+  installCC
 
-  createChannel0
   createGlobalChannel
 }
 
@@ -127,7 +127,7 @@ function createGlobalChannel() {
   ordererJoinChannel globalchannel superadmin.com localhost:4050
 
   peerJoinChannel globalchannel superadmin.com SuperadminMSP localhost:5050
-  peerJoinChannel globalchannel retailer0.com Retailer0MSP localhost:5060
+  peerJoinChannel globalchannel retailer0.com Retailer0MSP localhost:5055
 }
 
 function createChannel0() {
@@ -146,11 +146,15 @@ function createChannel0() {
   ordererJoinChannel channel0 distributor0.com localhost:4054
   ordererJoinChannel channel0 retailer0.com localhost:4055
 
-  peerJoinChannel channel0 supplier0.com Supplier0MSP localhost:5052
-  peerJoinChannel channel0 producer0.com Producer0MSP localhost:5054
-  peerJoinChannel channel0 manufacturer0.com Manufacturer0MSP localhost:5056
-  peerJoinChannel channel0 distributor0.com Distributor0MSP localhost:5058
-  peerJoinChannel channel0 retailer0.com Retailer0MSP localhost:5060
+  peerJoinChannel channel0 supplier0.com Supplier0MSP localhost:5051
+  peerJoinChannel channel0 producer0.com Producer0MSP localhost:5052
+  peerJoinChannel channel0 manufacturer0.com Manufacturer0MSP localhost:5053
+  peerJoinChannel channel0 distributor0.com Distributor0MSP localhost:5054
+  peerJoinChannel channel0 retailer0.com Retailer0MSP localhost:5055
+}
+
+function installCC() {
+  ./script/installCC.sh "cc" "./chaincode/" "1.1"
 }
 
 function deployCC() {

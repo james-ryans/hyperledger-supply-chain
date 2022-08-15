@@ -1,0 +1,4 @@
+      - Host: orderer.%[1]s
+        Port: 605%[2]d
+        ClientTLSCert: %[3]s
+        ServerTLSCert: %[3]s

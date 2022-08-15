@@ -23,7 +23,7 @@ Organizations:
       - orderer.supplier0.com:6051
     AnchorPeers:
       - Host: peer.supplier0.com
-        Port: 5052
+        Port: 5051
 
   - &Producer0Org
     Name: Producer0MSP
@@ -47,7 +47,7 @@ Organizations:
       - orderer.producer0.com:6052
     AnchorPeers:
       - Host: peer.producer0.com
-        Port: 5054
+        Port: 5052
 
   - &Manufacturer0Org
     Name: Manufacturer0MSP
@@ -71,7 +71,7 @@ Organizations:
       - orderer.manufacturer0.com:6053
     AnchorPeers:
       - Host: peer.manufacturer0.com
-        Port: 5056
+        Port: 5053
 
   - &Distributor0Org
     Name: Distributor0MSP
@@ -95,7 +95,7 @@ Organizations:
       - orderer.distributor0.com:6054
     AnchorPeers:
       - Host: peer.distributor0.com
-        Port: 5058
+        Port: 5054
 
   - &Retailer0Org
     Name: Retailer0MSP
@@ -119,7 +119,7 @@ Organizations:
       - orderer.retailer0.com:6055
     AnchorPeers:
       - Host: peer.retailer0.com
-        Port: 5060
+        Port: 5055
 
 Capabilities:
   Channel: &ChannelCapabilities
@@ -146,10 +146,10 @@ Application: &ApplicationDefaults
       Rule: "MAJORITY Admins"
     LifecycleEndorsement:
       Type: ImplicitMeta
-      Rule: "MAJORITY Endorsement"
+      Rule: "ANY Endorsement"
     Endorsement:
       Type: ImplicitMeta
-      Rule: "MAJORITY Endorsement"
+      Rule: "ANY Endorsement"
 
   Capabilities:
     <<: *ApplicationCapabilities
@@ -219,6 +219,9 @@ Channel: &ChannelDefaults
     Admins:
       Type: ImplicitMeta
       Rule: "MAJORITY Admins"
+    Endorsement:
+      Type: ImplicitMeta
+      Rule: "ANY Endorsement"
 
   Capabilities:
     <<: *ChannelCapabilities

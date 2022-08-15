@@ -1,12 +1,10 @@
-.env
-.env*
-!.env*.example
 .idea/
 vendor/
 *.tar.gz
 log.txt
 
 app/wallet
+app/storage/*
 
 organizations/*/*
 !organizations/*/fabric-ca/

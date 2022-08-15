@@ -31,13 +31,13 @@ services:
       - CORE_PEER_ID=peer.superadmin.com
       - CORE_PEER_ADDRESS=peer.superadmin.com:5050
       - CORE_PEER_LISTENADDRESS=0.0.0.0:5050
-      - CORE_PEER_CHAINCODEADDRESS=peer.superadmin.com:5051
-      - CORE_PEER_CHAINCODELISTENADDRESS=0.0.0.0:5051
+      - CORE_PEER_CHAINCODEADDRESS=peer.superadmin.com:5150
+      - CORE_PEER_CHAINCODELISTENADDRESS=0.0.0.0:5150
       - CORE_PEER_GOSSIP_BOOTSTRAP=peer.superadmin.com:5050
       - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer.superadmin.com:5050
       - CORE_PEER_LOCALMSPID=SuperadminMSP
       - CORE_PEER_MSPCONFIGPATH=/etc/hyperledger/fabric/msp
-      - CORE_OPERATIONS_LISTENADDRESS=peer.superadmin.com:9443
+      - CORE_OPERATIONS_LISTENADDRESS=peer.superadmin.com:9550
       - CORE_METRICS_PROVIDER=prometheus
       - CORE_CHAINCODE_EXECUTETIMEOUT=300s
       - CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock
@@ -49,7 +49,7 @@ services:
       - /var/run/docker.sock:/host/var/run/docker.sock
     ports:
       - "5050:5050"
-      - "9443:9443"
+      - "9550:9550"
     networks:
       - hehe
     depends_on:

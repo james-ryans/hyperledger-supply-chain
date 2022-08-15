@@ -31,7 +31,7 @@ function yaml_ccp {
 ORGDOTCOM=superadmin.com
 ORG=Superadmin
 P0PORT=5050
-CAPORT=7054
+CAPORT=7050
 PEERPEM=/Users/james_ryans/go/src/github.com/meneketehe/hehe/organizations/superadmin.com/fabric-ca/ca-cert.pem
 CAPEM=/Users/james_ryans/go/src/github.com/meneketehe/hehe/organizations/superadmin.com/fabric-ca/ca-cert.pem
 
@@ -40,8 +40,8 @@ echo "$(yaml_ccp $ORGDOTCOM $ORG $P0PORT $CAPORT $PEERPEM $CAPEM)" > organizatio
 
 ORGDOTCOM=supplier0.com
 ORG=Supplier0
-P0PORT=5052
-CAPORT=7055
+P0PORT=5051
+CAPORT=7051
 PEERPEM=/Users/james_ryans/go/src/github.com/meneketehe/hehe/organizations/supplier0.com/fabric-ca/ca-cert.pem
 CAPEM=/Users/james_ryans/go/src/github.com/meneketehe/hehe/organizations/supplier0.com/fabric-ca/ca-cert.pem
 
@@ -50,8 +50,8 @@ echo "$(yaml_ccp $ORGDOTCOM $ORG $P0PORT $CAPORT $PEERPEM $CAPEM)" > organizatio
 
 ORGDOTCOM=producer0.com
 ORG=Producer0
-P0PORT=5054
-CAPORT=7056
+P0PORT=5052
+CAPORT=7052
 PEERPEM=/Users/james_ryans/go/src/github.com/meneketehe/hehe/organizations/producer0.com/fabric-ca/ca-cert.pem
 CAPEM=/Users/james_ryans/go/src/github.com/meneketehe/hehe/organizations/producer0.com/fabric-ca/ca-cert.pem
 
@@ -60,8 +60,8 @@ echo "$(yaml_ccp $ORGDOTCOM $ORG $P0PORT $CAPORT $PEERPEM $CAPEM)" > organizatio
 
 ORGDOTCOM=manufacturer0.com
 ORG=Manufacturer0
-P0PORT=5056
-CAPORT=7057
+P0PORT=5053
+CAPORT=7053
 PEERPEM=/Users/james_ryans/go/src/github.com/meneketehe/hehe/organizations/manufacturer0.com/fabric-ca/ca-cert.pem
 CAPEM=/Users/james_ryans/go/src/github.com/meneketehe/hehe/organizations/manufacturer0.com/fabric-ca/ca-cert.pem
 
@@ -70,8 +70,8 @@ echo "$(yaml_ccp $ORGDOTCOM $ORG $P0PORT $CAPORT $PEERPEM $CAPEM)" > organizatio
 
 ORGDOTCOM=distributor0.com
 ORG=Distributor0
-P0PORT=5058
-CAPORT=7058
+P0PORT=5054
+CAPORT=7054
 PEERPEM=/Users/james_ryans/go/src/github.com/meneketehe/hehe/organizations/distributor0.com/fabric-ca/ca-cert.pem
 CAPEM=/Users/james_ryans/go/src/github.com/meneketehe/hehe/organizations/distributor0.com/fabric-ca/ca-cert.pem
 
@@ -80,8 +80,8 @@ echo "$(yaml_ccp $ORGDOTCOM $ORG $P0PORT $CAPORT $PEERPEM $CAPEM)" > organizatio
 
 ORGDOTCOM=retailer0.com
 ORG=Retailer0
-P0PORT=5060
-CAPORT=7059
+P0PORT=5055
+CAPORT=7055
 PEERPEM=/Users/james_ryans/go/src/github.com/meneketehe/hehe/organizations/retailer0.com/fabric-ca/ca-cert.pem
 CAPEM=/Users/james_ryans/go/src/github.com/meneketehe/hehe/organizations/retailer0.com/fabric-ca/ca-cert.pem
 

@@ -8,23 +8,23 @@ setPeerEnv() {
 
   elif [ "$1" = "supplier0.com" ]; then
     local MSPID="Supplier0MSP"
-    local ADDRESS="localhost:5052"
+    local ADDRESS="localhost:5051"
 
   elif [ "$1" = "producer0.com" ]; then
     local MSPID="Producer0MSP"
-    local ADDRESS="localhost:5054"
+    local ADDRESS="localhost:5052"
 
   elif [ "$1" = "manufacturer0.com" ]; then
     local MSPID="Manufacturer0MSP"
-    local ADDRESS="localhost:5056"
+    local ADDRESS="localhost:5053"
 
   elif [ "$1" = "distributor0.com" ]; then
     local MSPID="Distributor0MSP"
-    local ADDRESS="localhost:5058"
+    local ADDRESS="localhost:5054"
 
   elif [ "$1" = "retailer0.com" ]; then
     local MSPID="Retailer0MSP"
-    local ADDRESS="localhost:5060"
+    local ADDRESS="localhost:5055"
   fi
 
   export FABRIC_CFG_PATH="${PWD}/organizations/${ORG}/peercfg/"

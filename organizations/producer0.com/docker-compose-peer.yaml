@@ -29,15 +29,15 @@ services:
       - CORE_PEER_TLS_KEY_FILE=/etc/hyperledger/fabric/tls/server.key
       - CORE_PEER_TLS_ROOTCERT_FILE=/etc/hyperledger/fabric/tls/ca.crt
       - CORE_PEER_ID=peer.producer0.com
-      - CORE_PEER_ADDRESS=peer.producer0.com:5054
-      - CORE_PEER_LISTENADDRESS=0.0.0.0:5054
-      - CORE_PEER_CHAINCODEADDRESS=peer.producer0.com:5055
-      - CORE_PEER_CHAINCODELISTENADDRESS=0.0.0.0:5055
-      - CORE_PEER_GOSSIP_BOOTSTRAP=peer.producer0.com:5054
-      - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer.producer0.com:5054
+      - CORE_PEER_ADDRESS=peer.producer0.com:5052
+      - CORE_PEER_LISTENADDRESS=0.0.0.0:5052
+      - CORE_PEER_CHAINCODEADDRESS=peer.producer0.com:5152
+      - CORE_PEER_CHAINCODELISTENADDRESS=0.0.0.0:5152
+      - CORE_PEER_GOSSIP_BOOTSTRAP=peer.producer0.com:5052
+      - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer.producer0.com:5052
       - CORE_PEER_LOCALMSPID=Producer0MSP
       - CORE_PEER_MSPCONFIGPATH=/etc/hyperledger/fabric/msp
-      - CORE_OPERATIONS_LISTENADDRESS=peer.producer0.com:9447
+      - CORE_OPERATIONS_LISTENADDRESS=peer.producer0.com:9552
       - CORE_METRICS_PROVIDER=prometheus
       - CORE_CHAINCODE_EXECUTETIMEOUT=300s
       - CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock
@@ -48,8 +48,8 @@ services:
       - ./peercfg:/etc/hyperledger/peercfg
       - /var/run/docker.sock:/host/var/run/docker.sock
     ports:
-      - "5054:5054"
-      - "9447:9447"
+      - "5052:5052"
+      - "9552:9552"
     networks:
       - hehe
     depends_on:

@@ -15,11 +15,11 @@ services:
       - FABRIC_CA_HOME=/etc/hyperledger/fabric-ca-server
       - FABRIC_CA_SERVER_CA_NAME=ca.producer0.com
       - FABRIC_CA_SERVER_TLS_ENABLED=true
-      - FABRIC_CA_SERVER_PORT=7056
-      - FABRIC_CA_SERVER_OPERATIONS_LISTENADDRESS=0.0.0.0:17056
+      - FABRIC_CA_SERVER_PORT=7052
+      - FABRIC_CA_SERVER_OPERATIONS_LISTENADDRESS=0.0.0.0:17052
     ports:
-      - "7056:7056"
-      - "17056:17056"
+      - "7052:7052"
+      - "17052:17052"
     volumes:
       - ./fabric-ca:/etc/hyperledger/fabric-ca-server
     networks:

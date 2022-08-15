@@ -307,3 +307,71 @@ func (h *Handler) DeleteUser(c *gin.Context) {
 		"data":    nil,
 	})
 }
+
+func (h *Handler) InitOrganization(c *gin.Context) {
+	orgID := os.Getenv("ORG_ID")
+	orgName := os.Getenv("ORG_NAME")
+	orgRole := os.Getenv("ORG_ROLE")
+	orgCode := os.Getenv("ORG_CODE")
+	channelID := os.Getenv("FABRIC_CHANNEL_NAME")
+
+	organization := model.Organization{
+		ID:   orgID,
+		Type: orgRole,
+		Name: orgName,
+		Code: orgCode,
+		Location: model.Location{
+			Province:   "North Sumatra",
+			City:       "Medan",
+			District:   "Medan Kota",
+			PostalCode: "20212",
+			Address:    "Jl. Thamrin",
+			Coordinate: model.Coordinate{
+				Latitude:  123.1,
+				Longitude: 321.1,
+			},
+		},
+		ContactInfo: model.ContactInfo{
+			Phone: "081234567890",
+			Email: fmt.Sprintf("%s0@hehe.com", orgRole),
+		},
+	}
+
+	var err error
+	switch orgRole {
+	case "supplier":
+		_, err = h.supplierService.CreateSupplier(channelID, &model.Supplier{
+			Organization: organization,
+		})
+	case "producer":
+		_, err = h.producerService.CreateProducer(channelID, &model.Producer{
+			Organization: organization,
+		})
+	case "manufacturer":
+		_, err = h.manufacturerService.CreateManufacturer(channelID, &model.Manufacturer{
+			Organization: organization,
+		})
+	case "distributor":
+		_, err = h.distributorService.CreateDistributor(channelID, &model.Distributor{
+			Vendor: model.Vendor{Organization: organization},
+		})
+	case "retailer":
+		_, err = h.retailerService.CreateRetailer(channelID, &model.Retailer{
+			Vendor: model.Vendor{Organization: organization},
+		})
+	}
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"success": false,
+			"message": err.Error(),
+			"data":    nil,
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"success": true,
+		"message": fmt.Sprintf("initialize organization with %s, %s, and %s data success", orgRole, orgName, orgID),
+		"data":    nil,
+	})
+}

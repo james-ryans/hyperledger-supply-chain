@@ -1,0 +1,22 @@
+  - &%[1]s
+    Name: %[1]s
+    ID: %[1]s
+    MSPDir: %[3]s
+    Policies:
+      Readers:
+        Type: Signature
+        Rule: "OR('%[1]s.member')"
+      Writers:
+        Type: Signature
+        Rule: "OR('%[1]s.member')"
+      Admins:
+        Type: Signature
+        Rule: "OR('%[1]s.admin')"
+      Endorsement:
+        Type: Signature
+        Rule: "OR('%[1]s.peer')"
+    OrdererEndpoints:
+      - orderer.%[2]s:605%[4]d
+    AnchorPeers:
+      - Host: peer.%[2]s
+        Port: 505%[4]d

@@ -3,6 +3,7 @@ package model
 type GlobalOrganization struct {
 	ID          string      `json:"_id"`
 	Rev         string      `json:"_rev,omitempty"`
+	Seq         int         `json:"seq"`
 	Role        string      `json:"role"`
 	Name        string      `json:"name"`
 	Code        string      `json:"code,omitempty"`

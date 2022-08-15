@@ -130,7 +130,9 @@ func NewHandler(c *Config) {
 	osg.POST("", h.CreateOrganization)
 
 	csg := c.R.Group("api/organizations/channels")
-	csg.Use(middleware.AuthOrganization(), middleware.SuperadminRole())
+	csg.Use(middleware.AuthOrganization())
+	csg.GET("joined", h.GetJoinedChannels)
+	csg.Use(middleware.SuperadminRole())
 	csg.GET("", h.GetAllChannels)
 	csg.GET("/:channelID", h.GetChannel)
 	csg.POST("", h.CreateChannel)

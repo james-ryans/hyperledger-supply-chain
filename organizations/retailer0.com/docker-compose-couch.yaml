@@ -14,6 +14,6 @@ services:
       - COUCHDB_USER=admin
       - COUCHDB_PASSWORD=adminpw
     ports:
-      - "5985:5984"
+      - "5955:5984"
     networks:
       - hehe

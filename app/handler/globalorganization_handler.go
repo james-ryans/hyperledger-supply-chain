@@ -115,7 +115,18 @@ func (h *Handler) CreateOrganization(c *gin.Context) {
 		}
 	}
 
+	orgs, err := h.globalOrganizationService.GetAllOrganizations(map[string]string{})
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"success": false,
+			"message": err.Error(),
+			"data":    nil,
+		})
+		return
+	}
+
 	input := &model.GlobalOrganization{
+		Seq:    len(orgs) + 1,
 		Role:   req.Role,
 		Name:   req.Name,
 		Code:   req.Code,
