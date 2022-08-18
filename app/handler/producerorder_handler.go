@@ -2,7 +2,9 @@ package handler
 
 import (
 	"fmt"
+	"log"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -57,6 +59,8 @@ func (h *Handler) GetAllIncomingRiceGrainOrder(c *gin.Context) {
 func (h *Handler) GetAllAcceptedIncomingRiceGrainOrder(c *gin.Context) {
 	orgID := c.MustGet("orgID").(string)
 	channelID := c.Param("channelID")
+	name := c.Query("filter[name]")
+	log.Println(name)
 
 	riceGrainOrders, err := h.riceGrainOrderService.GetAllAcceptedIncomingRiceGrainOrder(channelID, orgID)
 	if err != nil {
@@ -68,10 +72,18 @@ func (h *Handler) GetAllAcceptedIncomingRiceGrainOrder(c *gin.Context) {
 		return
 	}
 
+	orders := make([]*model.RiceGrainOrder, 0)
+	for _, order := range riceGrainOrders {
+		if grain, err := h.riceGrainService.GetRiceGrainByID(channelID, order.RiceGrainID); err == nil && strings.ToLower(grain.VarietyName) == strings.ToLower(name) {
+			log.Printf("%s %s", strings.ToLower(grain.VarietyName), strings.ToLower(name))
+			orders = append(orders, order)
+		}
+	}
+
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,
 		"message": nil,
-		"data":    response.RiceGrainOrdersResponse(riceGrainOrders),
+		"data":    response.RiceGrainOrdersResponse(orders),
 	})
 }
 
