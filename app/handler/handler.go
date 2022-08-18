@@ -122,6 +122,7 @@ func NewHandler(c *Config) {
 
 	ag.Use(middleware.AuthOrganization())
 	ag.GET("/me", h.GetMeAsOrganization)
+	ag.POST("/change-password", h.ChangePasswordOrganization)
 
 	osg := c.R.Group("api/organizations/organizations")
 	osg.Use(middleware.AuthOrganization(), middleware.SuperadminRole())
