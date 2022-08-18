@@ -7,6 +7,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/meneketehe/hehe/app/model"
+	"github.com/meneketehe/hehe/app/model/enum"
 	usermodel "github.com/meneketehe/hehe/app/model/user"
 	request "github.com/meneketehe/hehe/app/request/organization"
 	response "github.com/meneketehe/hehe/app/response/organization"
@@ -47,10 +48,50 @@ func (h *Handler) GetDistributedRiceOrder(c *gin.Context) {
 		return
 	}
 
+	prevOrders := make([]*model.RiceOrder, 0)
+	if riceOrder.Status == enum.OrderReceived {
+		sacks, err := h.riceSackService.GetAllRiceSackByRiceOrderID(channelID, riceOrder.ID)
+		if err != nil {
+			c.JSON(http.StatusNotFound, gin.H{
+				"success": false,
+				"message": err.Error(),
+				"data":    nil,
+			})
+			return
+		}
+
+		for _, sack := range sacks {
+			exists := false
+			for _, order := range prevOrders {
+				if sack.RiceOrderID[0] == order.ID {
+					exists = true
+					break
+				}
+			}
+
+			if exists {
+				continue
+			}
+
+			prevOrder, err := h.riceOrderService.GetRiceOrderByID(channelID, sack.RiceOrderID[0])
+			if err != nil {
+				c.JSON(http.StatusNotFound, gin.H{
+					"success": false,
+					"message": err.Error(),
+					"data":    nil,
+				})
+				return
+			}
+
+			prevOrders = append(prevOrders, prevOrder)
+		}
+
+	}
+
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,
 		"message": nil,
-		"data":    response.RiceOrderResponse(riceOrder),
+		"data":    response.RiceDistributionOrderDetailResponse(riceOrder, prevOrders),
 	})
 }
 
