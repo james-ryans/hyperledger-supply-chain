@@ -13,7 +13,7 @@
     },
     "organizations": {
         "${ORGDOTCOM}": {
-            "mspid": "${ORG}",
+            "mspid": "${ORGMSPID}",
             "peers": [
                 "peer.${ORGDOTCOM}"
             ],

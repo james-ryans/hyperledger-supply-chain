@@ -11,6 +11,7 @@ function networkUp() {
   installCC
 
   createGlobalChannel
+  deployGCC globalchannel cc ./globalchaincode/ 1.0 "1"
 }
 
 function createSuperadminOrg() {

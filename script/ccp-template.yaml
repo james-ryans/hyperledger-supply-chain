@@ -9,7 +9,7 @@ client:
         endorser: '300'
 organizations:
   ${ORGDOTCOM}:
-    mspid: ${ORG}MSP
+    mspid: ${ORGMSPID}
     peers:
     - peer.${ORGDOTCOM}
     certificateAuthorities:
